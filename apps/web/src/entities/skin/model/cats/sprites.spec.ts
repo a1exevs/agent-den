@@ -1,4 +1,3 @@
-
 import { catPalette } from './cat-palettes';
 import { catSprites } from './cat-sprites';
 import { stationPalette, stationSprites } from './station-sprites';

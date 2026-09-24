@@ -7,7 +7,6 @@ import { type Room } from '@entities/agent';
 import { type Skin, slotFor, type StationSlot } from '@entities/skin';
 import { DenPixelSprite } from '@shared/ui';
 
-
 type Placement = {
   agent: AgentState;
   targetX: number;

@@ -12,7 +12,6 @@ import { TranscriptStore } from '@entities/transcript';
 import { injectNow } from '@shared/lib';
 import { DenPixelSprite, DenSheet } from '@shared/ui';
 
-
 /** Details of one agent: who, where, what it's doing, and its live transcript. */
 @Component({
   selector: 'den-agent-panel',

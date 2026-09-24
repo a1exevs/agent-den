@@ -5,7 +5,6 @@ import { DenRoom } from './den-room';
 import { AgentStore, groupIntoRooms } from '@entities/agent';
 import { catsSkin } from '@entities/skin';
 
-
 /** The whole den: one room per project, live from the collector. */
 @Component({
   selector: 'den-world',

@@ -14,7 +14,6 @@ import {
 import { type TranscriptStatus } from '@entities/transcript';
 import { DenSearchField, DenToggle } from '@shared/ui';
 
-
 /** Distance from the bottom (px) that still counts as "following". */
 const FOLLOW_THRESHOLD_PX = 48;
 
