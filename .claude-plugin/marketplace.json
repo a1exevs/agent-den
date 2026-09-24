@@ -1,5 +1,6 @@
 {
   "name": "agent-den",
+  "description": "agent-den: watch your Claude Code agents live as pixel-art cats",
   "owner": {
     "name": "Alexander Evstafiadi"
   },

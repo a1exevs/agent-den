@@ -12,6 +12,7 @@ export interface ClaudeCodeHookPayload {
   tool_response?: unknown;
   prompt?: string;
   message?: string;
+  notification_type?: string;
   /** Present on subagent hooks (and on tool hooks fired inside a subagent). */
   agent_id?: string;
   agent_type?: string;
@@ -37,9 +38,20 @@ function describeToolInput(input: Record<string, unknown> | undefined): string |
   return typeof value === 'string' ? value.slice(0, 160) : undefined;
 }
 
+/**
+ * "Claude is waiting for your input" fires a while after `Stop` — the turn is over, so the cat keeps sleeping
+ * instead of yowling at the door. Real permission prompts still map to `waiting`.
+ */
+function isIdleReminder(payload: ClaudeCodeHookPayload): boolean {
+  return (
+    payload.hook_event_name === 'Notification' &&
+    (payload.notification_type === 'idle_prompt' || /waiting for your input/i.test(payload.message ?? ''))
+  );
+}
+
 export function fromClaudeCodeHook(payload: ClaudeCodeHookPayload): DenEvent | null {
   const kind = kindByHook[payload.hook_event_name];
-  if (!kind || !payload.session_id) {
+  if (!kind || !payload.session_id || isIdleReminder(payload)) {
     return null;
   }
 

@@ -26,11 +26,15 @@ async function emit(
     detail: toolName ? `mock ${toolName}` : undefined,
     timestamp: Date.now(),
   };
-  await fetch(endpoint, {
-    method: 'POST',
-    headers: { 'content-type': 'application/json' },
-    body: JSON.stringify(event),
-  });
+  try {
+    await fetch(endpoint, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify(event),
+    });
+  } catch {
+    // Collector restarting (tsx watch) — drop the event, the scenario keeps going.
+  }
 }
 
 async function runTools(

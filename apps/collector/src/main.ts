@@ -7,18 +7,39 @@ import { WebSocketServer } from 'ws';
 import { type ClaudeCodeHookPayload, fromClaudeCodeHook } from './adapters/claude-code';
 import { type CursorHookPayload, fromCursorHook } from './adapters/cursor';
 import { DenStore } from './den-store';
+import { isAllowedOrigin } from './local-origin';
 
 const port = Number(process.env['AGENT_DEN_PORT'] ?? COLLECTOR_PORT);
 const store = new DenStore();
 const app = new Hono();
 
-app.use('*', cors({ origin: origin => (origin.startsWith('http://localhost') ? origin : null) }));
+/** Last raw hook payloads — to inspect what agents actually send (`GET /debug/hooks`). */
+const recentHooks: unknown[] = [];
+const RECENT_HOOKS_LIMIT = 50;
+
+function remember(payload: unknown): void {
+  recentHooks.push(payload);
+  if (recentHooks.length > RECENT_HOOKS_LIMIT) {
+    recentHooks.shift();
+  }
+}
+
+app.use('*', async (c, next) => {
+  if (!isAllowedOrigin(c.req.header('origin'))) {
+    return c.text('forbidden origin', 403);
+  }
+  await next();
+});
+app.use('*', cors({ origin: origin => (isAllowedOrigin(origin) ? origin : null) }));
 
 app.get('/health', c => c.json({ ok: true }));
 app.get('/agents', c => c.json(store.snapshot()));
+app.get('/debug/hooks', c => c.json(recentHooks));
 
 app.post('/hooks/claude-code', async c => {
-  const event = fromClaudeCodeHook(await c.req.json<ClaudeCodeHookPayload>());
+  const payload = await c.req.json<ClaudeCodeHookPayload>();
+  remember(payload);
+  const event = fromClaudeCodeHook(payload);
   if (event) {
     store.push(event);
   }
@@ -26,7 +47,9 @@ app.post('/hooks/claude-code', async c => {
 });
 
 app.post('/hooks/cursor', async c => {
-  const event = fromCursorHook(await c.req.json<CursorHookPayload>());
+  const payload = await c.req.json<CursorHookPayload>();
+  remember(payload);
+  const event = fromCursorHook(payload);
   if (event) {
     store.push(event);
   }
@@ -44,7 +67,11 @@ const server = serve({ fetch: app.fetch, port, hostname: '127.0.0.1' }, info => 
   process.stdout.write(`agent-den collector listening on http://127.0.0.1:${info.port}\n`);
 });
 
-const wss = new WebSocketServer({ server: server as never, path: '/ws' });
+const wss = new WebSocketServer({
+  server: server as never,
+  path: '/ws',
+  verifyClient: ({ origin }: { origin?: string }) => isAllowedOrigin(origin),
+});
 
 wss.on('connection', socket => {
   const send = (message: ServerMessage): void => socket.send(JSON.stringify(message));
