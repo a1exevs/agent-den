@@ -1,0 +1,37 @@
+---
+description: State management with Angular signals
+globs: ["apps/web/**"]
+---
+
+# State Management
+
+## Live agent state — signal stores in entities
+
+The collector streams `ServerMessage`s (`@agent-den/contracts`) over WebSocket. The transport lives in
+`entities/agent/api/` (internal); the store in `entities/agent/model/` applies events with the shared
+`reduceAgents()` and exposes **read-only signals**.
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class AgentStore {
+  private readonly state = signal<ReadonlyMap<string, AgentState>>(new Map());
+
+  readonly list = computed(() => [...this.state().values()]);
+
+  apply(event: DenEvent): void {
+    this.state.update(agents => reduceAgents(agents, event));
+  }
+}
+```
+
+## Rules
+
+- Stores are `@Injectable({ providedIn: 'root' })` classes with private writable `signal`s and public
+  `computed` / `.asReadonly()` signals. Mutate only through store methods.
+- Immutable updates (`signal.update(prev => next)`), never mutate the value in place.
+- RxJS only at the edges (WebSocket, timers) — convert to signals with `toSignal()` or push into the store.
+- Client-only preferences (sound on/off, skin) → a store in `entities` or `shared/model`, persisted to
+  `localStorage` inside the store (guard access with try/catch).
+- Derive, don't store: anything computable from agent state is a `computed()`.
+- Only containers inject stores; presentational components receive data via inputs.
+- Server state has one source of truth: the collector snapshot + events. No duplicated copies.

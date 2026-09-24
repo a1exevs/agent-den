@@ -1,0 +1,8 @@
+{
+  "name": "agent-den",
+  "version": "0.1.0",
+  "description": "Streams Claude Code session, tool and subagent events to the local agent-den collector (cats included)",
+  "author": {
+    "name": "Alexander Evstafiadi"
+  }
+}

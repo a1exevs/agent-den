@@ -1,0 +1,36 @@
+@layer reset, tokens, base;
+
+@layer reset {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+    margin: 0;
+  }
+}
+
+@layer tokens {
+  :root {
+    color-scheme: light dark;
+
+    --den-font-pixel: 'Courier New', ui-monospace, monospace;
+    --den-bg: light-dark(#f4ecd8, #1d1a24);
+    --den-fg: light-dark(#2b2233, #efe6d2);
+    --den-accent: #ff8a3d;
+    --den-pixel: 4px;
+  }
+}
+
+@layer base {
+  html,
+  body {
+    height: 100%;
+  }
+
+  body {
+    background: var(--den-bg);
+    color: var(--den-fg);
+    font-family: var(--den-font-pixel);
+    image-rendering: pixelated;
+  }
+}

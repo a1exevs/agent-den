@@ -1,0 +1,26 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+out-tsc
+.angular
+coverage
+
+# Logs
+*.log
+npm-debug.log*
+
+# Env
+.env
+.env.local
+
+# Editors & OS
+.idea
+.vscode/*
+!.vscode/extensions.json
+.DS_Store
+Thumbs.db
+
+# Collector runtime data
+.agent-den

@@ -1,0 +1,50 @@
+---
+description: Angular component architecture - standalone, signals, OnPush, container/presentational
+globs: ["apps/web/**"]
+---
+
+# Component Architecture
+
+## Baseline
+
+- Standalone components only (no NgModules). App is **zoneless** — never rely on zone.js.
+- `changeDetection: ChangeDetectionStrategy.OnPush` on every component (ESLint enforced).
+- Selector prefix `den-` (elements, kebab-case) / `den` (attribute directives, camelCase).
+- Signal APIs only: `input()`, `input.required()`, `output()`, `model()`, `viewChild()`, `computed()`, `effect()`
+  sparingly. No `@Input()` / `@Output()` decorators.
+- `inject()` instead of constructor injection.
+- Built-in control flow (`@if`, `@for` with `track`, `@switch`, `@defer`) — no `*ngIf` / `*ngFor`.
+- Templates and styles in separate files (`*.html`, `*.css`) unless the template is tiny (≤ ~10 lines).
+
+## Container / Presentational
+
+**Container** (usually in `pages/` or `widgets/`): injects stores/services from `@entities`, derives view models
+with `computed()`, passes data down, handles outputs.
+
+**Presentational** (`shared/ui`, most of `widgets/*/ui`): inputs + outputs only. No store injection, no transport.
+
+```typescript
+// Container
+export class DenWorld {
+  private readonly agents = inject(AgentStore);
+  protected readonly rooms = computed(() => groupByRoom(this.agents.list()));
+}
+
+// Presentational
+export class DenCat {
+  readonly agent = input.required<AgentView>();
+  readonly picked = output<string>();
+}
+```
+
+## Typing
+
+- Explicit types for inputs (`input.required<AgentView>()`) and outputs (`output<string>()`).
+- Template event handlers call component methods with explicit return types; no logic in templates beyond simple
+  expressions.
+- Class members used only by the template are `protected`; public API of the component is inputs/outputs.
+
+## File Naming
+
+`den-cat.ts`, `den-cat.html`, `den-cat.css`, `den-cat.spec.ts`. Class name matches the selector without prefix
+duplication: `den-cat` → `DenCat`. See file-naming for kebab-case.

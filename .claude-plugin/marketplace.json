@@ -1,0 +1,13 @@
+{
+  "name": "agent-den",
+  "owner": {
+    "name": "Alexander Evstafiadi"
+  },
+  "plugins": [
+    {
+      "name": "agent-den",
+      "source": "./plugins/claude-code",
+      "description": "Streams Claude Code events to the local agent-den collector"
+    }
+  ]
+}

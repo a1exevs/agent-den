@@ -1,0 +1,116 @@
+---
+description: Feature-Sliced Design architecture rules (Angular)
+globs: ["apps/web/**"]
+---
+
+# Feature-Sliced Design Architecture Rules
+
+## Project Structure
+
+`apps/web` uses **Feature-Sliced Design (FSD)**. Layer hierarchy:
+
+```
+app → pages → widgets → features → entities → shared
+```
+
+Layers import only downward. Per layer (except shared): slices → segments. Enforced by ESLint
+(`apps/web/linter/rules/restricted-imports-rule.ts`).
+
+**Layers:**
+- **app/** — bootstrap config, providers, routes, root component
+- **pages/** — routed page components
+- **widgets/** — composite UI blocks (e.g. the den world, the details panel)
+- **features/** — user interactions (toggle sound, switch skin, ...)
+- **entities/** — domain models (agent, room, achievement): types, stores, adapters
+- **shared/** — UI kit, lib helpers, api clients (WebSocket), config
+
+**Segments:** `ui/` (components), `model/` (signals stores, types, pure logic), `api/` (transport — internal to the slice), `lib/` (helpers).
+
+## UI kit boundary
+
+- `@spartan-ng/*` may be imported **only** inside `src/shared/**`.
+- Every primitive is wrapped in a `src/shared/ui/<name>/` component (`den-*` selector, own styles) and exported from `@shared`.
+- Upper layers never use Spartan directives directly — if a wrapper is missing, add it to `shared/ui` first.
+
+## Import Rules
+
+**Cross-layer — single-word aliases only:**
+
+```typescript
+// ✅ CORRECT
+import { DenButton, cn } from '@shared';
+import { AgentStore, type AgentView } from '@entities';
+
+// ❌ WRONG
+import { DenButton } from '@shared/ui';
+import { AgentStore } from '@entities/agent';
+import { BrnDialog } from '@spartan-ng/brain/dialog'; // outside shared
+```
+
+**Intra-layer — absolute paths from `src/`:**
+
+```typescript
+// ✅ CORRECT
+import { DenWorldRoom } from 'src/widgets/den-world/ui/den-world-room';
+```
+
+Relative imports (`./`, `../`) are forbidden. Shared contracts with the collector come from `@agent-den/contracts`.
+
+## Public API Exports
+
+Every layer, slice, and segment MUST have `index.ts` re-exporting public API. Use explicit named exports
+(`export { X } from '...'`), NOT `export *`. Export only what consumers need. Index files use absolute `src/` paths.
+
+```typescript
+// Layer root: src/pages/index.ts
+export { DenPage } from 'src/pages/den';
+
+// Slice: src/entities/agent/index.ts
+export { AgentStore, type AgentView } from 'src/entities/agent/model';
+```
+
+## When Creating New Code
+
+1. Pick correct layer
+2. Create or use slice
+3. Organize by segments (ui, model, api, lib)
+4. Add `index.ts` at each level
+5. Export only public API via index
+6. Use single-word imports from other layers
+
+## Example Structure
+
+```
+src/
+├── main.ts
+├── styles.css
+├── app/
+│   ├── index.ts
+│   ├── app.ts
+│   ├── app.config.ts
+│   └── app.routes.ts
+├── pages/
+│   ├── index.ts
+│   └── den/
+│       ├── index.ts
+│       └── ui/den-page.ts
+├── widgets/
+│   └── den-world/
+│       ├── index.ts
+│       └── ui/ (den-world.ts, den-world.css, den-world-room.ts)
+├── features/
+│   └── toggle-sound/
+├── entities/
+│   └── agent/
+│       ├── index.ts
+│       ├── api/ (agent-socket.ts)
+│       └── model/ (agent-store.ts, types.ts)
+└── shared/
+    ├── index.ts
+    ├── ui/
+    │   ├── index.ts
+    │   └── button/ (den-button.ts, den-button.css)
+    └── lib/
+        ├── index.ts
+        └── cn.ts
+```

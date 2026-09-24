@@ -1,0 +1,23 @@
+{
+  "name": "@agent-den/collector",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Local event collector: receives agent hooks, tails transcripts, broadcasts over WebSocket",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/main.ts",
+    "start": "tsx src/main.ts",
+    "lint": "tsc --noEmit -p ."
+  },
+  "dependencies": {
+    "@agent-den/contracts": "0.0.0",
+    "@hono/node-server": "2.1.1",
+    "hono": "4.13.9",
+    "ws": "8.21.3"
+  },
+  "devDependencies": {
+    "@types/node": "22.20.4",
+    "@types/ws": "8.18.1",
+    "tsx": "4.23.15"
+  }
+}
