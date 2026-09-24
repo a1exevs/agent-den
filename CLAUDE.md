@@ -26,3 +26,10 @@ Key constraints:
 - No relative imports in `apps/web/src`; cross-layer via `@shared`, `@entities`, ...; intra-layer via `src/...`.
 - Dependency versions are pinned exactly (`.npmrc` `save-exact=true`).
 - Hook sender must never block or fail the agent: short timeout, swallow errors, exit 0, no stdout.
+
+## Plugin development
+
+The installed plugin is a cached copy (`~/.claude/plugins/cache/agent-den/agent-den/<version>`). After changing
+`plugins/claude-code`, bump `version` in `.claude-plugin/plugin.json`, then run
+`claude plugin marketplace update agent-den` and `claude plugin update agent-den@agent-den`; new sessions pick it up.
+Raw payloads the collector received: `GET http://127.0.0.1:4317/debug/hooks`.

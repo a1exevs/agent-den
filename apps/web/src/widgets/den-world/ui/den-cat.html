@@ -2,5 +2,10 @@
   <span class="cat__bubble">{{ text }}</span>
 }
 <den-pixel-sprite class="cat__sprite" [art]="art()" [palette]="palette()" [scale]="scale()" [flip]="facingLeft()" />
-<span class="cat__name">{{ name() }}</span>
-<span class="cat__caption">{{ caption() }}</span>
+<span class="cat__labels">
+  <span class="cat__name">{{ name() }}</span>
+  @if (agent().title; as title) {
+    <span class="cat__title" [attr.title]="title">{{ title }}</span>
+  }
+  <span class="cat__caption">{{ caption() }}</span>
+</span>

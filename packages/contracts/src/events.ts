@@ -36,6 +36,8 @@ export interface DenEvent {
   toolCategory?: ToolCategory;
   /** Short human readable detail: file path, command, prompt excerpt, notification text. */
   detail?: string;
+  /** Session title (Claude Code sends `session_title` with prompts). */
+  title?: string;
   /** Epoch milliseconds. */
   timestamp: number;
 }
@@ -55,6 +57,7 @@ export interface AgentState {
   toolName?: string;
   toolCategory?: ToolCategory;
   detail?: string;
+  title?: string;
   startedAt: number;
   updatedAt: number;
   toolCounts: Partial<Record<ToolCategory, number>>;

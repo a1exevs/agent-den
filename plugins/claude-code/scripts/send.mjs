@@ -9,10 +9,12 @@ process.stdin.setEncoding('utf8');
 process.stdin.on('data', chunk => (raw += chunk));
 process.stdin.on('end', async () => {
   try {
+    // `cwd` follows the agent's `cd`s; the project root is what maps to a room.
+    const payload = { ...JSON.parse(raw), project_dir: process.env.CLAUDE_PROJECT_DIR };
     await fetch(endpoint, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: raw,
+      body: JSON.stringify(payload),
       signal: AbortSignal.timeout(1000),
     });
   } catch {

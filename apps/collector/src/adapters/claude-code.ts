@@ -13,6 +13,9 @@ export interface ClaudeCodeHookPayload {
   prompt?: string;
   message?: string;
   notification_type?: string;
+  session_title?: string;
+  /** Added by our sender from `CLAUDE_PROJECT_DIR`. */
+  project_dir?: string;
   /** Present on subagent hooks (and on tool hooks fired inside a subagent). */
   agent_id?: string;
   agent_type?: string;
@@ -64,11 +67,12 @@ export function fromClaudeCodeHook(payload: ClaudeCodeHookPayload): DenEvent | n
     sessionId: payload.session_id,
     agentId: payload.agent_id ?? payload.session_id,
     parentAgentId: isSubagent ? payload.session_id : undefined,
-    cwd: payload.cwd,
+    cwd: payload.project_dir ?? payload.cwd,
     toolName: payload.tool_name,
     toolCategory: payload.tool_name ? categorizeTool(payload.tool_name) : undefined,
     detail:
       payload.message ?? payload.prompt?.slice(0, 160) ?? describeToolInput(payload.tool_input) ?? payload.agent_type,
+    title: isSubagent ? payload.agent_type : payload.session_title,
     timestamp: Date.now(),
   };
 }

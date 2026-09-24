@@ -26,10 +26,10 @@
 }
 
 .room__scene {
-  --floor-height: 44px;
+  --floor-height: 60px;
 
   position: relative;
-  height: 250px;
+  height: 266px;
   min-width: 720px;
   overflow: hidden;
 }
