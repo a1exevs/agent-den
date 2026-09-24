@@ -1,6 +1,7 @@
 ---
 description: Feature-Sliced Design (Angular) — layers, slices, segments, where code goes, public API, import rules
-globs: ["apps/web/**"]
+globs: apps/web/**
+alwaysApply: false
 ---
 
 # Feature-Sliced Design

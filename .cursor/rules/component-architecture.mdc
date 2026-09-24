@@ -1,6 +1,7 @@
 ---
 description: Angular component architecture - standalone, signals, OnPush, separate files, container/presentational
-globs: ["apps/web/**"]
+globs: apps/web/**
+alwaysApply: false
 ---
 
 # Component Architecture

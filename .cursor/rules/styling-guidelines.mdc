@@ -1,6 +1,7 @@
 ---
 description: Plain modern CSS styling guidelines (no preprocessors, no Tailwind)
-globs: ["apps/web/**"]
+globs: apps/web/**
+alwaysApply: false
 ---
 
 # Styling Guidelines

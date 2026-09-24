@@ -1,6 +1,7 @@
 ---
 description: File naming conventions - kebab-case for all files
-globs: ["apps/**", "packages/**", "tools/**", "plugins/**"]
+globs: apps/**, packages/**, tools/**, plugins/**
+alwaysApply: false
 ---
 
 # File Naming Conventions

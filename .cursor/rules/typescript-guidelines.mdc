@@ -1,6 +1,7 @@
 ---
 description: TypeScript strict mode and type safety
-globs: ["apps/**", "packages/**", "tools/**"]
+globs: apps/**, packages/**, tools/**
+alwaysApply: false
 ---
 
 # TypeScript Guidelines

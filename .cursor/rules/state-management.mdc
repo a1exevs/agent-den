@@ -1,6 +1,7 @@
 ---
 description: State management with Angular signals
-globs: ["apps/web/**"]
+globs: apps/web/**
+alwaysApply: false
 ---
 
 # State Management
