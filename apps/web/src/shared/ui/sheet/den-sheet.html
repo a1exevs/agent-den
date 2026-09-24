@@ -1,0 +1,21 @@
+<brn-sheet
+  [side]="side()"
+  [state]="open() ? 'open' : 'closed'"
+  [hasBackdrop]="false"
+  [closeOnOutsidePointerEvents]="false"
+  [aria-modal]="false"
+  [aria-label]="label()"
+  (closed)="closed.emit()"
+>
+  <section *brnSheetContent class="sheet" [class.sheet--left]="side() === 'left'">
+    <header class="sheet__header">
+      <div class="sheet__heading">
+        <ng-content select="[denSheetHeader]" />
+      </div>
+      <button brnSheetClose type="button" class="sheet__close" aria-label="Close panel">✕</button>
+    </header>
+    <div class="sheet__body">
+      <ng-content />
+    </div>
+  </section>
+</brn-sheet>

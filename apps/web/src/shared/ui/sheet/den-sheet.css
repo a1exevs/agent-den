@@ -1,0 +1,67 @@
+.sheet {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  width: min(480px, 100vw);
+  height: 100dvh;
+  color: var(--den-fg);
+  background: var(--den-paper);
+  border-left: 4px solid var(--den-ink);
+  box-shadow: -6px 0 0 color-mix(in srgb, var(--den-ink) 35%, transparent);
+  animation: sheet-in 0.18s steps(3);
+
+  &.sheet--left {
+    border-left: 0;
+    border-right: 4px solid var(--den-ink);
+  }
+}
+
+.sheet__header {
+  display: flex;
+  align-items: start;
+  gap: 12px;
+  padding: 12px 12px 12px 16px;
+  color: var(--den-bar-fg);
+  background: var(--den-ink);
+}
+
+.sheet__heading {
+  flex: 1;
+  min-width: 0;
+}
+
+.sheet__close {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  font: inherit;
+  font-size: 16px;
+  color: inherit;
+  background: transparent;
+  border: 2px solid currentColor;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--den-ink);
+    background: var(--den-bar-fg);
+    outline: none;
+  }
+}
+
+.sheet__body {
+  min-height: 0;
+  overflow: hidden;
+}
+
+@keyframes sheet-in {
+  from {
+    translate: 24px 0;
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sheet {
+    animation: none;
+  }
+}

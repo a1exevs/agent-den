@@ -1,0 +1,58 @@
+<den-sheet [open]="isOpen()" label="Agent details" (closed)="closed.emit()">
+  @if (agent(); as agent) {
+    <div class="who" denSheetHeader>
+      <den-pixel-sprite class="who__sprite" [art]="art()" [palette]="palette()" [scale]="3" />
+      <div class="who__text">
+        <h2 class="who__name">
+          {{ name() }}
+          @if (agent.parentAgentId) {
+            <span class="who__badge">kitten</span>
+          }
+        </h2>
+        @if (agent.title) {
+          <p class="who__title">{{ agent.title }}</p>
+        }
+        <p class="who__status" [class.who__status--alert]="agent.activity === 'waiting' || agent.activity === 'error'">
+          {{ status() }}
+        </p>
+      </div>
+    </div>
+  }
+
+  @if (agent(); as agent) {
+    <div class="details">
+      <dl class="facts">
+        <div class="facts__row">
+          <dt>room</dt>
+          <dd class="facts__path" [attr.title]="agent.cwd">{{ agent.cwd ?? 'somewhere' }}</dd>
+        </div>
+        <div class="facts__row">
+          <dt>awake</dt>
+          <dd>{{ duration() }} · since {{ agent.startedAt | date: 'HH:mm' }}</dd>
+        </div>
+        <div class="facts__row">
+          <dt>via</dt>
+          <dd>{{ agent.source }}</dd>
+        </div>
+        @if (agent.detail) {
+          <div class="facts__row">
+            <dt>now</dt>
+            <dd class="facts__path" [attr.title]="agent.detail">{{ agent.detail }}</dd>
+          </div>
+        }
+      </dl>
+
+      @if (toolCounts().length) {
+        <ul class="counts" aria-label="Tool calls">
+          @for (item of toolCounts(); track item.label) {
+            <li class="counts__chip">
+              {{ item.label }} <b>{{ item.count }}</b>
+            </li>
+          }
+        </ul>
+      }
+
+      <den-transcript-feed class="details__feed" [entries]="feed()" [status]="transcriptStatus()" />
+    </div>
+  }
+</den-sheet>

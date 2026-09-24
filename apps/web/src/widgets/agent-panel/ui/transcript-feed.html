@@ -1,0 +1,40 @@
+<div class="feed__toolbar">
+  <den-search-field class="feed__search" label="Search the transcript" placeholder="search…" [(value)]="query" />
+  <den-toggle [(pressed)]="showTools">tools</den-toggle>
+  <den-toggle [(pressed)]="showThinking">thinking</den-toggle>
+  <den-toggle [(pressed)]="follow">follow</den-toggle>
+</div>
+
+<ol #list class="feed__list" (scroll)="onScroll()">
+  @for (entry of visible(); track entry.id) {
+    <li [class]="'entry entry--' + entry.kind">
+      @if (entry.kind === 'tool') {
+        <details class="entry__tool">
+          <summary>
+            <span class="entry__tool-name">{{ entry.name }}</span>
+            <span class="entry__tool-summary">{{ entry.summary }}</span>
+            @if (!entry.result) {
+              <span class="entry__pending" aria-label="running">…</span>
+            } @else if (entry.result.isError) {
+              <span class="entry__error-mark" aria-label="failed">✖</span>
+            }
+          </summary>
+          <pre class="entry__code">{{ entry.input }}</pre>
+          @if (entry.result; as result) {
+            <pre class="entry__code entry__result" [class.entry__result--error]="result.isError">{{ result.text }}</pre>
+            @if (result.clipped) {
+              <p class="entry__clipped">output clipped</p>
+            }
+          }
+        </details>
+      } @else {
+        <p class="entry__text">{{ entry.text }}</p>
+      }
+      @if (entry.time) {
+        <time class="entry__time" [attr.datetime]="entry.time">{{ entry.time | date: 'HH:mm:ss' }}</time>
+      }
+    </li>
+  } @empty {
+    <li class="feed__empty">{{ emptyText() }}</li>
+  }
+</ol>

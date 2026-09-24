@@ -42,8 +42,30 @@ export interface DenEvent {
   timestamp: number;
 }
 
+/** One content block of a transcript message, clipped for display. */
+export type TranscriptBlock =
+  | { kind: 'text'; text: string }
+  | { kind: 'thinking'; text: string }
+  | { kind: 'tool-use'; id: string; name: string; input: string; summary?: string }
+  | { kind: 'tool-result'; toolUseId: string; text: string; isError: boolean; clipped: boolean };
+
+export interface TranscriptItem {
+  id: string;
+  role: 'user' | 'assistant';
+  timestamp?: string;
+  blocks: TranscriptBlock[];
+}
+
 /** Messages sent from the collector to web clients over WebSocket. */
-export type ServerMessage = { type: 'snapshot'; agents: AgentState[] } | { type: 'event'; event: DenEvent };
+export type ServerMessage =
+  | { type: 'snapshot'; agents: AgentState[] }
+  | { type: 'event'; event: DenEvent }
+  /** `reset` — replace everything shown so far (first load or the file was rewritten). */
+  | { type: 'transcript'; agentId: string; items: TranscriptItem[]; reset: boolean }
+  | { type: 'transcript-missing'; agentId: string };
+
+/** Messages sent from web clients to the collector. One watched transcript per connection. */
+export type ClientMessage = { type: 'watch-transcript'; agentId: string } | { type: 'unwatch-transcript' };
 
 export type AgentActivity = 'idle' | 'thinking' | 'tool' | 'waiting' | 'done' | 'error' | 'gone';
 

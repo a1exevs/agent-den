@@ -1,0 +1,8 @@
+<main class="page" [class.page--with-panel]="selected()">
+  <header class="page__header">
+    <h1 class="page__title">agent-den</h1>
+    <p class="page__subtitle">where your agents nap between tool calls</p>
+  </header>
+  <den-world [selectedAgentId]="selected()" (agentPicked)="toggle($event)" />
+</main>
+<den-agent-panel [agentId]="selected()" (closed)="selected.set(null)" />

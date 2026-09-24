@@ -1,0 +1,22 @@
+.page {
+  display: grid;
+  gap: 24px;
+  max-width: 1200px;
+  margin-inline: auto;
+  padding: 24px 16px 48px;
+  transition: padding-right 0.18s steps(3);
+
+  &.page--with-panel {
+    padding-right: min(496px, 50vw);
+  }
+}
+
+.page__title {
+  font-size: 28px;
+  letter-spacing: 0.08em;
+}
+
+.page__subtitle {
+  font-size: 13px;
+  opacity: 0.7;
+}

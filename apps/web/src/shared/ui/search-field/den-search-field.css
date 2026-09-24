@@ -1,0 +1,18 @@
+:host {
+  display: block;
+}
+
+.search {
+  width: 100%;
+  padding: 4px 8px;
+  font: inherit;
+  font-size: 12px;
+  color: var(--den-fg);
+  background: var(--den-bg);
+  border: 2px solid var(--den-ink);
+
+  &:focus-visible {
+    outline: 2px solid var(--den-accent);
+    outline-offset: 1px;
+  }
+}

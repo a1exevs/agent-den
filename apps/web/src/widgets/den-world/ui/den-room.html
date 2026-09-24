@@ -31,6 +31,8 @@
         [targetX]="placement.targetX"
         [originX]="placement.originX"
         [offset]="placement.offset"
+        [selected]="placement.agent.agentId === selectedAgentId()"
+        (picked)="agentPicked.emit($event)"
       />
     }
   </div>

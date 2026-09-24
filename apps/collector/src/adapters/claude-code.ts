@@ -6,6 +6,8 @@ import { categorizeTool, type DenEvent, type DenEventKind } from '@agent-den/con
 export interface ClaudeCodeHookPayload {
   hook_event_name: string;
   session_id: string;
+  transcript_path?: string;
+  agent_transcript_path?: string;
   cwd?: string;
   tool_name?: string;
   tool_input?: Record<string, unknown>;

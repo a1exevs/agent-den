@@ -7,6 +7,7 @@ import { categorizeTool, type DenEvent, type DenEventKind } from '@agent-den/con
 
 import type { DenStore } from '../den-store';
 import { type InferredState, inferState } from './infer-state';
+import type { TranscriptRegistry } from './transcript-registry';
 
 const PROJECTS_DIR = join(homedir(), '.claude', 'projects');
 /** Only transcripts touched this recently count as live sessions. */
@@ -113,7 +114,11 @@ function stateEvent(identity: Identity, state: InferredState, timestamp: number)
  * Backfills sessions the collector hasn't heard about through hooks — after a collector restart, or for sessions
  * without the plugin. Hooks stay the source of truth: agents already known to the store are never touched.
  */
-export async function scanTranscripts(store: DenStore, now = Date.now()): Promise<number> {
+export async function scanTranscripts(
+  store: DenStore,
+  registry: TranscriptRegistry,
+  now = Date.now(),
+): Promise<number> {
   let added = 0;
   let projects: string[];
   try {
@@ -127,6 +132,7 @@ export async function scanTranscripts(store: DenStore, now = Date.now()): Promis
     for (const file of await freshFiles(projectDir, now, /\.jsonl$/)) {
       const sessionId = basename(file.path, '.jsonl');
       const sessionDir = join(projectDir, sessionId);
+      registry.set(sessionId, file.path);
 
       if (!store.has(sessionId)) {
         const tail = await readTail(file.path);
@@ -143,6 +149,7 @@ export async function scanTranscripts(store: DenStore, now = Date.now()): Promis
 
       for (const subagent of await freshFiles(join(sessionDir, 'subagents'), now, /^agent-.+\.jsonl$/)) {
         const agentId = basename(subagent.path, '.jsonl').replace(/^agent-/, '');
+        registry.set(agentId, subagent.path);
         if (store.has(agentId)) {
           continue;
         }

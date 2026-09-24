@@ -1,5 +1,14 @@
 import type { AgentState } from '@agent-den/contracts';
-import { afterNextRender, ChangeDetectionStrategy, Component, computed, effect, input, signal } from '@angular/core';
+import {
+  afterNextRender,
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 
 import { actionFor, type Skin } from '@entities';
 import { DenPixelSprite } from '@shared';
@@ -20,6 +29,14 @@ const KITTEN_SCALE = 2;
     '[class.cat--kitten]': 'isKitten()',
     '[class.cat--walking]': 'walking()',
     '[class.cat--waiting]': 'action() === "wait"',
+    '[class.cat--selected]': 'selected()',
+    role: 'button',
+    tabindex: '0',
+    '[attr.aria-label]': 'name() + ", " + caption()',
+    '[attr.aria-pressed]': 'selected()',
+    '(click)': 'picked.emit(agent().agentId)',
+    '(keydown.enter)': 'picked.emit(agent().agentId)',
+    '(keydown.space)': '$event.preventDefault(); picked.emit(agent().agentId)',
     '[style.left]': 'left()',
     '[style.--walk-ms]': 'walkMs',
   },
@@ -33,6 +50,8 @@ export class DenCat {
   readonly originX = input.required<number>();
   /** Nudge in px so characters at the same station don't overlap. */
   readonly offset = input<number>(0);
+  readonly selected = input<boolean>(false);
+  readonly picked = output<string>();
 
   private readonly arrived = signal(false);
   protected readonly walking = signal(false);

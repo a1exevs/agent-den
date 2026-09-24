@@ -1,9 +1,7 @@
 import { type AgentState, reduceAgents, type ServerMessage } from '@agent-den/contracts';
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 
-import { collectorSocketUrl, injectNow } from '@shared';
-
-import { connectAgentSocket, type ConnectionStatus } from 'src/entities/agent/api/agent-socket';
+import { CollectorSocket, injectNow } from '@shared';
 
 /** How long a finished kitten stays around before it hops back into the box. */
 const KITTEN_LINGER_MS = 3000;
@@ -11,12 +9,11 @@ const KITTEN_LINGER_MS = 3000;
 /** Live agents streamed from the collector. */
 @Injectable({ providedIn: 'root' })
 export class AgentStore {
+  private readonly socket = inject(CollectorSocket);
   private readonly agents = signal<ReadonlyMap<string, AgentState>>(new Map());
-  private readonly connection = signal<ConnectionStatus>('connecting');
   private readonly now = injectNow(1000);
-  private disconnect: (() => void) | undefined;
 
-  readonly status = this.connection.asReadonly();
+  readonly status = this.socket.status;
 
   /** Agents that should be drawn right now. */
   readonly visible = computed(() => {
@@ -29,25 +26,25 @@ export class AgentStore {
   });
 
   constructor() {
-    inject(DestroyRef).onDestroy(() => this.disconnect?.());
+    const unsubscribe = this.socket.onMessage(message => this.apply(message));
+    inject(DestroyRef).onDestroy(unsubscribe);
   }
 
   /** Idempotent: opens the collector socket once. */
   connect(): void {
-    if (this.disconnect) {
-      return;
-    }
-    this.disconnect = connectAgentSocket(collectorSocketUrl, {
-      onMessage: (message: ServerMessage): void => this.apply(message),
-      onStatus: (status: ConnectionStatus): void => this.connection.set(status),
-    });
+    this.socket.connect();
+  }
+
+  /** Live state of one agent (including ones that already left). */
+  byId(agentId: string): AgentState | undefined {
+    return this.agents().get(agentId);
   }
 
   private apply(message: ServerMessage): void {
     if (message.type === 'snapshot') {
       this.agents.set(new Map(message.agents.map(agent => [agent.agentId, agent])));
-      return;
+    } else if (message.type === 'event') {
+      this.agents.update(agents => reduceAgents(agents, message.event));
     }
-    this.agents.update(agents => reduceAgents(agents, message.event));
   }
 }

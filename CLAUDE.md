@@ -24,6 +24,7 @@ Key constraints:
 
 - `@spartan-ng/*` only inside `apps/web/src/shared/**` (ESLint enforced).
 - No relative imports in `apps/web/src`; cross-layer via `@shared`, `@entities`, ...; intra-layer via `src/...`.
+- Components: separate `.ts` / `.html` / `.css` files, never inline templates or styles.
 - Dependency versions are pinned exactly (`.npmrc` `save-exact=true`).
 - Hook sender must never block or fail the agent: short timeout, swallow errors, exit 0, no stdout.
 

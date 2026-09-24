@@ -1,5 +1,5 @@
 import type { AgentState } from '@agent-den/contracts';
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
 import { type Room, type Skin, slotFor, type StationSlot } from '@entities';
 import { DenPixelSprite } from '@shared';
@@ -32,6 +32,8 @@ function spread(index: number): number {
 export class DenRoom {
   readonly room = input.required<Room>();
   readonly skin = input.required<Skin>();
+  readonly selectedAgentId = input<string | null>(null);
+  readonly agentPicked = output<string>();
 
   protected readonly stationScale = STATION_SCALE;
 

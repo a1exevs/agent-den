@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 
 import { AgentStore, catsSkin, groupIntoRooms } from '@entities';
 
@@ -14,6 +14,9 @@ import { DenRoom } from 'src/widgets/den-world/ui/den-room';
 })
 export class DenWorld {
   private readonly store = inject(AgentStore);
+
+  readonly selectedAgentId = input<string | null>(null);
+  readonly agentPicked = output<string>();
 
   protected readonly skin = catsSkin;
   protected readonly status = this.store.status;

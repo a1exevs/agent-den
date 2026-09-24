@@ -5,7 +5,12 @@
 }
 
 @for (room of rooms(); track room.id) {
-  <den-room [room]="room" [skin]="skin" />
+  <den-room
+    [room]="room"
+    [skin]="skin"
+    [selectedAgentId]="selectedAgentId()"
+    (agentPicked)="agentPicked.emit($event)"
+  />
 } @empty {
   @if (status() === 'online') {
     <p class="world__notice">

@@ -1,0 +1,19 @@
+.toggle {
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--den-fg);
+  background: transparent;
+  border: 2px solid var(--den-ink);
+  cursor: pointer;
+
+  &[data-state='on'] {
+    color: var(--den-bubble-bg);
+    background: var(--den-ink);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--den-accent);
+    outline-offset: 1px;
+  }
+}

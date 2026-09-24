@@ -40,6 +40,7 @@ export default tsEslint.config(
       '@angular-eslint/component-selector': ['error', { type: 'element', prefix: 'den', style: 'kebab-case' }],
       '@angular-eslint/prefer-on-push-component-change-detection': 'error',
       '@angular-eslint/prefer-signals': 'error',
+      '@angular-eslint/component-max-inline-declarations': ['error', { template: 0, styles: 0, animations: 0 }],
     },
   },
   {

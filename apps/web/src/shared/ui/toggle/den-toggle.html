@@ -1,0 +1,9 @@
+<button
+  brnToggle
+  type="button"
+  class="toggle"
+  [state]="pressed() ? 'on' : 'off'"
+  (stateChange)="pressed.set($event === 'on')"
+>
+  <ng-content />
+</button>

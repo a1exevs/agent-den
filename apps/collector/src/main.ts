@@ -1,4 +1,4 @@
-import { COLLECTOR_PORT, type DenEvent, type ServerMessage } from '@agent-den/contracts';
+import { type ClientMessage, COLLECTOR_PORT, type DenEvent, type ServerMessage } from '@agent-den/contracts';
 import { serve } from '@hono/node-server';
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
@@ -8,10 +8,13 @@ import { type ClaudeCodeHookPayload, fromClaudeCodeHook } from './adapters/claud
 import { type CursorHookPayload, fromCursorHook } from './adapters/cursor';
 import { DenStore } from './den-store';
 import { isAllowedOrigin } from './local-origin';
+import { followTranscript } from './transcripts/transcript-follower';
+import { TranscriptRegistry } from './transcripts/transcript-registry';
 import { scanTranscripts } from './transcripts/transcript-scanner';
 
 const port = Number(process.env['AGENT_DEN_PORT'] ?? COLLECTOR_PORT);
 const store = new DenStore();
+const transcripts = new TranscriptRegistry();
 const app = new Hono();
 
 /** Last raw hook payloads — to inspect what agents actually send (`GET /debug/hooks`). */
@@ -40,6 +43,7 @@ app.get('/debug/hooks', c => c.json(recentHooks));
 app.post('/hooks/claude-code', async c => {
   const payload = await c.req.json<ClaudeCodeHookPayload>();
   remember(payload);
+  transcripts.rememberHook(payload);
   const event = fromClaudeCodeHook(payload);
   if (event) {
     store.push(event);
@@ -78,7 +82,7 @@ const SCAN_INTERVAL_MS = 30_000;
 const SWEEP_INTERVAL_MS = 60_000;
 
 const scan = (): void => {
-  scanTranscripts(store)
+  scanTranscripts(store, transcripts)
     .then(added => {
       if (added > 0) {
         process.stdout.write(`backfilled ${added} agent(s) from transcripts\n`);
@@ -91,9 +95,48 @@ scan();
 setInterval(scan, SCAN_INTERVAL_MS);
 setInterval(() => store.sweep(), SWEEP_INTERVAL_MS);
 
+function parseClientMessage(data: unknown): ClientMessage | null {
+  try {
+    const message = JSON.parse(String(data)) as ClientMessage;
+    return message.type === 'watch-transcript' || message.type === 'unwatch-transcript' ? message : null;
+  } catch {
+    return null;
+  }
+}
+
 wss.on('connection', socket => {
   const send = (message: ServerMessage): void => socket.send(JSON.stringify(message));
   send({ type: 'snapshot', agents: store.snapshot() });
   const unsubscribe = store.subscribe(event => send({ type: 'event', event }));
-  socket.on('close', unsubscribe);
+
+  // One watched transcript per connection: the details panel shows one agent at a time.
+  let stopFollowing: (() => void) | undefined;
+
+  socket.on('message', data => {
+    const message = parseClientMessage(data);
+    if (!message) {
+      return;
+    }
+    stopFollowing?.();
+    stopFollowing = undefined;
+    if (message.type === 'unwatch-transcript') {
+      return;
+    }
+    const { agentId } = message;
+    const path = transcripts.get(agentId);
+    if (!path) {
+      send({ type: 'transcript-missing', agentId });
+      return;
+    }
+    stopFollowing = followTranscript(
+      path,
+      (items, reset) => send({ type: 'transcript', agentId, items, reset }),
+      () => send({ type: 'transcript-missing', agentId }),
+    );
+  });
+
+  socket.on('close', () => {
+    unsubscribe();
+    stopFollowing?.();
+  });
 });

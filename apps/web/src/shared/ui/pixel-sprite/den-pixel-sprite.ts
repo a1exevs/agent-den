@@ -5,18 +5,7 @@ import { type Palette, type PixelArt, renderSpriteSheet } from 'src/shared/ui/pi
 /** Crisp pixel-art sprite; frames loop with a pure CSS `steps()` animation. */
 @Component({
   selector: 'den-pixel-sprite',
-  template: `
-    <span
-      class="sprite"
-      [class.sprite--flip]="flip()"
-      [style.background-image]="sheet()"
-      [style.--w]="art().width"
-      [style.--h]="art().height"
-      [style.--frames]="art().frames.length"
-      [style.--fps]="art().fps"
-      [style.--scale]="scale()"
-    ></span>
-  `,
+  templateUrl: './den-pixel-sprite.html',
   styleUrl: './den-pixel-sprite.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

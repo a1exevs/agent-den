@@ -1,39 +1,19 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
-import { DenWorld } from '@widgets';
+import { DenAgentPanel, DenWorld } from '@widgets';
 
-/** Main screen: the den with rooms per project. */
+/** Main screen: the den with rooms per project; click a character to see what it's up to. */
 @Component({
   selector: 'den-den-page',
-  imports: [DenWorld],
-  template: `
-    <main class="page">
-      <header class="page__header">
-        <h1 class="page__title">agent-den</h1>
-        <p class="page__subtitle">where your agents nap between tool calls</p>
-      </header>
-      <den-world />
-    </main>
-  `,
-  styles: `
-    .page {
-      display: grid;
-      gap: 24px;
-      max-width: 1200px;
-      margin-inline: auto;
-      padding: 24px 16px 48px;
-    }
-
-    .page__title {
-      font-size: 28px;
-      letter-spacing: 0.08em;
-    }
-
-    .page__subtitle {
-      font-size: 13px;
-      opacity: 0.7;
-    }
-  `,
+  imports: [DenAgentPanel, DenWorld],
+  templateUrl: './den-page.html',
+  styleUrl: './den-page.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DenPage {}
+export class DenPage {
+  protected readonly selected = signal<string | null>(null);
+
+  protected toggle(agentId: string): void {
+    this.selected.update(current => (current === agentId ? null : agentId));
+  }
+}
