@@ -8,14 +8,14 @@ export type Action = 'idle' | 'think' | 'read' | 'edit' | 'shell' | 'web' | 'del
 /** Station slots every skin must draw. `entrance` doubles as the "waiting for you" spot. */
 export type StationSlot = 'entrance' | 'web' | 'read' | 'center' | 'edit' | 'shell' | 'spawn' | 'rest';
 
-interface SkinStation {
+type SkinStation = {
   slot: StationSlot;
   art: PixelArt;
   /** Horizontal position in the room, percent. */
   x: number;
   /** Raise above the floor, in art pixels (e.g. a window hangs on the wall). */
   lift?: number;
-}
+};
 
 export interface Skin {
   id: string;

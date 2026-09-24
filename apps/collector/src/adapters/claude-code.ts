@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { categorizeTool, type DenEvent, type DenEventKind } from '@agent-den/contracts';
 
 /** Subset of the Claude Code hook stdin payload we rely on. */
-export interface ClaudeCodeHookPayload {
+export type ClaudeCodeHookPayload = {
   hook_event_name: string;
   session_id: string;
   transcript_path?: string;
@@ -21,7 +21,7 @@ export interface ClaudeCodeHookPayload {
   /** Present on subagent hooks (and on tool hooks fired inside a subagent). */
   agent_id?: string;
   agent_type?: string;
-}
+};
 
 const kindByHook: Record<string, DenEventKind> = {
   SessionStart: 'session-start',

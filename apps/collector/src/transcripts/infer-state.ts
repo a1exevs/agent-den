@@ -1,12 +1,12 @@
 import type { DenEventKind } from '@agent-den/contracts';
 
 /** What the tail of a transcript says the agent is doing right now. */
-export interface InferredState {
+export type InferredState = {
   kind: DenEventKind;
   cwd?: string;
   toolName?: string;
   detail?: string;
-}
+};
 
 type ContentBlock = { type?: string; name?: string; input?: Record<string, unknown> };
 

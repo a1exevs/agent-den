@@ -36,15 +36,28 @@ const handleClick = (e: MouseEvent): void => {
 
 ## Type Definitions
 
-- `interface` — ONLY for business entities and wire contracts (AgentState, DenEvent, etc.)
-- `type` — for everything else: unions, intersections, view models, utility types
+`interface` means "this is a domain entity"; `type` is everything else.
+
+| Use | For | Examples |
+|---|---|---|
+| `interface` | a **domain entity**: a thing with identity that lives in app state | `AgentState`, `Room`, `Skin` |
+| `type` | payloads, events and messages | `ClaudeCodeHookPayload`, `DenEvent`, `ServerMessage`, `TranscriptItem` |
+| `type` | params, options, config records, internal results | `SkinStation`, `InferredState`, `Placement` |
+| `type` | unions, intersections, mapped/utility types, view models | `AgentActivity`, `FeedEntry`, `Palette` |
+| `type` | anything in `shared` (it has no domain) | `PixelArt` |
+
+Doubt? It's a `type`. An entity should be recognisable by name alone (`Agent…`, `Room`, `Skin`).
+
+Enforced by `@typescript-eslint/consistent-type-definitions: type` everywhere, switched off only where entities
+live: `apps/web/src/entities/*/model/**` and `packages/contracts/src/**`. Inside those folders the split is a review
+matter.
 
 ## Type Exports
 
 Mark type-only re-exports in barrel files with `type` (`export { type X }` or `export type { X }`):
 
 ```typescript
-export { AgentStore, groupIntoRooms, type Room } from './model';
+export { groupIntoRooms, type Room } from './model/rooms';
 ```
 
 ## General Practices

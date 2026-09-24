@@ -20,7 +20,7 @@ export type DenEventKind =
   | 'stop';
 
 /** Normalized event — every adapter (hooks, JSONL, mock) emits this shape. */
-export interface DenEvent {
+export type DenEvent = {
   id: string;
   source: AgentSource;
   kind: DenEventKind;
@@ -40,7 +40,7 @@ export interface DenEvent {
   title?: string;
   /** Epoch milliseconds. */
   timestamp: number;
-}
+};
 
 /** One content block of a transcript message, clipped for display. */
 export type TranscriptBlock =
@@ -49,12 +49,12 @@ export type TranscriptBlock =
   | { kind: 'tool-use'; id: string; name: string; input: string; summary?: string }
   | { kind: 'tool-result'; toolUseId: string; text: string; isError: boolean; clipped: boolean };
 
-export interface TranscriptItem {
+export type TranscriptItem = {
   id: string;
   role: 'user' | 'assistant';
   timestamp?: string;
   blocks: TranscriptBlock[];
-}
+};
 
 /** Messages sent from the collector to web clients over WebSocket. */
 export type ServerMessage =

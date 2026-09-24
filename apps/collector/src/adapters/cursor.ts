@@ -3,7 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { categorizeTool, type DenEvent, type DenEventKind } from '@agent-den/contracts';
 
 /** Subset of the Cursor hook stdin payload we rely on. */
-export interface CursorHookPayload {
+export type CursorHookPayload = {
   hook_event_name: string;
   conversation_id: string;
   workspace_roots?: string[];
@@ -12,7 +12,7 @@ export interface CursorHookPayload {
   tool_name?: string;
   prompt?: string;
   status?: string;
-}
+};
 
 const kindByHook: Record<string, DenEventKind> = {
   beforeSubmitPrompt: 'prompt',

@@ -52,7 +52,16 @@ export default tsEslint.config(
       // No cycles at all — also catches a file importing its own slice's index.ts.
       'import/no-cycle': ['error', { ignoreExternal: true }],
       'import/no-self-import': 'error',
+      // `interface` = domain entity, `type` = everything else (payloads, params, unions, view models).
+      '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
       ...segmentDirectionRule(join(import.meta.dirname, 'src')),
+    },
+  },
+  {
+    // Domain entities live in entity models — the only place `interface` is allowed.
+    files: ['src/entities/*/model/**/*.ts'],
+    rules: {
+      '@typescript-eslint/consistent-type-definitions': 'off',
     },
   },
   // FSD import boundaries + "Spartan only in shared", one block per layer.

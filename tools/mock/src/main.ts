@@ -8,7 +8,13 @@ const endpoint = `http://127.0.0.1:${process.env['AGENT_DEN_PORT'] ?? COLLECTOR_
 const projects = ['D:/projects/agent-den', 'D:/projects/set-forge', 'D:/projects/pet-shop'];
 const tools = ['Read', 'Grep', 'Edit', 'Write', 'Bash', 'WebFetch', 'Glob', 'mcp__figma__get_screenshot'];
 
-const pick = <T>(items: readonly T[]): T => items[Math.floor(Math.random() * items.length)]!;
+function pick<T>(items: readonly T[]): T {
+  const item = items[Math.floor(Math.random() * items.length)];
+  if (item === undefined) {
+    throw new Error('pick: items must not be empty');
+  }
+  return item;
+}
 const pause = (min: number, max: number): Promise<void> => sleep(min + Math.random() * (max - min));
 
 async function emit(

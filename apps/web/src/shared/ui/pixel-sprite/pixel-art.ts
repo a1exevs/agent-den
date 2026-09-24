@@ -2,14 +2,14 @@
  * Pixel art defined in code: every frame is a list of rows, every char is a palette key.
  * `.` is always transparent.
  */
-export interface PixelArt {
+export type PixelArt = {
   id: string;
   width: number;
   height: number;
   frames: readonly (readonly string[])[];
   /** Frames per second of the idle loop. */
   fps: number;
-}
+};
 
 /** Palette key (single char) → CSS color. */
 export type Palette = Readonly<Record<string, string>>;
