@@ -4,7 +4,8 @@
 //   2. `index.ts`: required for every slice and every `shared` segment (their public API); forbidden in the segments
 //      of a slice — the slice index re-exports straight from files, a segment barrel would be dead code;
 //   3. segments are the five standard ones (ui, model, api, lib, config);
-//   4. kebab-case file and folder names across the monorepo sources.
+//   4. kebab-case file and folder names across the monorepo sources;
+//   5. no `app/index.ts` (only main.ts imports app, directly by file).
 // Exit code 1 lists every violation.
 
 import { existsSync, readdirSync, statSync } from 'node:fs';
@@ -85,6 +86,10 @@ function checkFsd() {
       }
       checkSegments('slice', slicePath, 'forbidden');
     }
+  }
+
+  if (existsSync(join(webSrc, 'app', 'index.ts'))) {
+    problems.push('apps/web/src/app/index.ts: app has no public API — main.ts imports its files directly');
   }
 
   const shared = join(webSrc, 'shared');

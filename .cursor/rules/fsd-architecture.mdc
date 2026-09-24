@@ -28,6 +28,8 @@ app → pages → widgets → features → entities → shared        (arrows = 
 
 - Only **downwards**. Never sideways between slices of one layer (see §6), never upwards.
 - A layer is created when its first slice appears — no empty folders (there is no `features/` yet).
+- `app/` is imported only by `main.ts`, directly by file. While it is small (root component, config, routes) its
+  files sit in `app/` itself; split it into segments by purpose (`routes/`, `providers/`, `styles/`) once it grows.
 
 ## 2. Where does new code go?
 
@@ -102,6 +104,7 @@ ui ──→ model ──→ api
 | segment of `shared` (`shared/ui/index.ts`) | **required** | `shared` has no slices — its segments are the public API |
 | segment inside a slice (`entities/agent/model/index.ts`) | **forbidden** | nobody may import it: outsiders use the slice index, insiders import files — it would be a dead barrel |
 | layer (`src/entities/index.ts`) | **forbidden** | layer barrels hide dependencies and create cycles |
+| `app/index.ts` | **forbidden** | only `main.ts` imports `app`, and it imports the files directly — nobody needs a public API |
 
 - Explicit named re-exports only (`export { X }`, `export { type Y }`), never `export *`.
 - Export **only what other slices use** — knip fails on unused exports.
@@ -192,7 +195,7 @@ import { BrnSheet } from '@spartan-ng/brain/sheet';               // ❌ outside
 src/
 ├── main.ts
 ├── styles.css
-├── app/             index.ts, app.ts/.html, app.config.ts, app.routes.ts
+├── app/             app.ts/.html, app.config.ts, app.routes.ts
 ├── pages/
 │   └── den/         index.ts, ui/ (den-page)
 ├── widgets/
