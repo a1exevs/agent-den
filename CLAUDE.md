@@ -1,45 +1,8 @@
-# agent-den
+@AGENTS.md
 
-Pixel-art den where AI agent sessions are cats and subagents are kittens. Requirements: `docs/requirements.md`.
+## Claude Code specifics
 
-## Layout (npm workspaces)
-
-- `apps/web` — Angular 22, zoneless, signals, FSD. UI primitives: `@spartan-ng/brain` wrapped in `src/shared/ui`, plain CSS.
-- `apps/collector` — Node + Hono on `127.0.0.1:4317`: `POST /hooks/claude-code`, `POST /hooks/cursor`, `POST /events`, WebSocket `/ws`.
-- `packages/contracts` — `DenEvent`, `AgentState`, `reduceAgents()` shared by collector and web.
-- `plugins/claude-code` — Claude Code plugin (hooks → `scripts/send.mjs` → collector). Marketplace: `.claude-plugin/marketplace.json`.
-- `tools/mock` — dev-only scenario generator.
-
-## Commands
-
-- `npm run dev:collector` / `npm run dev:web` / `npm run dev:mock`
-- `npm run lint`, `npm test`, `npm run build`, `npm run format`
-
-## Rules
-
-Coding rules have one source: `.cursor/rules/*.mdc` (Cursor format). `npm run rules:sync` generates
-`.claude/rules/*.md` from them (Cursor `globs` → Claude `paths`), so Claude Code loads each rule only when working
-with matching files. Edit the `.mdc`, never the generated `.md`; `npm run lint` fails if they drift.
-Rules: `fsd-architecture`, `component-architecture`, `state-management`, `styling-guidelines`,
-`typescript-guidelines`, `file-naming`.
-
-Key constraints:
-
-- `@spartan-ng/*` only inside `apps/web/src/shared/**` (ESLint enforced).
-- FSD (standard): import other slices via `@layer/slice` (`@entities/agent`), shared via `@shared/<segment>` (`@shared/ui`),
-  relative paths inside a slice (no `src/...`); no layer `index.ts`. `npm run lint` runs ESLint + Steiger.
-- Components: separate `.ts` / `.html` / `.css` files, never inline templates or styles.
-- Dependency versions are pinned exactly (`.npmrc` `save-exact=true`).
-- Hook sender must never block or fail the agent: short timeout, swallow errors, exit 0, no stdout.
-
-## Plugin development
-
-The installed plugin is a cached copy (`~/.claude/plugins/cache/agent-den/agent-den/<version>`). After changing
-`plugins/claude-code`, bump `version` in `.claude-plugin/plugin.json`, then run
-`claude plugin marketplace update agent-den` and `claude plugin update agent-den@agent-den`; new sessions pick it up.
-Raw payloads the collector received: `GET http://127.0.0.1:4317/debug/hooks`.
-
-## Dev server gotcha
-
-`ng serve` doesn't pick up changes to `tsconfig` `paths` or to `packages/contracts` types (outside the app root):
-restart it with a clean cache (`rm -rf apps/web/.angular/cache`). `ng build` is not affected.
+- Coding rules reach you as path-scoped `.claude/rules/*.md`, generated from `.cursor/rules/*.mdc`. To change a
+  rule, edit the `.mdc` and run `npm run rules:sync`.
+- Project-wide instructions for all agents live in `AGENTS.md` (imported above); put only Claude-specific notes here.
+- Preview: `.claude/launch.json` has the `web` config (Angular dev server, port 4210) for `preview_start`.
