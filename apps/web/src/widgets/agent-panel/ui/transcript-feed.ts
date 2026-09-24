@@ -13,7 +13,7 @@ import {
 import { type TranscriptStatus } from '@entities';
 import { DenSearchField, DenToggle } from '@shared';
 
-import type { FeedEntry } from 'src/widgets/agent-panel/lib/build-feed';
+import type { FeedEntry } from 'src/widgets/agent-panel/model/build-feed';
 
 /** Distance from the bottom (px) that still counts as "following". */
 const FOLLOW_THRESHOLD_PX = 48;

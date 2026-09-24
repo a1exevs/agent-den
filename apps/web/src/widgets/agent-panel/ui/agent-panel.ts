@@ -5,8 +5,8 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, ou
 import { actionFor, AgentStore, catsSkin, TranscriptStore } from '@entities';
 import { DenPixelSprite, DenSheet, injectNow } from '@shared';
 
-import { buildFeed } from 'src/widgets/agent-panel/lib/build-feed';
 import { activityLabel, formatDuration, toolCategoryLabels } from 'src/widgets/agent-panel/lib/describe-agent';
+import { buildFeed } from 'src/widgets/agent-panel/model/build-feed';
 import { DenTranscriptFeed } from 'src/widgets/agent-panel/ui/transcript-feed';
 
 /** Details of one agent: who, where, what it's doing, and its live transcript. */

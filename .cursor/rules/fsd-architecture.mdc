@@ -24,7 +24,12 @@ Layers import only downward. Per layer (except shared): slices → segments. Enf
 - **entities/** — domain models (agent, room, achievement): types, stores, adapters
 - **shared/** — UI kit, lib helpers, api clients (WebSocket), config
 
-**Segments:** `ui/` (components), `model/` (signals stores, types, pure logic), `api/` (transport — internal to the slice), `lib/` (helpers).
+**Segments** (the five standard FSD ones; name any extra segment by purpose, never `components`/`hooks`/`types`/`utils`):
+- `ui/` — components and their styles
+- `model/` — state (signal stores), domain types, business logic, view-model derivation
+- `api/` — talking to the outside world (collector socket, HTTP); internal to the slice
+- `lib/` — helpers used inside the slice (formatters, pure utilities)
+- `config/` — configuration and feature flags
 
 ## UI kit boundary
 
