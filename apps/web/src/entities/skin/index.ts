@@ -1,11 +1,2 @@
-export {
-  type Action,
-  actionFor,
-  catSprites,
-  catsSkin,
-  type Skin,
-  type SkinStation,
-  slotFor,
-  stationSprites,
-  type StationSlot,
-} from './model';
+export { catsSkin } from './model/cats/cats-skin';
+export { actionFor, type Skin, slotFor, type StationSlot } from './model/skin';

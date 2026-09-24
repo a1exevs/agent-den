@@ -18,7 +18,8 @@ This file is read by every coding agent (Cursor natively, Claude Code through `C
 ## Commands
 
 - `npm run dev:collector` / `npm run dev:web` / `npm run dev:mock`
-- `npm run lint` — rules sync check, Prettier, ESLint, Steiger (FSD), tsc
+- `npm run lint` — rules sync check, structure check (FSD folders, kebab-case), Prettier, knip (unused exports),
+  ESLint (incl. FSD imports, cycles, segment direction), Steiger (FSD), tsc
 - `npm test`, `npm run build`, `npm run format`
 - `npm run rules:sync` — regenerate `.claude/rules` after editing `.cursor/rules`
 

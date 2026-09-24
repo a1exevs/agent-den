@@ -1,6 +1,6 @@
 import type { TranscriptItem } from '@agent-den/contracts';
 
-export type ToolResult = { text: string; isError: boolean; clipped: boolean };
+type ToolResult = { text: string; isError: boolean; clipped: boolean };
 
 export type FeedEntry =
   | { kind: 'prompt' | 'reply' | 'thinking' | 'note'; id: string; time?: string; text: string }

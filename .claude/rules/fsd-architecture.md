@@ -8,12 +8,7 @@ paths:
 # Feature-Sliced Design
 
 `apps/web` follows standard [Feature-Sliced Design](https://feature-sliced.design/ru/docs/get-started/overview).
-Two tools check it — keep both green (`npm run lint` runs both):
-
-- **ESLint** `no-restricted-imports` (`apps/web/linter/rules/restricted-imports-rule.ts`): `src/...` paths, upper-layer
-  and cross-slice alias imports, public-API sidesteps, Spartan outside `shared`.
-- **Steiger** (`npm run lint:fsd`, config `apps/web/steiger.config.ts`): structure — relative paths into another slice,
-  public API, segment and slice names, layer `index.ts`.
+`npm run lint` enforces almost all of it — see [§9 Enforcement](#9-enforcement). What no tool can check is marked there.
 
 Structure: **layer → slice → segment → file**. `app` and `shared` have no slices (layer → segment → file).
 
@@ -102,20 +97,25 @@ ui ──→ model ──→ api
 
 ## 5. Public API (`index.ts`)
 
-- Every **slice** has `index.ts`. So does every segment of a slice (the slice `index.ts` re-exports from them)
-  and every segment of `shared` (`shared/ui/index.ts`, ...).
-- **Layers have no `index.ts`** (no `src/entities/index.ts`) — layer barrels hide dependencies and create cycles.
-- Explicit named re-exports only (`export { X }`, `export { type Y }`), never `export *`. Export only what other
-  slices actually use.
+| Where | `index.ts`? | Why |
+|---|---|---|
+| slice (`entities/agent/index.ts`) | **required** | the slice's public API; re-exports straight from files |
+| segment of `shared` (`shared/ui/index.ts`) | **required** | `shared` has no slices — its segments are the public API |
+| segment inside a slice (`entities/agent/model/index.ts`) | **forbidden** | nobody may import it: outsiders use the slice index, insiders import files — it would be a dead barrel |
+| layer (`src/entities/index.ts`) | **forbidden** | layer barrels hide dependencies and create cycles |
+
+- Explicit named re-exports only (`export { X }`, `export { type Y }`), never `export *`.
+- Export **only what other slices use** — knip fails on unused exports.
 - Index files re-export with relative paths.
 
 ```typescript
 // src/entities/agent/index.ts
-export { AgentStore, groupIntoRooms, type Room } from './model';
+export { AgentStore } from './model/agent-store';
+export { groupIntoRooms, type Room } from './model/rooms';
 
-// src/entities/agent/model/index.ts
-export { AgentStore } from './agent-store';
-export { groupIntoRooms, type Room } from './rooms';
+// src/shared/ui/index.ts
+export { DenSheet } from './sheet';
+export { DenToggle } from './toggle';
 ```
 
 ## 6. Imports
@@ -163,9 +163,29 @@ import { BrnSheet } from '@spartan-ng/brain/sheet';               // ❌ outside
 
 1. Pick the place with §2 (pages first).
 2. Create the slice folder (kebab-case) and only the segments you need (§4).
-3. Add `index.ts` to the slice and its segments; export only what other slices use (§5).
+3. Add the slice `index.ts` (re-export straight from files; no `index.ts` in its segments); export only what other slices use (§5).
 4. Imports: relative inside the slice, `@layer/slice` / `@shared/segment` across (§6).
-5. `npm run lint` — ESLint + Steiger green.
+5. `npm run lint` green.
+
+## 9. Enforcement
+
+| Rule | Checked by |
+|---|---|
+| Only downwards between layers | ESLint `no-restricted-imports` (aliases), Steiger `forbidden-imports` (relative paths) |
+| No imports between slices of one layer | ESLint (aliases), Steiger `forbidden-imports` (relative paths) |
+| Through the public API only | ESLint (aliases), Steiger `no-public-api-sidestep` (relative paths) |
+| No `src/...` paths | ESLint + tsc (no such alias) |
+| No import of your own slice/segment index | ESLint `no-restricted-imports` (`.` / `..`) |
+| No dependency cycles | ESLint `import/no-cycle`, `import/no-self-import` |
+| Segment direction `ui → model → api → lib, config` | ESLint `import/no-restricted-paths` (zones generated per slice: `linter/rules/segment-direction-rule.ts`) |
+| `index.ts` placement (§5), no `export *` | `scripts/check-structure.mjs`, Steiger `public-api`, `no-layer-public-api`, `no-wildcard-exports` |
+| Only the five standard segments; nothing but `index.ts` in a slice root | `scripts/check-structure.mjs` |
+| kebab-case names | `scripts/check-structure.mjs` |
+| No unused exports / files / dependencies | knip (`knip.json`) |
+| Spartan only in `shared` | ESLint |
+| Pages first | Steiger `insignificant-slice` — **warning only** |
+| `shared` knows nothing about the domain | ❌ not checkable (upward imports are caught, domain concepts are not) — review |
+| Which layer new code belongs to (§2) | ❌ a design decision — review |
 
 ## Current structure
 

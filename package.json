@@ -13,18 +13,21 @@
     "tools/*"
   ],
   "scripts": {
-    "dev:web": "npm run start -w @agent-den/web",
+    "build": "npm run build --workspaces --if-present",
     "dev:collector": "npm run dev -w @agent-den/collector",
     "dev:mock": "npm run start -w @agent-den/mock",
-    "build": "npm run build --workspaces --if-present",
-    "lint": "node scripts/sync-agent-rules.mjs --check && prettier --check . && npm run lint --workspaces --if-present",
+    "dev:web": "npm run start -w @agent-den/web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "npm run test --workspaces --if-present",
-    "rules:sync": "node scripts/sync-agent-rules.mjs"
+    "lint": "node scripts/sync-agent-rules.mjs --check && node scripts/check-structure.mjs && prettier --check . && knip && npm run lint --workspaces --if-present",
+    "lint:structure": "node scripts/check-structure.mjs",
+    "lint:unused": "knip",
+    "rules:sync": "node scripts/sync-agent-rules.mjs",
+    "test": "npm run test --workspaces --if-present"
   },
   "devDependencies": {
     "@alexevs/prettier-config": "1.0.1",
+    "knip": "6.38.0",
     "prettier": "3.9.6",
     "typescript": "6.0.3"
   }

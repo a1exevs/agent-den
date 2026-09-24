@@ -1,1 +1,1 @@
-export { DenPage } from './ui';
+export { DenPage } from './ui/den-page';

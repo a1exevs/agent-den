@@ -1,6 +1,7 @@
 import eslintJs from '@eslint/js';
 import angular from 'angular-eslint';
 import prettierConfig from 'eslint-config-prettier';
+import { join } from 'node:path';
 import tsEslint from 'typescript-eslint';
 
 import languageOptions from './linter/language-options';
@@ -8,6 +9,7 @@ import plugins from './linter/plugins';
 import curlyRule from './linter/rules/curly-rule';
 import importOrderRule from './linter/rules/import-order-rule';
 import { fsdLayers, restrictedImportsRule } from './linter/rules/restricted-imports-rule';
+import { segmentDirectionRule } from './linter/rules/segment-direction-rule';
 import sortImportsRule from './linter/rules/sort-imports-rule';
 import unusedVarsRule from './linter/rules/unused-vars-rule';
 import settings from './linter/settings';
@@ -47,6 +49,10 @@ export default tsEslint.config(
     files: ['src/**/*.ts'],
     rules: {
       'eslint-plugin-tsdoc/syntax': 'error',
+      // No cycles at all — also catches a file importing its own slice's index.ts.
+      'import/no-cycle': ['error', { ignoreExternal: true }],
+      'import/no-self-import': 'error',
+      ...segmentDirectionRule(join(import.meta.dirname, 'src')),
     },
   },
   // FSD import boundaries + "Spartan only in shared", one block per layer.

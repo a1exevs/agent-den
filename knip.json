@@ -1,0 +1,23 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "workspaces": {
+    ".": {
+      "entry": ["scripts/*.mjs"]
+    },
+    "apps/web": {
+      "entry": ["src/**/*.spec.ts", "steiger.config.ts"],
+      "project": ["src/**/*.ts", "linter/**/*.ts"]
+    },
+    "apps/collector": {
+      "entry": ["src/**/*.spec.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/contracts": {
+      "project": ["src/**/*.ts"]
+    },
+    "tools/mock": {
+      "project": ["src/**/*.ts"]
+    }
+  },
+  "ignore": ["plugins/**"]
+}

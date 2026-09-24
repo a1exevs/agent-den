@@ -1,1 +1,1 @@
-export { CollectorSocket, type ConnectionStatus } from './collector-socket';
+export { CollectorSocket } from './collector-socket';

@@ -1,1 +1,1 @@
-export { DenAgentPanel } from './ui';
+export { DenAgentPanel } from './ui/agent-panel';

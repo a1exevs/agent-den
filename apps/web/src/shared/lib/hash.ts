@@ -1,5 +1,5 @@
 /** Small stable string hash (FNV-1a) — deterministic picks like fur color or cat name. */
-export function hashString(value: string): number {
+function hashString(value: string): number {
   let hash = 0x811c9dc5;
   for (let index = 0; index < value.length; index++) {
     hash ^= value.charCodeAt(index);
