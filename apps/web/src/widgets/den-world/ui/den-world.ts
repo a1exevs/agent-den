@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 
-import { DenRoom } from './den-room';
-
 import { AgentStore, groupIntoRooms } from '@entities/agent';
 import { catsSkin } from '@entities/skin';
+
+import { DenRoom } from './den-room';
 
 /** The whole den: one room per project, live from the collector. */
 @Component({

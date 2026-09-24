@@ -1,8 +1,8 @@
+import { assertPixelArt } from '@shared/ui';
+
 import { catPalette } from './cat-palettes';
 import { catSprites } from './cat-sprites';
 import { stationPalette, stationSprites } from './station-sprites';
-
-import { assertPixelArt } from '@shared/ui';
 
 describe('cat skin sprites', () => {
   const all = [...Object.values(catSprites), ...Object.values(stationSprites)];

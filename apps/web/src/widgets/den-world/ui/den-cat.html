@@ -1,7 +1,14 @@
 @if (bubble(); as text) {
   <span class="cat__bubble">{{ text }}</span>
 }
-<den-pixel-sprite class="cat__sprite" [art]="art()" [palette]="palette()" [scale]="scale()" [flip]="facingLeft()" />
+<den-agent-avatar
+  class="cat__sprite"
+  [agent]="agent()"
+  [skin]="skin()"
+  [action]="action()"
+  [scale]="scale()"
+  [flip]="facingLeft()"
+/>
 <span class="cat__labels">
   <span class="cat__name">{{ name() }}</span>
   @if (agent().title; as title) {

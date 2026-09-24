@@ -10,17 +10,19 @@ import {
   signal,
 } from '@angular/core';
 
-import { actionFor, type Skin } from '@entities/skin';
-import { DenPixelSprite } from '@shared/ui';
+import { actionFor, DenAgentAvatar, type Skin } from '@entities/skin';
 
 const WALK_MS = 1200;
 const CAT_SCALE = 3;
 const KITTEN_SCALE = 2;
 
-/** One agent as a character. Walks from `originX` to `targetX` on arrival and between stations. */
+/**
+ * An agent as an actor on the den scene: enters from the door (kittens from the box), walks between stations, shows
+ * bubbles and labels, can be picked. How it looks is `DenAgentAvatar` from the skin entity.
+ */
 @Component({
   selector: 'den-cat',
-  imports: [DenPixelSprite],
+  imports: [DenAgentAvatar],
   templateUrl: './den-cat.html',
   styleUrl: './den-cat.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -61,8 +63,6 @@ export class DenCat {
   protected readonly isKitten = computed(() => Boolean(this.agent().parentAgentId));
   protected readonly scale = computed(() => (this.isKitten() ? KITTEN_SCALE : CAT_SCALE));
   protected readonly action = computed(() => (this.walking() ? 'idle' : actionFor(this.agent())));
-  protected readonly art = computed(() => this.skin().characterArt(this.action()));
-  protected readonly palette = computed(() => this.skin().characterPalette(this.agent().sessionId));
   protected readonly name = computed(() => this.skin().characterName(this.agent().agentId));
   protected readonly bubble = computed(() => (this.walking() ? undefined : this.skin().bubble[this.action()]));
   protected readonly x = computed(() => (this.arrived() ? this.targetX() : this.originX()));

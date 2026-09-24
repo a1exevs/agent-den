@@ -1,7 +1,7 @@
 <den-sheet [open]="isOpen()" label="Agent details" (closed)="closed.emit()">
   @if (agent(); as agent) {
     <div class="who" denSheetHeader>
-      <den-pixel-sprite class="who__sprite" [art]="art()" [palette]="palette()" [scale]="3" />
+      <den-agent-avatar class="who__sprite" [agent]="agent" [skin]="skin" [scale]="3" />
       <div class="who__text">
         <h2 class="who__name">
           {{ name() }}

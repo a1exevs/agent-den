@@ -13,10 +13,6 @@
   }
 }
 
-.cat__sprite {
-  filter: drop-shadow(0 3px 0 rgb(0 0 0 / 0.18));
-}
-
 :host {
   cursor: pointer;
   outline: none;
@@ -24,9 +20,8 @@
 
 :host(:focus-visible) .cat__sprite,
 :host(.cat--selected) .cat__sprite {
-  filter: drop-shadow(0 3px 0 rgb(0 0 0 / 0.18)) drop-shadow(0 0 0 var(--den-accent))
-    drop-shadow(2px 0 0 var(--den-accent)) drop-shadow(-2px 0 0 var(--den-accent))
-    drop-shadow(0 -2px 0 var(--den-accent));
+  filter: drop-shadow(0 0 0 var(--den-accent)) drop-shadow(2px 0 0 var(--den-accent))
+    drop-shadow(-2px 0 0 var(--den-accent)) drop-shadow(0 -2px 0 var(--den-accent));
 }
 
 :host(.cat--selected) .cat__name {

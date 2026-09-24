@@ -55,6 +55,8 @@ Our examples:
 | sound on/off, skin switcher | `features/toggle-sound`, `features/switch-skin` | a user action |
 | `AgentStore`, `groupIntoRooms` | `entities/agent/model` | domain state and logic |
 | cat sprites, stations, poses | `entities/skin/model` | domain (how an agent looks) |
+| `DenAgentAvatar` (pose sprite in session colors) | `entities/skin/ui` | entity UI: how an agent looks, reused by `den-world` and `agent-panel` |
+| `DenCat` (walks, bubbles, labels, picking) | `widgets/den-world/ui` | behaviour on the den scene — knows rooms and stations, so not entity UI |
 | `CollectorSocket` | `shared/api` | transport, knows nothing about cats |
 | `DenSheet`, `DenToggle`, `DenPixelSprite` | `shared/ui` | UI kit |
 | `injectNow`, `hashString` | `shared/lib` | generic helpers |
@@ -203,7 +205,7 @@ src/
 │   └── agent-panel/ index.ts, ui/ (agent-panel, transcript-feed), model/ (build-feed), lib/ (describe-agent)
 ├── entities/
 │   ├── agent/       index.ts, model/ (agent-store, rooms)
-│   ├── skin/        index.ts, model/ (skin, cats/…)
+│   ├── skin/        index.ts, model/ (skin, cats/…), ui/ (agent-avatar)
 │   └── transcript/  index.ts, model/ (transcript-store)
 └── shared/
     ├── api/         index.ts, collector-socket
