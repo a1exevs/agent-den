@@ -23,7 +23,8 @@ Follow `.cursor/rules/*.mdc` — they apply to Claude Code too:
 Key constraints:
 
 - `@spartan-ng/*` only inside `apps/web/src/shared/**` (ESLint enforced).
-- No relative imports in `apps/web/src`; cross-layer via `@shared`, `@entities`, ...; intra-layer via `src/...`.
+- FSD (standard): import other slices via `@layer/slice` (`@entities/agent`), shared via `@shared/<segment>` (`@shared/ui`),
+  own slice via `src/...`; no layer `index.ts`, no relative imports. `npm run lint` runs ESLint + Steiger.
 - Components: separate `.ts` / `.html` / `.css` files, never inline templates or styles.
 - Dependency versions are pinned exactly (`.npmrc` `save-exact=true`).
 - Hook sender must never block or fail the agent: short timeout, swallow errors, exit 0, no stdout.
@@ -34,3 +35,8 @@ The installed plugin is a cached copy (`~/.claude/plugins/cache/agent-den/agent-
 `plugins/claude-code`, bump `version` in `.claude-plugin/plugin.json`, then run
 `claude plugin marketplace update agent-den` and `claude plugin update agent-den@agent-den`; new sessions pick it up.
 Raw payloads the collector received: `GET http://127.0.0.1:4317/debug/hooks`.
+
+## Dev server gotcha
+
+`ng serve` doesn't pick up changes to `tsconfig` `paths` or to `packages/contracts` types (outside the app root):
+restart it with a clean cache (`rm -rf apps/web/.angular/cache`). `ng build` is not affected.

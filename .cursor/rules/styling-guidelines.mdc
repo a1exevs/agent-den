@@ -14,7 +14,7 @@ container queries, `@property` for animatable variables.
 
 - `component-name.css` next to the component, referenced via `styleUrl`. Angular emulated encapsulation scopes it.
 - Class names: **kebab-case**, BEM-ish (`.cat`, `.cat--sleeping`, `.cat__tail`).
-- Conditional classes via `[class.cat--sleeping]="isSleeping()"` or `cn()` from `@shared`. No `[ngClass]`.
+- Conditional classes via `[class.cat--sleeping]="isSleeping()"` or `cn()` from `@shared/lib`. No `[ngClass]`.
 - Dynamic values (sprite frame, position) → CSS custom properties bound from the template
   (`[style.--frame]="frame()"`), not inline style strings.
 
@@ -25,7 +25,7 @@ defined in the `tokens` layer; components consume tokens and never hardcode pale
 
 ## Pixel art
 
-- Sprites render with `image-rendering: pixelated`; sizes are multiples of `--den-pixel`.
+- Sprites are code-defined pixel art (`@shared/ui` `DenPixelSprite`), rendered with `image-rendering: pixelated` at an integer `scale`.
 - Frame animation via `steps()` timing on `background-position` or a frame custom property.
 - Respect `prefers-reduced-motion`: reduce idle animations, keep state changes readable.
 

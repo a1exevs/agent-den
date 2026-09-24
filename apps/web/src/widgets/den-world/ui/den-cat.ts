@@ -10,8 +10,8 @@ import {
   signal,
 } from '@angular/core';
 
-import { actionFor, type Skin } from '@entities';
-import { DenPixelSprite } from '@shared';
+import { actionFor, type Skin } from '@entities/skin';
+import { DenPixelSprite } from '@shared/ui';
 
 const WALK_MS = 1200;
 const CAT_SCALE = 3;

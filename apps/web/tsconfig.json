@@ -16,12 +16,11 @@
     "module": "preserve",
     "paths": {
       "src/*": ["./src/*"],
-      "@app": ["./src/app/index.ts"],
-      "@pages": ["./src/pages/index.ts"],
-      "@widgets": ["./src/widgets/index.ts"],
-      "@features": ["./src/features/index.ts"],
-      "@entities": ["./src/entities/index.ts"],
-      "@shared": ["./src/shared/index.ts"],
+      "@pages/*": ["./src/pages/*"],
+      "@widgets/*": ["./src/widgets/*"],
+      "@features/*": ["./src/features/*"],
+      "@entities/*": ["./src/entities/*"],
+      "@shared/*": ["./src/shared/*"],
       "@agent-den/contracts": ["../../packages/contracts/src/index.ts"]
     }
   },

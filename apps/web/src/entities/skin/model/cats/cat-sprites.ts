@@ -1,4 +1,4 @@
-import { patchFrame, type PixelArt } from '@shared';
+import { patchFrame, type PixelArt } from '@shared/ui';
 
 /*
  * Palette keys: k outline, o fur, d stripes, w belly/muzzle, p pink (nose, ears, mouth), g eyes.

@@ -1,4 +1,4 @@
-import type { Palette, PixelArt } from '@shared';
+import type { Palette, PixelArt } from '@shared/ui';
 
 export const stationPalette: Palette = {
   k: '#1e1824',

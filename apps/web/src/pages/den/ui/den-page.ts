@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
 
-import { DenAgentPanel, DenWorld } from '@widgets';
+import { DenAgentPanel } from '@widgets/agent-panel';
+import { DenWorld } from '@widgets/den-world';
 
 /** Main screen: the den with rooms per project; click a character to see what it's up to. */
 @Component({

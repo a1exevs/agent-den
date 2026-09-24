@@ -1,7 +1,8 @@
 import { type AgentState, reduceAgents, type ServerMessage } from '@agent-den/contracts';
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 
-import { CollectorSocket, injectNow } from '@shared';
+import { CollectorSocket } from '@shared/api';
+import { injectNow } from '@shared/lib';
 
 /** How long a finished kitten stays around before it hops back into the box. */
 const KITTEN_LINGER_MS = 3000;

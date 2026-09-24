@@ -1,7 +1,7 @@
 import type { ServerMessage, TranscriptItem } from '@agent-den/contracts';
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 
-import { CollectorSocket } from '@shared';
+import { CollectorSocket } from '@shared/api';
 
 export type TranscriptStatus = 'idle' | 'loading' | 'ready' | 'missing';
 

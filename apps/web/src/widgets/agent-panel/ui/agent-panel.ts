@@ -2,8 +2,11 @@ import type { ToolCategory } from '@agent-den/contracts';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
 
-import { actionFor, AgentStore, catsSkin, TranscriptStore } from '@entities';
-import { DenPixelSprite, DenSheet, injectNow } from '@shared';
+import { AgentStore } from '@entities/agent';
+import { actionFor, catsSkin } from '@entities/skin';
+import { TranscriptStore } from '@entities/transcript';
+import { injectNow } from '@shared/lib';
+import { DenPixelSprite, DenSheet } from '@shared/ui';
 
 import { activityLabel, formatDuration, toolCategoryLabels } from 'src/widgets/agent-panel/lib/describe-agent';
 import { buildFeed } from 'src/widgets/agent-panel/model/build-feed';

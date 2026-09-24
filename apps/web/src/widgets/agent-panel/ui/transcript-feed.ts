@@ -10,8 +10,8 @@ import {
   viewChild,
 } from '@angular/core';
 
-import { type TranscriptStatus } from '@entities';
-import { DenSearchField, DenToggle } from '@shared';
+import { type TranscriptStatus } from '@entities/transcript';
+import { DenSearchField, DenToggle } from '@shared/ui';
 
 import type { FeedEntry } from 'src/widgets/agent-panel/model/build-feed';
 

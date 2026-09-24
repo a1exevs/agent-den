@@ -1,4 +1,4 @@
-import { assertPixelArt } from '@shared';
+import { assertPixelArt } from '@shared/ui';
 
 import { catPalette } from 'src/entities/skin/model/cats/cat-palettes';
 import { catSprites } from 'src/entities/skin/model/cats/cat-sprites';

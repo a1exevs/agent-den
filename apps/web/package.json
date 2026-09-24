@@ -8,7 +8,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
-    "lint": "eslint ."
+    "lint": "eslint . && steiger ./src",
+    "lint:fsd": "steiger ./src"
   },
   "dependencies": {
     "@agent-den/contracts": "0.0.0",
@@ -29,6 +30,7 @@
     "@angular/cli": "22.2.0",
     "@angular/compiler-cli": "22.2.0",
     "@eslint/js": "9.39.5",
+    "@feature-sliced/steiger-plugin": "0.7.0",
     "angular-eslint": "22.5.0",
     "eslint": "9.39.5",
     "eslint-config-prettier": "10.1.8",
@@ -40,6 +42,7 @@
     "globals": "17.12.0",
     "jiti": "2.7.0",
     "jsdom": "30.1.1",
+    "steiger": "0.6.0",
     "typescript-eslint": "8.70.1",
     "vitest": "5.0.1"
   }

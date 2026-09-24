@@ -1,121 +1,124 @@
 ---
-description: Feature-Sliced Design architecture rules (Angular)
+description: Feature-Sliced Design architecture rules (Angular) — layers, slices, segments, public API, imports
 globs: ["apps/web/**"]
 ---
 
-# Feature-Sliced Design Architecture Rules
+# Feature-Sliced Design
 
-## Project Structure
+`apps/web` follows standard [Feature-Sliced Design](https://feature-sliced.design/ru/docs/get-started/overview).
+Checked by two tools — keep both green:
 
-`apps/web` uses **Feature-Sliced Design (FSD)**. Layer hierarchy:
+- **Steiger** (`npm run lint:fsd` → `steiger ./src`, config `apps/web/steiger.config.ts`) — structure: public API,
+  sidesteps, cross-slice imports, segment names, layer index files.
+- **ESLint** `no-restricted-imports` (`apps/web/linter/rules/restricted-imports-rule.ts`) — layer direction,
+  relative imports, public-API sidesteps, Spartan boundary.
+
+## Layers
 
 ```
 app → pages → widgets → features → entities → shared
 ```
 
-Layers import only downward. Per layer (except shared): slices → segments. Enforced by ESLint
-(`apps/web/linter/rules/restricted-imports-rule.ts`).
+A module may import only from layers **below** its own. Layers are created when needed (no empty `features/`).
 
-**Layers:**
-- **app/** — bootstrap config, providers, routes, root component
-- **pages/** — routed page components
-- **widgets/** — composite UI blocks (e.g. the den world, the details panel)
-- **features/** — user interactions (toggle sound, switch skin, ...)
-- **entities/** — domain models (agent, room, achievement): types, stores, adapters
-- **shared/** — UI kit, lib helpers, api clients (WebSocket), config
+| Layer | Holds | Slices? |
+|---|---|---|
+| `app/` | bootstrap config, providers, routes, root component | no — segments only |
+| `pages/` | routed screens (`den`) | yes |
+| `widgets/` | big self-contained UI blocks (`den-world`, `agent-panel`) | yes |
+| `features/` | user interactions that bring value (toggle sound, switch skin) | yes |
+| `entities/` | domain: `agent`, `skin`, `transcript` — stores, types, domain logic | yes |
+| `shared/` | UI kit, collector socket, config, helpers — no domain knowledge | no — segments only |
 
-**Segments** (the five standard FSD ones; name any extra segment by purpose, never `components`/`hooks`/`types`/`utils`):
-- `ui/` — components and their styles
-- `model/` — state (signal stores), domain types, business logic, view-model derivation
+**Pages first:** keep code inside the page (or the widget) that uses it; extract a widget / feature / entity when a
+second consumer appears. Steiger's `fsd/insignificant-slice` (warning) points at slices used in one place only.
+
+## Segments
+
+The five standard segments. A custom segment is named by **purpose**, never `components`/`hooks`/`types`/`utils`.
+
+- `ui/` — components (always `.ts` + `.html` + `.css`) and their formatters
+- `model/` — signal stores, domain types, business logic, view-model derivation
 - `api/` — talking to the outside world (collector socket, HTTP); internal to the slice
 - `lib/` — helpers used inside the slice (formatters, pure utilities)
 - `config/` — configuration and feature flags
 
+Sub-folders inside a segment are fine for grouping (`entities/skin/model/cats/`).
+
+## Public API
+
+- Every **slice** has `index.ts`; so does every **shared segment** (`shared/ui/index.ts`, `shared/lib/index.ts`, ...).
+  Segments inside a slice have their own `index.ts` too; the slice `index.ts` re-exports from them.
+- **Layers have no `index.ts`** (no `src/entities/index.ts`) — layer barrels hide dependencies and create cycles.
+- Explicit named re-exports only (`export { X } from '...'`, `export { type Y } from '...'`), never `export *`.
+  Export only what consumers need.
+- Index files use absolute `src/` paths.
+
+```typescript
+// src/entities/agent/index.ts
+export { AgentStore, groupIntoRooms, type Room } from 'src/entities/agent/model';
+
+// src/shared/ui/index.ts
+export { DenPixelSprite, DenSheet, DenToggle } from 'src/shared/ui/...';
+```
+
+## Imports
+
+| From → to | Form | Example |
+|---|---|---|
+| another layer's slice | `@layer/slice` | `import { AgentStore } from '@entities/agent';` |
+| a shared segment | `@shared/segment` | `import { DenSheet } from '@shared/ui';` |
+| inside the same slice (or inside `shared`) | absolute `src/...` | `import { DenCat } from 'src/widgets/den-world/ui/den-cat';` |
+| workspace packages | package name | `import { reduceAgents } from '@agent-den/contracts';` |
+
+Forbidden (ESLint + Steiger):
+
+```typescript
+import { AgentStore } from '@entities/agent/model/agent-store'; // ❌ sidesteps the public API
+import { DenSheet } from '@shared/ui/sheet';                     // ❌ sidesteps the shared segment API
+import { catsSkin } from '@entities/skin';                        // ❌ inside entities/agent: cross-slice import
+import { DenWorld } from '@widgets/den-world';                    // ❌ inside entities: upper layer
+import { DenCat } from './den-cat';                               // ❌ relative import
+import { BrnSheet } from '@spartan-ng/brain/sheet';               // ❌ outside shared
+```
+
+**Cross-slice on the same layer** is not allowed. If two entities really must know each other, use FSD's
+[`@x` notation](https://feature-sliced.design/docs/reference/public-api#public-api-for-cross-imports)
+(`entities/agent/@x/skin.ts`) — don't add it without discussing first; usually the dependency belongs one layer up.
+
 ## UI kit boundary
 
-- `@spartan-ng/*` may be imported **only** inside `src/shared/**`.
-- Every primitive is wrapped in a `src/shared/ui/<name>/` component (`den-*` selector, own styles) and exported from `@shared`.
-- Upper layers never use Spartan directives directly — if a wrapper is missing, add it to `shared/ui` first.
+- `@spartan-ng/*` is imported **only** inside `src/shared/**`.
+- Every primitive is wrapped in `src/shared/ui/<name>/` (`den-*` selector, own styles) and exported from `@shared/ui`.
+- If a wrapper is missing, add it to `shared/ui` first — upper layers never use Spartan directives directly.
 
-## Import Rules
+## Creating new code
 
-**Cross-layer — single-word aliases only:**
+1. Pick the lowest layer where the code makes sense; start inside its consumer (pages first).
+2. Create the slice folder (kebab-case) with segments.
+3. Add `index.ts` to the slice and its segments; export only the public API.
+4. Import other slices via `@layer/slice`, shared via `@shared/segment`, own files via `src/...`.
+5. Run `npm run lint` (ESLint + Steiger).
 
-```typescript
-// ✅ CORRECT
-import { DenButton, cn } from '@shared';
-import { AgentStore, type AgentView } from '@entities';
-
-// ❌ WRONG
-import { DenButton } from '@shared/ui';
-import { AgentStore } from '@entities/agent';
-import { BrnDialog } from '@spartan-ng/brain/dialog'; // outside shared
-```
-
-**Intra-layer — absolute paths from `src/`:**
-
-```typescript
-// ✅ CORRECT
-import { DenWorldRoom } from 'src/widgets/den-world/ui/den-world-room';
-```
-
-Relative imports (`./`, `../`) are forbidden. Shared contracts with the collector come from `@agent-den/contracts`.
-
-## Public API Exports
-
-Every layer, slice, and segment MUST have `index.ts` re-exporting public API. Use explicit named exports
-(`export { X } from '...'`), NOT `export *`. Export only what consumers need. Index files use absolute `src/` paths.
-
-```typescript
-// Layer root: src/pages/index.ts
-export { DenPage } from 'src/pages/den';
-
-// Slice: src/entities/agent/index.ts
-export { AgentStore, type AgentView } from 'src/entities/agent/model';
-```
-
-## When Creating New Code
-
-1. Pick correct layer
-2. Create or use slice
-3. Organize by segments (ui, model, api, lib)
-4. Add `index.ts` at each level
-5. Export only public API via index
-6. Use single-word imports from other layers
-
-## Example Structure
+## Current structure
 
 ```
 src/
 ├── main.ts
 ├── styles.css
-├── app/
-│   ├── index.ts
-│   ├── app.ts
-│   ├── app.config.ts
-│   └── app.routes.ts
+├── app/            index.ts, app.ts/.html, app.config.ts, app.routes.ts
 ├── pages/
-│   ├── index.ts
-│   └── den/
-│       ├── index.ts
-│       └── ui/den-page.ts
+│   └── den/        index.ts, ui/ (den-page)
 ├── widgets/
-│   └── den-world/
-│       ├── index.ts
-│       └── ui/ (den-world.ts, den-world.css, den-world-room.ts)
-├── features/
-│   └── toggle-sound/
+│   ├── den-world/  index.ts, ui/ (den-world, den-room, den-cat)
+│   └── agent-panel/ index.ts, ui/ (agent-panel, transcript-feed), model/ (build-feed), lib/ (describe-agent)
 ├── entities/
-│   └── agent/
-│       ├── index.ts
-│       ├── api/ (agent-socket.ts)
-│       └── model/ (agent-store.ts, types.ts)
+│   ├── agent/      index.ts, model/ (agent-store, rooms)
+│   ├── skin/       index.ts, model/ (skin, cats/…)
+│   └── transcript/ index.ts, model/ (transcript-store)
 └── shared/
-    ├── index.ts
-    ├── ui/
-    │   ├── index.ts
-    │   └── button/ (den-button.ts, den-button.css)
-    └── lib/
-        ├── index.ts
-        └── cn.ts
+    ├── api/        index.ts, collector-socket
+    ├── config/     index.ts
+    ├── lib/        index.ts, cn, hash, now
+    └── ui/         index.ts, pixel-sprite/, sheet/, toggle/, search-field/
 ```

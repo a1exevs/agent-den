@@ -19,7 +19,9 @@ TS strict mode enabled. All strict checks enforced.
 
 ## Explicit Return Types
 
-ALL functions MUST have explicit return types, including `void`:
+Named functions, class methods and exported arrow functions declare their return type, including `void`.
+Short inline callbacks (`computed(() => ...)`, `.map(x => ...)`, event handlers in `addEventListener`) may rely on
+inference.
 
 ```typescript
 function calculateTotal(items: Item[]): number {
@@ -36,13 +38,12 @@ const handleClick = (e: MouseEvent): void => {
 - `interface` — ONLY for business entities and wire contracts (AgentState, DenEvent, etc.)
 - `type` — for everything else: unions, intersections, view models, utility types
 
-
 ## Type Exports
 
-Use `export type { X }` in barrel files:
+Mark type-only re-exports in barrel files with `type` (`export { type X }` or `export type { X }`):
 
 ```typescript
-export type { AgentView, RoomView } from 'src/entities/agent/model/types';
+export { AgentStore, groupIntoRooms, type Room } from 'src/entities/agent/model';
 ```
 
 ## General Practices

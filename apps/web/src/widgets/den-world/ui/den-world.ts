@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 
-import { AgentStore, catsSkin, groupIntoRooms } from '@entities';
+import { AgentStore, groupIntoRooms } from '@entities/agent';
+import { catsSkin } from '@entities/skin';
 
 import { DenRoom } from 'src/widgets/den-world/ui/den-room';
 

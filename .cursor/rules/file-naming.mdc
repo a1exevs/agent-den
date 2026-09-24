@@ -5,51 +5,16 @@ globs: ["apps/**", "packages/**", "tools/**", "plugins/**"]
 
 # File Naming Conventions
 
-All files in this project MUST use **kebab-case** (lowercase with hyphens).
-
-## Files
+All files and folders use **kebab-case** (lowercase with hyphens).
 
 ```
-✅ CORRECT:
-- den-page.ts
-- den-cat.html
-- den-cat.css
-- agent-store.ts
-- reduce-agents.ts
-- claude-code.ts
-
-❌ WRONG:
-- DenPage.ts (PascalCase)
-- denCat.html (camelCase)
-- AgentStore.ts (PascalCase)
-- agent.store.ts (Angular dot-suffix style — not used here)
+✅ den-page.ts, den-cat.html, den-cat.css, agent-store.ts, reduce-agents.ts, claude-code.ts
+❌ DenPage.ts (PascalCase), denCat.html (camelCase), agent.store.ts (dot-suffix)
 ```
 
-Angular's `*.component.ts` / `*.service.ts` suffixes are **not** used: the file is named after the thing
-(`den-cat.ts` → `DenCat`, `agent-store.ts` → `AgentStore`). Tests: `*.spec.ts` next to the file.
-
-## Import Conventions in Index Files
-
-**Index files MUST use absolute paths from `src/` (not aliases, not relative).** Re-exports: same pattern as FSD public API.
-
-```typescript
-// ✅ CORRECT
-export { DenPage } from 'src/pages/den';
-
-// ❌ WRONG - don't use aliases in index files
-export { DenPage } from '@pages/den';
-
-// ❌ WRONG - don't use relative paths
-export { DenPage } from './den';
-```
-
-**Rationale:** Aliases can cause circular dependencies in index files. Absolute paths from `src/` are explicit and avoid ambiguity.
-
-Node packages (`packages/*`, `apps/collector`, `tools/*`) have no `src/` alias — they use relative imports inside
-the package and `@agent-den/*` across packages.
-
-## Rationale
-
-- **Consistency**: All files follow the same pattern
-- **Cross-platform**: Works on case-sensitive and case-insensitive filesystems
-- **Readability**: Hyphens clearly separate words
+- Angular's `*.component.ts` / `*.service.ts` suffixes are **not** used: the file is named after the thing
+  (`den-cat.ts` → `DenCat`, `agent-store.ts` → `AgentStore`).
+- Tests: `*.spec.ts` next to the file they test.
+- Public API files are `index.ts` (see fsd-architecture).
+- Node packages (`packages/*`, `apps/collector`, `tools/*`) have no `src/` alias: relative imports inside the
+  package, `@agent-den/*` across packages.

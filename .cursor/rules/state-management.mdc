@@ -5,21 +5,26 @@ globs: ["apps/web/**"]
 
 # State Management
 
-## Live agent state — signal stores in entities
+## Live state — signal stores in entities
 
-The collector streams `ServerMessage`s (`@agent-den/contracts`) over WebSocket. The transport lives in
-`entities/agent/api/` (internal); the store in `entities/agent/model/` applies events with the shared
-`reduceAgents()` and exposes **read-only signals**.
+One WebSocket to the collector lives in `shared/api` (`CollectorSocket`: reconnect, `onMessage`, `onOpen`, `send`).
+Entity stores subscribe to it and turn `ServerMessage`s (`@agent-den/contracts`) into **read-only signals**:
+
+- `entities/agent` — `AgentStore`: applies snapshots/events with the shared `reduceAgents()`.
+- `entities/transcript` — `TranscriptStore`: watches one agent's transcript (`watch-transcript`), re-subscribes on
+  reconnect via `onOpen`.
 
 ```typescript
 @Injectable({ providedIn: 'root' })
 export class AgentStore {
-  private readonly state = signal<ReadonlyMap<string, AgentState>>(new Map());
+  private readonly socket = inject(CollectorSocket);
+  private readonly agents = signal<ReadonlyMap<string, AgentState>>(new Map());
 
-  readonly list = computed(() => [...this.state().values()]);
+  readonly visible = computed(() => [...this.agents().values()].filter(agent => agent.activity !== 'gone'));
 
-  apply(event: DenEvent): void {
-    this.state.update(agents => reduceAgents(agents, event));
+  constructor() {
+    const unsubscribe = this.socket.onMessage(message => this.apply(message));
+    inject(DestroyRef).onDestroy(unsubscribe);
   }
 }
 ```
@@ -28,10 +33,12 @@ export class AgentStore {
 
 - Stores are `@Injectable({ providedIn: 'root' })` classes with private writable `signal`s and public
   `computed` / `.asReadonly()` signals. Mutate only through store methods.
-- Immutable updates (`signal.update(prev => next)`), never mutate the value in place.
-- RxJS only at the edges (WebSocket, timers) — convert to signals with `toSignal()` or push into the store.
-- Client-only preferences (sound on/off, skin) → a store in `entities` or `shared/model`, persisted to
-  `localStorage` inside the store (guard access with try/catch).
+- Immutable updates (`signal.update(prev => next)`), never mutate a signal's value in place.
+- No RxJS for app state. At the edges (socket, timers) push into a store; `injectNow()` from `@shared/lib` gives a
+  ticking clock signal.
+- Client-only preferences (sound on/off, skin) → a store in the owning slice's `model/`, persisted to
+  `localStorage` inside the store (guard every access with try/catch).
 - Derive, don't store: anything computable from agent state is a `computed()`.
-- Only containers inject stores; presentational components receive data via inputs.
-- Server state has one source of truth: the collector snapshot + events. No duplicated copies.
+- Only containers (pages, widget roots) inject stores; presentational components receive data via inputs.
+- One source of truth for agent state: collector snapshot + events. No duplicated copies in components.
+- UI-only state (selected agent, search query, toggles) stays in the component that owns it as a `signal`.
