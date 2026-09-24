@@ -13,7 +13,7 @@ Pixel-art den where AI agent sessions are cats and subagents are kittens. Requir
 ## Commands
 
 - `npm run dev:collector` / `npm run dev:web` / `npm run dev:mock`
-- `npm run lint`, `npm run build`, `npm run format`
+- `npm run lint`, `npm test`, `npm run build`, `npm run format`
 
 ## Rules
 

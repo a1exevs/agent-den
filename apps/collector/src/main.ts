@@ -8,6 +8,7 @@ import { type ClaudeCodeHookPayload, fromClaudeCodeHook } from './adapters/claud
 import { type CursorHookPayload, fromCursorHook } from './adapters/cursor';
 import { DenStore } from './den-store';
 import { isAllowedOrigin } from './local-origin';
+import { scanTranscripts } from './transcripts/transcript-scanner';
 
 const port = Number(process.env['AGENT_DEN_PORT'] ?? COLLECTOR_PORT);
 const store = new DenStore();
@@ -72,6 +73,23 @@ const wss = new WebSocketServer({
   path: '/ws',
   verifyClient: ({ origin }: { origin?: string }) => isAllowedOrigin(origin),
 });
+
+const SCAN_INTERVAL_MS = 30_000;
+const SWEEP_INTERVAL_MS = 60_000;
+
+const scan = (): void => {
+  scanTranscripts(store)
+    .then(added => {
+      if (added > 0) {
+        process.stdout.write(`backfilled ${added} agent(s) from transcripts\n`);
+      }
+    })
+    .catch((error: unknown) => process.stderr.write(`transcript scan failed: ${String(error)}\n`));
+};
+
+scan();
+setInterval(scan, SCAN_INTERVAL_MS);
+setInterval(() => store.sweep(), SWEEP_INTERVAL_MS);
 
 wss.on('connection', socket => {
   const send = (message: ServerMessage): void => socket.send(JSON.stringify(message));
