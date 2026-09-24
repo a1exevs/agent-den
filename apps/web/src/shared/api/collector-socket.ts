@@ -1,7 +1,7 @@
 import type { ClientMessage, ServerMessage } from '@agent-den/contracts';
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 
-import { collectorSocketUrl } from 'src/shared/config';
+import { collectorSocketUrl } from '../config';
 
 export type ConnectionStatus = 'connecting' | 'online' | 'offline';
 

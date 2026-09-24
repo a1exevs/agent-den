@@ -45,6 +45,22 @@ The five standard segments. A custom segment is named by **purpose**, never `com
 
 Sub-folders inside a segment are fine for grouping (`entities/skin/model/cats/`).
 
+### Between segments of one slice
+
+Segments of the same slice (and segments of `shared`) import each other freely with **relative paths** — FSD only
+puts walls between layers and slices. Keep the direction:
+
+```
+ui ──→ model ──→ api
+ │       │        │
+ └───────┴────────┴──→ lib, config
+```
+
+- `ui` may use `model`, `api`, `lib`, `config`; `model` may use `api`, `lib`, `config`; `api` — `lib`, `config`.
+- `model` never imports `ui`; `lib` / `config` don't depend on other segments of the slice.
+- Import the **file** (`../model/build-feed`), never your own slice's `index.ts` (`'..'`) — that is a cycle:
+  the index re-exports the very file that imports it.
+
 ## Public API
 
 - Every **slice** has `index.ts`; so does every **shared segment** (`shared/ui/index.ts`, `shared/lib/index.ts`, ...).
@@ -52,34 +68,39 @@ Sub-folders inside a segment are fine for grouping (`entities/skin/model/cats/`)
 - **Layers have no `index.ts`** (no `src/entities/index.ts`) — layer barrels hide dependencies and create cycles.
 - Explicit named re-exports only (`export { X } from '...'`, `export { type Y } from '...'`), never `export *`.
   Export only what consumers need.
-- Index files use absolute `src/` paths.
+- Index files re-export with relative paths.
 
 ```typescript
 // src/entities/agent/index.ts
-export { AgentStore, groupIntoRooms, type Room } from 'src/entities/agent/model';
+export { AgentStore, groupIntoRooms, type Room } from './model';
 
 // src/shared/ui/index.ts
-export { DenPixelSprite, DenSheet, DenToggle } from 'src/shared/ui/...';
+export { DenSheet } from './sheet';
+export { DenToggle } from './toggle';
 ```
 
 ## Imports
 
+As the [FSD docs](https://feature-sliced.design/docs/reference/public-api) put it: relative inside a slice,
+absolute (alias) across slices.
+
 | From → to | Form | Example |
 |---|---|---|
+| inside the same slice (or inside `shared`) | relative, full path to the file | `import { DenCat } from './den-cat';` |
 | another layer's slice | `@layer/slice` | `import { AgentStore } from '@entities/agent';` |
 | a shared segment | `@shared/segment` | `import { DenSheet } from '@shared/ui';` |
-| inside the same slice (or inside `shared`) | absolute `src/...` | `import { DenCat } from 'src/widgets/den-world/ui/den-cat';` |
 | workspace packages | package name | `import { reduceAgents } from '@agent-den/contracts';` |
 
-Forbidden (ESLint + Steiger):
+Forbidden:
 
 ```typescript
-import { AgentStore } from '@entities/agent/model/agent-store'; // ❌ sidesteps the public API
-import { DenSheet } from '@shared/ui/sheet';                     // ❌ sidesteps the shared segment API
-import { catsSkin } from '@entities/skin';                        // ❌ inside entities/agent: cross-slice import
-import { DenWorld } from '@widgets/den-world';                    // ❌ inside entities: upper layer
-import { DenCat } from './den-cat';                               // ❌ relative import
-import { BrnSheet } from '@spartan-ng/brain/sheet';               // ❌ outside shared
+import { cn } from 'src/shared/lib';                              // ❌ `src/` paths (ESLint; alias removed from tsconfig)
+import { AgentStore } from '@entities/agent/model/agent-store'; // ❌ sidesteps the public API (ESLint)
+import { DenSheet } from '@shared/ui/sheet';                     // ❌ sidesteps the shared segment API (ESLint)
+import { catsSkin } from '@entities/skin';                        // ❌ inside entities/agent: cross-slice (ESLint)
+import { DenAgentPanel } from '../../agent-panel';                // ❌ relative path into another slice (Steiger)
+import { DenWorld } from '@widgets/den-world';                    // ❌ inside entities: upper layer (ESLint)
+import { BrnSheet } from '@spartan-ng/brain/sheet';               // ❌ outside shared (ESLint)
 ```
 
 **Cross-slice on the same layer** is not allowed. If two entities really must know each other, use FSD's
@@ -97,7 +118,7 @@ import { BrnSheet } from '@spartan-ng/brain/sheet';               // ❌ outside
 1. Pick the lowest layer where the code makes sense; start inside its consumer (pages first).
 2. Create the slice folder (kebab-case) with segments.
 3. Add `index.ts` to the slice and its segments; export only the public API.
-4. Import other slices via `@layer/slice`, shared via `@shared/segment`, own files via `src/...`.
+4. Import other slices via `@layer/slice`, shared via `@shared/segment`, own files via relative paths.
 5. Run `npm run lint` (ESLint + Steiger).
 
 ## Current structure

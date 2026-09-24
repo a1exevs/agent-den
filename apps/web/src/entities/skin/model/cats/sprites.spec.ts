@@ -1,8 +1,9 @@
-import { assertPixelArt } from '@shared/ui';
 
-import { catPalette } from 'src/entities/skin/model/cats/cat-palettes';
-import { catSprites } from 'src/entities/skin/model/cats/cat-sprites';
-import { stationPalette, stationSprites } from 'src/entities/skin/model/cats/station-sprites';
+import { catPalette } from './cat-palettes';
+import { catSprites } from './cat-sprites';
+import { stationPalette, stationSprites } from './station-sprites';
+
+import { assertPixelArt } from '@shared/ui';
 
 describe('cat skin sprites', () => {
   const all = [...Object.values(catSprites), ...Object.values(stationSprites)];

@@ -1,11 +1,12 @@
 import type { AgentState } from '@agent-den/contracts';
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 
+import { DenCat } from './den-cat';
+
 import { type Room } from '@entities/agent';
 import { type Skin, slotFor, type StationSlot } from '@entities/skin';
 import { DenPixelSprite } from '@shared/ui';
 
-import { DenCat } from 'src/widgets/den-world/ui/den-cat';
 
 type Placement = {
   agent: AgentState;

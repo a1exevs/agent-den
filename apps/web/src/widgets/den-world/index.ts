@@ -1,1 +1,1 @@
-export { DenWorld } from 'src/widgets/den-world/ui';
+export { DenWorld } from './ui';

@@ -24,7 +24,7 @@ Key constraints:
 
 - `@spartan-ng/*` only inside `apps/web/src/shared/**` (ESLint enforced).
 - FSD (standard): import other slices via `@layer/slice` (`@entities/agent`), shared via `@shared/<segment>` (`@shared/ui`),
-  own slice via `src/...`; no layer `index.ts`, no relative imports. `npm run lint` runs ESLint + Steiger.
+  relative paths inside a slice (no `src/...`); no layer `index.ts`. `npm run lint` runs ESLint + Steiger.
 - Components: separate `.ts` / `.html` / `.css` files, never inline templates or styles.
 - Dependency versions are pinned exactly (`.npmrc` `save-exact=true`).
 - Hook sender must never block or fail the agent: short timeout, swallow errors, exit 0, no stdout.

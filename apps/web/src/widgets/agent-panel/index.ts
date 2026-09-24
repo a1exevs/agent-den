@@ -1,1 +1,1 @@
-export { DenAgentPanel } from 'src/widgets/agent-panel/ui';
+export { DenAgentPanel } from './ui';

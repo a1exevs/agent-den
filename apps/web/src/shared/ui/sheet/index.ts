@@ -1,1 +1,1 @@
-export { DenSheet } from 'src/shared/ui/sheet/den-sheet';
+export { DenSheet } from './den-sheet';

@@ -1,1 +1,1 @@
-export { AgentStore, groupIntoRooms, type Room } from 'src/entities/agent/model';
+export { AgentStore, groupIntoRooms, type Room } from './model';

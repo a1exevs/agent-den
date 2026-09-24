@@ -1,6 +1,6 @@
 import type { TranscriptItem } from '@agent-den/contracts';
 
-import { buildFeed } from 'src/widgets/agent-panel/model/build-feed';
+import { buildFeed } from './build-feed';
 
 describe('buildFeed', () => {
   it('attaches tool results to their calls and keeps order', () => {

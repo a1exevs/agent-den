@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 
-import { type Palette, type PixelArt, renderSpriteSheet } from 'src/shared/ui/pixel-sprite/pixel-art';
+import { type Palette, type PixelArt, renderSpriteSheet } from './pixel-art';
 
 /** Crisp pixel-art sprite; frames loop with a pure CSS `steps()` animation. */
 @Component({

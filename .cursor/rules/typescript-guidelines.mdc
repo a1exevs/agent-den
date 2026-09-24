@@ -43,7 +43,7 @@ const handleClick = (e: MouseEvent): void => {
 Mark type-only re-exports in barrel files with `type` (`export { type X }` or `export type { X }`):
 
 ```typescript
-export { AgentStore, groupIntoRooms, type Room } from 'src/entities/agent/model';
+export { AgentStore, groupIntoRooms, type Room } from './model';
 ```
 
 ## General Practices

@@ -15,6 +15,6 @@ All files and folders use **kebab-case** (lowercase with hyphens).
 - Angular's `*.component.ts` / `*.service.ts` suffixes are **not** used: the file is named after the thing
   (`den-cat.ts` → `DenCat`, `agent-store.ts` → `AgentStore`).
 - Tests: `*.spec.ts` next to the file they test.
-- Public API files are `index.ts` (see fsd-architecture).
-- Node packages (`packages/*`, `apps/collector`, `tools/*`) have no `src/` alias: relative imports inside the
+- Public API files are `index.ts` (see fsd-architecture); imports inside a slice are relative, across slices via aliases.
+- Node packages (`packages/*`, `apps/collector`, `tools/*`): relative imports inside the
   package, `@agent-den/*` across packages.

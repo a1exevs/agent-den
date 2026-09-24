@@ -1,4 +1,5 @@
 import type { AgentState, ToolCategory } from '@agent-den/contracts';
+
 import type { Palette, PixelArt } from '@shared/ui';
 
 /** What the character is doing, independent of the skin. */

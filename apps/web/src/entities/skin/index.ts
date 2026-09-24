@@ -8,4 +8,4 @@ export {
   slotFor,
   stationSprites,
   type StationSlot,
-} from 'src/entities/skin/model';
+} from './model';

@@ -1,1 +1,1 @@
-export { CollectorSocket, type ConnectionStatus } from 'src/shared/api/collector-socket';
+export { CollectorSocket, type ConnectionStatus } from './collector-socket';

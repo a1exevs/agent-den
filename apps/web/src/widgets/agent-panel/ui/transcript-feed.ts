@@ -1,3 +1,4 @@
+import type { FeedEntry } from '../model/build-feed';
 import { DatePipe } from '@angular/common';
 import {
   afterRenderEffect,
@@ -13,7 +14,6 @@ import {
 import { type TranscriptStatus } from '@entities/transcript';
 import { DenSearchField, DenToggle } from '@shared/ui';
 
-import type { FeedEntry } from 'src/widgets/agent-panel/model/build-feed';
 
 /** Distance from the bottom (px) that still counts as "following". */
 const FOLLOW_THRESHOLD_PX = 48;

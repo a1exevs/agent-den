@@ -15,7 +15,6 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "src/*": ["./src/*"],
       "@pages/*": ["./src/pages/*"],
       "@widgets/*": ["./src/widgets/*"],
       "@features/*": ["./src/features/*"],

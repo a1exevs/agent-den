@@ -1,1 +1,1 @@
-export { type TranscriptStatus, TranscriptStore } from 'src/entities/transcript/model';
+export { type TranscriptStatus, TranscriptStore } from './model';

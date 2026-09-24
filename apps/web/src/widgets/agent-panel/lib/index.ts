@@ -1,1 +1,1 @@
-export { activityLabel, formatDuration, toolCategoryLabels } from 'src/widgets/agent-panel/lib/describe-agent';
+export { activityLabel, formatDuration, toolCategoryLabels } from './describe-agent';

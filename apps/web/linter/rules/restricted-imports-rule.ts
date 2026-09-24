@@ -8,9 +8,10 @@ type FsdLayer = (typeof fsdLayers)[number];
 /** Layers reachable through an `@layer/...` alias (`app` is only ever imported by `main.ts`). */
 const aliasedLayers = fsdLayers.filter(layer => layer !== 'app');
 
-const relativeImports = {
-  group: ['./*', '../*'],
-  message: 'Use absolute imports: `src/...` inside a slice, `@layer/slice` across slices.',
+/** FSD: relative paths inside a slice, aliases across slices. `src/...` paths are neither. */
+const srcPathImports = {
+  group: ['src', 'src/*'],
+  message: 'Use a relative path inside the slice (`./den-cat`) or an alias across slices (`@entities/agent`).',
 };
 
 const publicApiSidestep = {
@@ -25,25 +26,25 @@ const spartanImports = {
 
 /**
  * Builds `no-restricted-imports` for a file inside `layer`:
- * - relative imports and public-API sidesteps are always banned;
+ * - `src/...` paths and public-API sidesteps are always banned (relative paths leaving the slice are Steiger's job);
  * - upper layers are banned; so are sibling slices through the alias (`@entities/*` inside entities) —
  *   FSD forbids cross-slice imports within a layer;
  * - `@spartan-ng/*` is allowed only inside `shared`.
  */
 export function restrictedImportsRule(layer: FsdLayer): Linter.RulesRecord {
-  const upperLayers = fsdLayers.slice(0, fsdLayers.indexOf(layer));
-  const patterns = [relativeImports, publicApiSidestep];
+  const upperLayers = aliasedLayers.slice(0, aliasedLayers.indexOf(layer as (typeof aliasedLayers)[number]));
+  const patterns = [srcPathImports, publicApiSidestep];
 
-  if (upperLayers.length > 0) {
+  if (layer !== 'app' && upperLayers.length > 0) {
     patterns.push({
-      group: upperLayers.flatMap(upper => [`@${upper}/*`, `src/${upper}/*`, `src/${upper}`]),
+      group: upperLayers.map(upper => `@${upper}/*`),
       message: `FSD: \`${layer}\` may import only layers below it.`,
     });
   }
   if (layer !== 'app' && layer !== 'shared') {
     patterns.push({
       group: [`@${layer}/*`],
-      message: `FSD: slices of \`${layer}\` must not import each other; inside a slice use \`src/${layer}/<slice>/...\`.`,
+      message: `FSD: slices of \`${layer}\` must not import each other; inside a slice use relative paths.`,
     });
   }
   if (layer !== 'shared') {

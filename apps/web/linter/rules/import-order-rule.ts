@@ -15,7 +15,7 @@ const importOrderRule: Linter.RulesRecord = {
       'newlines-between': 'always',
       pathGroups: [
         {
-          pattern: 'src/**',
+          pattern: '@{pages,widgets,features,entities,shared}/**',
           group: 'internal',
           position: 'after',
         },

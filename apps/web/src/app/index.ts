@@ -1,2 +1,2 @@
-export { App } from 'src/app/app';
-export { appConfig } from 'src/app/app.config';
+export { App } from './app';
+export { appConfig } from './app.config';

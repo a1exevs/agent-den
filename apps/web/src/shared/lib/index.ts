@@ -1,3 +1,3 @@
-export { cn } from 'src/shared/lib/cn';
-export { hashString, pickByHash } from 'src/shared/lib/hash';
-export { injectNow } from 'src/shared/lib/now';
+export { cn } from './cn';
+export { hashString, pickByHash } from './hash';
+export { injectNow } from './now';

@@ -1,1 +1,1 @@
-export { DenToggle } from 'src/shared/ui/toggle/den-toggle';
+export { DenToggle } from './den-toggle';

@@ -1,7 +1,8 @@
-import { catName, catPalette } from 'src/entities/skin/model/cats/cat-palettes';
-import { type CatPose, catSprites } from 'src/entities/skin/model/cats/cat-sprites';
-import { stationPalette, stationSprites } from 'src/entities/skin/model/cats/station-sprites';
-import type { Action, Skin } from 'src/entities/skin/model/skin';
+import type { Action, Skin } from '../skin';
+
+import { catName, catPalette } from './cat-palettes';
+import { type CatPose, catSprites } from './cat-sprites';
+import { stationPalette, stationSprites } from './station-sprites';
 
 const poseByAction: Record<Action, CatPose> = {
   idle: 'sit',

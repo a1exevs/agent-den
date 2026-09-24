@@ -5,7 +5,7 @@ const settings: Record<string, unknown> = {
       project: './tsconfig.app.json',
     },
   },
-  'import/internal-regex': '^(src/|@(pages|widgets|features|entities|shared)/)',
+  'import/internal-regex': '^@(pages|widgets|features|entities|shared)/',
 };
 
 export default settings;
