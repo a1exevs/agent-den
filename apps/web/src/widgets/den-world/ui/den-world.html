@@ -1,0 +1,16 @@
+@if (status() === 'offline') {
+  <p class="world__notice world__notice--offline">
+    The collector is napping. Wake it up: <code>npm run dev:collector</code>
+  </p>
+}
+
+@for (room of rooms(); track room.id) {
+  <den-room [room]="room" [skin]="skin" />
+} @empty {
+  @if (status() === 'online') {
+    <p class="world__notice">
+      No cats yet. Start a Claude Code session with the plugin, or summon fake ones:
+      <code>npm run dev:mock</code>
+    </p>
+  }
+}

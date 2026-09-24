@@ -1,0 +1,57 @@
+.room {
+  border: 4px solid var(--den-ink);
+  background: var(--den-paper);
+  box-shadow: 6px 6px 0 var(--den-ink);
+}
+
+.room__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 6px 12px;
+  color: var(--den-bar-fg);
+  background: var(--den-ink);
+}
+
+.room__name {
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.room__count {
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.room__scene {
+  --floor-height: 44px;
+
+  position: relative;
+  height: 250px;
+  min-width: 720px;
+  overflow: hidden;
+}
+
+.room__wall {
+  position: absolute;
+  inset: 0 0 var(--floor-height);
+  background: repeating-linear-gradient(90deg, transparent 0 46px, var(--den-wall-line) 46px 48px), var(--den-wall);
+}
+
+.room__floor {
+  position: absolute;
+  inset: auto 0 0;
+  height: var(--floor-height);
+  background:
+    repeating-linear-gradient(90deg, var(--den-floor) 0 62px, var(--den-floor-line) 62px 64px), var(--den-floor);
+  border-top: 4px solid var(--den-ink);
+}
+
+.room__station {
+  position: absolute;
+  bottom: calc(var(--floor-height) - 8px + var(--lift) * 5px);
+  z-index: 1;
+  translate: -50% 0;
+}

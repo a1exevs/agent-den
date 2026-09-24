@@ -1,0 +1,37 @@
+<section class="room">
+  <header class="room__header">
+    <h2 class="room__name">{{ room().name }}</h2>
+    <span class="room__count">
+      🐈 {{ catCount() }}
+      @if (kittenCount()) {
+        · kittens {{ kittenCount() }}
+      }
+    </span>
+  </header>
+
+  <div class="room__scene">
+    <div class="room__wall"></div>
+    <div class="room__floor"></div>
+
+    @for (station of skin().stations; track station.slot) {
+      <den-pixel-sprite
+        class="room__station"
+        [style.left.%]="station.x"
+        [style.--lift]="station.lift ?? 0"
+        [art]="station.art"
+        [palette]="skin().stationPalette"
+        [scale]="stationScale"
+      />
+    }
+
+    @for (placement of placements(); track placement.agent.agentId) {
+      <den-cat
+        [agent]="placement.agent"
+        [skin]="skin()"
+        [targetX]="placement.targetX"
+        [originX]="placement.originX"
+        [offset]="placement.offset"
+      />
+    }
+  </div>
+</section>

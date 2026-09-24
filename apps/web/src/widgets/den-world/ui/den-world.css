@@ -1,0 +1,23 @@
+:host {
+  display: grid;
+  gap: 28px;
+  overflow-x: auto;
+  padding: 4px 10px 10px 4px;
+}
+
+.world__notice {
+  padding: 12px 16px;
+  font-size: 14px;
+  border: 3px dashed var(--den-ink);
+
+  & code {
+    padding: 1px 6px;
+    color: var(--den-bubble-bg);
+    background: var(--den-bubble-fg);
+  }
+}
+
+.world__notice--offline {
+  border-style: solid;
+  border-color: var(--den-accent);
+}

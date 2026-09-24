@@ -1,0 +1,6 @@
+@if (bubble(); as text) {
+  <span class="cat__bubble">{{ text }}</span>
+}
+<den-pixel-sprite class="cat__sprite" [art]="art()" [palette]="palette()" [scale]="scale()" [flip]="facingLeft()" />
+<span class="cat__name">{{ name() }}</span>
+<span class="cat__caption">{{ caption() }}</span>

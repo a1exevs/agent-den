@@ -16,7 +16,16 @@
     --den-font-pixel: 'Courier New', ui-monospace, monospace;
     --den-bg: light-dark(#f4ecd8, #1d1a24);
     --den-fg: light-dark(#2b2233, #efe6d2);
-    --den-accent: #ff8a3d;
+    --den-accent: #ff6b3d;
+    --den-ink: light-dark(#2b2233, #0f0c14);
+    --den-paper: light-dark(#fffaf0, #2d2838);
+    --den-wall: light-dark(#f6d9b8, #3b3350);
+    --den-wall-line: light-dark(#ecc9a3, #342d47);
+    --den-floor: light-dark(#b98a5e, #5a4636);
+    --den-floor-line: light-dark(#a57a50, #4c3b2e);
+    --den-bar-fg: light-dark(#fffaf0, #efe6d2);
+    --den-bubble-bg: #fffaf0;
+    --den-bubble-fg: #1e1824;
     --den-pixel: 4px;
   }
 }

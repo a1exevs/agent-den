@@ -1,0 +1,36 @@
+:host {
+  display: inline-block;
+  line-height: 0;
+}
+
+.sprite {
+  --frame-width: calc(var(--w) * var(--scale) * 1px);
+
+  display: block;
+  width: var(--frame-width);
+  height: calc(var(--h) * var(--scale) * 1px);
+  background-repeat: no-repeat;
+  background-size: calc(var(--frame-width) * var(--frames)) 100%;
+  image-rendering: pixelated;
+  animation: sprite-play calc(var(--frames) / var(--fps) * 1s) steps(var(--frames)) infinite;
+
+  &.sprite--flip {
+    scale: -1 1;
+  }
+}
+
+@keyframes sprite-play {
+  from {
+    background-position-x: 0;
+  }
+
+  to {
+    background-position-x: calc(var(--frame-width) * var(--frames) * -1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sprite {
+    animation-duration: calc(var(--frames) / var(--fps) * 3s);
+  }
+}

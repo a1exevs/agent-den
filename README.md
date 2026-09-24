@@ -9,7 +9,7 @@ editing, knock things off the table while running shell commands and yowl at the
 ```bash
 npm install
 npm run dev:collector   # 127.0.0.1:4317
-npm run dev:web         # http://localhost:4200
+npm run dev:web         # http://localhost:4210
 npm run dev:mock        # optional: fake agents for development
 ```
 

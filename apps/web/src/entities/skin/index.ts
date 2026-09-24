@@ -1,4 +1,3 @@
-export { AgentStore, type ConnectionStatus, groupIntoRooms, type Room } from 'src/entities/agent';
 export {
   type Action,
   actionFor,
@@ -9,4 +8,4 @@ export {
   slotFor,
   stationSprites,
   type StationSlot,
-} from 'src/entities/skin';
+} from 'src/entities/skin/model';

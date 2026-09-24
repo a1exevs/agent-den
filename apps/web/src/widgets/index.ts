@@ -1,2 +1,1 @@
-// Public API of the `widgets` layer. Slices are added here as they appear.
-export {};
+export { DenWorld } from 'src/widgets/den-world';
