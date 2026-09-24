@@ -4,3 +4,4 @@ coverage
 .angular
 package-lock.json
 .cursor
+.claude/rules

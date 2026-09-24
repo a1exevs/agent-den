@@ -1,0 +1,46 @@
+---
+paths:
+  - "apps/web/**"
+---
+
+<!-- Generated from .cursor/rules/state-management.mdc by scripts/sync-agent-rules.mjs — edit the .mdc, not this file. -->
+
+# State Management
+
+## Live state — signal stores in entities
+
+One WebSocket to the collector lives in `shared/api` (`CollectorSocket`: reconnect, `onMessage`, `onOpen`, `send`).
+Entity stores subscribe to it and turn `ServerMessage`s (`@agent-den/contracts`) into **read-only signals**:
+
+- `entities/agent` — `AgentStore`: applies snapshots/events with the shared `reduceAgents()`.
+- `entities/transcript` — `TranscriptStore`: watches one agent's transcript (`watch-transcript`), re-subscribes on
+  reconnect via `onOpen`.
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class AgentStore {
+  private readonly socket = inject(CollectorSocket);
+  private readonly agents = signal<ReadonlyMap<string, AgentState>>(new Map());
+
+  readonly visible = computed(() => [...this.agents().values()].filter(agent => agent.activity !== 'gone'));
+
+  constructor() {
+    const unsubscribe = this.socket.onMessage(message => this.apply(message));
+    inject(DestroyRef).onDestroy(unsubscribe);
+  }
+}
+```
+
+## Rules
+
+- Stores are `@Injectable({ providedIn: 'root' })` classes with private writable `signal`s and public
+  `computed` / `.asReadonly()` signals. Mutate only through store methods.
+- Immutable updates (`signal.update(prev => next)`), never mutate a signal's value in place.
+- No RxJS for app state. At the edges (socket, timers) push into a store; `injectNow()` from `@shared/lib` gives a
+  ticking clock signal.
+- Client-only preferences (sound on/off, skin) → a store in the owning slice's `model/`, persisted to
+  `localStorage` inside the store (guard every access with try/catch).
+- Derive, don't store: anything computable from agent state is a `computed()`.
+- Only containers (pages, widget roots) inject stores; presentational components receive data via inputs.
+- One source of truth for agent state: collector snapshot + events. No duplicated copies in components.
+- UI-only state (selected agent, search query, toggles) stays in the component that owns it as a `signal`.

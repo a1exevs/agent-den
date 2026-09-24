@@ -17,8 +17,11 @@ Pixel-art den where AI agent sessions are cats and subagents are kittens. Requir
 
 ## Rules
 
-Follow `.cursor/rules/*.mdc` — they apply to Claude Code too:
-`fsd-architecture`, `component-architecture`, `state-management`, `styling-guidelines`, `typescript-guidelines`, `file-naming`.
+Coding rules have one source: `.cursor/rules/*.mdc` (Cursor format). `npm run rules:sync` generates
+`.claude/rules/*.md` from them (Cursor `globs` → Claude `paths`), so Claude Code loads each rule only when working
+with matching files. Edit the `.mdc`, never the generated `.md`; `npm run lint` fails if they drift.
+Rules: `fsd-architecture`, `component-architecture`, `state-management`, `styling-guidelines`,
+`typescript-guidelines`, `file-naming`.
 
 Key constraints:
 

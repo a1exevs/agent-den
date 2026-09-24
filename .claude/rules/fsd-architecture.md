@@ -1,0 +1,191 @@
+---
+paths:
+  - "apps/web/**"
+---
+
+<!-- Generated from .cursor/rules/fsd-architecture.mdc by scripts/sync-agent-rules.mjs — edit the .mdc, not this file. -->
+
+# Feature-Sliced Design
+
+`apps/web` follows standard [Feature-Sliced Design](https://feature-sliced.design/ru/docs/get-started/overview).
+Two tools check it — keep both green (`npm run lint` runs both):
+
+- **ESLint** `no-restricted-imports` (`apps/web/linter/rules/restricted-imports-rule.ts`): `src/...` paths, upper-layer
+  and cross-slice alias imports, public-API sidesteps, Spartan outside `shared`.
+- **Steiger** (`npm run lint:fsd`, config `apps/web/steiger.config.ts`): structure — relative paths into another slice,
+  public API, segment and slice names, layer `index.ts`.
+
+Structure: **layer → slice → segment → file**. `app` and `shared` have no slices (layer → segment → file).
+
+## 1. Layers
+
+```
+app → pages → widgets → features → entities → shared        (arrows = "may import")
+```
+
+| Layer | What lives here | Has slices | May import |
+|---|---|---|---|
+| `app/` | bootstrap: `app.config.ts`, routes, root component, global providers | no | pages, widgets, features, entities, shared |
+| `pages/` | one slice per route/screen; composes widgets | yes | widgets, features, entities, shared |
+| `widgets/` | big self-contained UI blocks that combine entities/features | yes | features, entities, shared |
+| `features/` | one user action that brings value (toggle sound, switch skin) | yes | entities, shared |
+| `entities/` | domain objects: state, types, domain logic, their own small UI | yes | shared |
+| `shared/` | domain-agnostic code: UI kit, collector socket, config, helpers | no | — (only other `shared` segments) |
+
+- Only **downwards**. Never sideways between slices of one layer (see §6), never upwards.
+- A layer is created when its first slice appears — no empty folders (there is no `features/` yet).
+
+## 2. Where does new code go?
+
+Walk from the top and stop at the first "yes":
+
+1. Is it app-wide wiring (provider, route, global error handling)? → `app/`
+2. Is it a whole screen? → `pages/<screen>/`
+3. Is it one user action (a button + the logic it triggers)? → `features/<verb-noun>/`
+4. Is it a big UI block assembled from several entities/features? → `widgets/<block>/`
+5. Is it a domain concept of this app (agent, skin, transcript, achievement)? → `entities/<noun>/`
+6. Would it make sense in any other project (no knowledge of agents/cats)? → `shared/<segment>/`
+
+**Pages first:** put code in the page/widget that uses it; extract a widget, feature or entity only when a second
+consumer appears. Steiger's `fsd/insignificant-slice` warning points at slices with a single consumer.
+
+Our examples:
+
+| Code | Place | Why |
+|---|---|---|
+| `DenPage` | `pages/den/ui` | a screen |
+| rooms with cats and stations | `widgets/den-world` | big block over the agent + skin entities |
+| details sheet with the transcript | `widgets/agent-panel` | big block over agent + transcript + skin |
+| sound on/off, skin switcher | `features/toggle-sound`, `features/switch-skin` | a user action |
+| `AgentStore`, `groupIntoRooms` | `entities/agent/model` | domain state and logic |
+| cat sprites, stations, poses | `entities/skin/model` | domain (how an agent looks) |
+| `CollectorSocket` | `shared/api` | transport, knows nothing about cats |
+| `DenSheet`, `DenToggle`, `DenPixelSprite` | `shared/ui` | UI kit |
+| `injectNow`, `hashString` | `shared/lib` | generic helpers |
+
+`shared` never knows about the domain: no agents, cats or skins there, and it never imports from other layers.
+
+## 3. Slices
+
+- A slice = one business thing, named in kebab-case: noun for entities (`agent`), verb-noun for features
+  (`toggle-sound`), block name for widgets/pages (`den-world`, `den`).
+- Slices are **isolated**: a slice doesn't import another slice of the same layer (§6).
+- A slice consists of segments (§4) and has a public API `index.ts` (§5). No files directly in the slice root
+  other than `index.ts`.
+
+## 4. Segments
+
+Five standard segments; a custom one is named by **purpose**, never `components`/`hooks`/`types`/`utils`.
+
+| Segment | Put here | Examples |
+|---|---|---|
+| `ui/` | components (`.ts` + `.html` + `.css`), their display formatters | `den-cat`, `transcript-feed` |
+| `model/` | signal stores, domain types, business logic, view-model derivation | `agent-store`, `rooms`, `build-feed` |
+| `api/` | talking to the outside world: socket, HTTP, mapping raw responses | `collector-socket` |
+| `lib/` | helpers used inside the slice, pure utilities | `describe-agent`, `hash`, `now` |
+| `config/` | constants, configuration, feature flags | `collectorSocketUrl` |
+
+- Create only the segments you need. Sub-folders inside a segment are fine for grouping (`entities/skin/model/cats/`).
+- Tests (`*.spec.ts`) sit next to the file they test, in the same segment.
+
+**Between segments of one slice** imports are free (relative paths), but keep the direction:
+
+```
+ui ──→ model ──→ api
+ │       │        │
+ └───────┴────────┴──→ lib, config
+```
+
+- `ui` may use `model`, `api`, `lib`, `config`; `model` may use `api`, `lib`, `config`; `api` — `lib`, `config`.
+- `model` never imports `ui`; `lib` and `config` don't depend on other segments of the slice.
+- The same applies to the segments of `shared` (`shared/ui` may use `shared/lib`, `shared/api` uses `shared/config`).
+
+## 5. Public API (`index.ts`)
+
+- Every **slice** has `index.ts`. So does every segment of a slice (the slice `index.ts` re-exports from them)
+  and every segment of `shared` (`shared/ui/index.ts`, ...).
+- **Layers have no `index.ts`** (no `src/entities/index.ts`) — layer barrels hide dependencies and create cycles.
+- Explicit named re-exports only (`export { X }`, `export { type Y }`), never `export *`. Export only what other
+  slices actually use.
+- Index files re-export with relative paths.
+
+```typescript
+// src/entities/agent/index.ts
+export { AgentStore, groupIntoRooms, type Room } from './model';
+
+// src/entities/agent/model/index.ts
+export { AgentStore } from './agent-store';
+export { groupIntoRooms, type Room } from './rooms';
+```
+
+## 6. Imports
+
+As the [FSD docs](https://feature-sliced.design/docs/reference/public-api) put it: **relative inside a slice,
+alias across slices.**
+
+| From → to | Allowed? | How | Example |
+|---|---|---|---|
+| file → file of the same segment | ✅ | relative | `import { DenCat } from './den-cat';` |
+| segment → segment of the same slice | ✅ (direction §4) | relative, to the **file** | `import { buildFeed } from '../model/build-feed';` |
+| segment → segment of `shared` (inside `shared`) | ✅ | relative | `import { collectorSocketUrl } from '../config';` |
+| slice → slice of a **lower** layer | ✅ | alias to its `index.ts` | `import { AgentStore } from '@entities/agent';` |
+| slice → `shared` segment | ✅ | alias to the segment | `import { DenSheet } from '@shared/ui';` |
+| anything → workspace package | ✅ | package name | `import { reduceAgents } from '@agent-den/contracts';` |
+| slice → another slice of the **same** layer | ❌ | — compose them one layer up | |
+| anything → **upper** layer | ❌ | — | |
+| anything → inside another slice's segments | ❌ | — use its public API | |
+| a file → its own slice's `index.ts` | ❌ | — cycle | |
+
+Forbidden — and who catches it:
+
+```typescript
+import { cn } from 'src/shared/lib';                              // ❌ `src/` paths — ESLint (alias not in tsconfig)
+import { AgentStore } from '@entities/agent/model/agent-store'; // ❌ public-API sidestep — ESLint
+import { DenSheet } from '@shared/ui/sheet';                     // ❌ shared segment sidestep — ESLint
+import { catsSkin } from '@entities/skin';                        // ❌ in entities/agent: cross-slice — ESLint
+import { DenAgentPanel } from '../../agent-panel';                // ❌ relative path into another slice — Steiger
+import { DenWorld } from '@widgets/den-world';                    // ❌ in entities: upper layer — ESLint
+import { BrnSheet } from '@spartan-ng/brain/sheet';               // ❌ outside shared — ESLint
+```
+
+**When two slices of one layer need each other:** the thing that uses both belongs one layer up (the `den` page links
+`den-world` and `agent-panel` through the selected agent). Only for `entities` FSD allows the
+[`@x` notation](https://feature-sliced.design/docs/reference/public-api#public-api-for-cross-imports)
+(`entities/agent/@x/skin.ts` — a narrow API for `skin`); discuss before adding one.
+
+## 7. UI kit boundary
+
+- `@spartan-ng/*` is imported **only** inside `src/shared/**`.
+- Every primitive is wrapped in `shared/ui/<name>/` (`den-*` selector, own styles) and exported from `@shared/ui`.
+- A wrapper is missing? Add it to `shared/ui` first — upper layers never use Spartan directives directly.
+
+## 8. Checklist for new code
+
+1. Pick the place with §2 (pages first).
+2. Create the slice folder (kebab-case) and only the segments you need (§4).
+3. Add `index.ts` to the slice and its segments; export only what other slices use (§5).
+4. Imports: relative inside the slice, `@layer/slice` / `@shared/segment` across (§6).
+5. `npm run lint` — ESLint + Steiger green.
+
+## Current structure
+
+```
+src/
+├── main.ts
+├── styles.css
+├── app/             index.ts, app.ts/.html, app.config.ts, app.routes.ts
+├── pages/
+│   └── den/         index.ts, ui/ (den-page)
+├── widgets/
+│   ├── den-world/   index.ts, ui/ (den-world, den-room, den-cat)
+│   └── agent-panel/ index.ts, ui/ (agent-panel, transcript-feed), model/ (build-feed), lib/ (describe-agent)
+├── entities/
+│   ├── agent/       index.ts, model/ (agent-store, rooms)
+│   ├── skin/        index.ts, model/ (skin, cats/…)
+│   └── transcript/  index.ts, model/ (transcript-store)
+└── shared/
+    ├── api/         index.ts, collector-socket
+    ├── config/      index.ts
+    ├── lib/         index.ts, cn, hash, now
+    └── ui/          index.ts, pixel-sprite/, sheet/, toggle/, search-field/
+```

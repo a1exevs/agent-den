@@ -1,0 +1,25 @@
+---
+paths:
+  - "apps/**"
+  - "packages/**"
+  - "tools/**"
+  - "plugins/**"
+---
+
+<!-- Generated from .cursor/rules/file-naming.mdc by scripts/sync-agent-rules.mjs — edit the .mdc, not this file. -->
+
+# File Naming Conventions
+
+All files and folders use **kebab-case** (lowercase with hyphens).
+
+```
+✅ den-page.ts, den-cat.html, den-cat.css, agent-store.ts, reduce-agents.ts, claude-code.ts
+❌ DenPage.ts (PascalCase), denCat.html (camelCase), agent.store.ts (dot-suffix)
+```
+
+- Angular's `*.component.ts` / `*.service.ts` suffixes are **not** used: the file is named after the thing
+  (`den-cat.ts` → `DenCat`, `agent-store.ts` → `AgentStore`).
+- Tests: `*.spec.ts` next to the file they test.
+- Public API files are `index.ts` (see fsd-architecture); imports inside a slice are relative, across slices via aliases.
+- Node packages (`packages/*`, `apps/collector`, `tools/*`): relative imports inside the
+  package, `@agent-den/*` across packages.
