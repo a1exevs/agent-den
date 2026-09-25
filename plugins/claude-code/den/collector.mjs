@@ -7480,6 +7480,16 @@ function isAllowedOrigin(origin) {
     return false;
   }
 }
+function isAllowedHost(host) {
+  if (!host) {
+    return false;
+  }
+  try {
+    return LOCAL_HOSTS.has(new URL(`http://${host}`).hostname);
+  } catch {
+    return false;
+  }
+}
 
 // apps/collector/src/static-web.ts
 import { readFile, stat } from "node:fs/promises";
@@ -8029,6 +8039,9 @@ function remember(payload) {
   }
 }
 app.use("*", async (c, next) => {
+  if (!isAllowedHost(c.req.header("host"))) {
+    return c.text("forbidden host", 403);
+  }
   if (!isAllowedOrigin(c.req.header("origin"))) {
     return c.text("forbidden origin", 403);
   }
@@ -8068,7 +8081,11 @@ app.post("/events", async (c) => {
 if (webDir) {
   app.get("*", async (c) => {
     const file = await readStaticFile(webDir, c.req.path);
-    return file ? c.body(new Uint8Array(file.body), 200, { "content-type": file.contentType }) : c.notFound();
+    if (!file) {
+      return c.notFound();
+    }
+    const cacheControl = file.contentType.startsWith("text/html") ? "no-cache" : "public, max-age=3600";
+    return c.body(new Uint8Array(file.body), 200, { "content-type": file.contentType, "cache-control": cacheControl });
   });
 }
 var server = serve({ fetch: app.fetch, port, hostname: "127.0.0.1" }, (info) => {
@@ -8079,7 +8096,7 @@ var server = serve({ fetch: app.fetch, port, hostname: "127.0.0.1" }, (info) => 
 var wss = new import_websocket_server.default({
   server,
   path: "/ws",
-  verifyClient: ({ origin }) => isAllowedOrigin(origin)
+  verifyClient: ({ origin, req }) => isAllowedOrigin(origin) && isAllowedHost(req.headers.host)
 });
 var SCAN_INTERVAL_MS = 3e4;
 var SWEEP_INTERVAL_MS = 6e4;

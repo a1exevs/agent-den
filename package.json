@@ -22,11 +22,11 @@
     "dev:web:fresh": "node -e \"require('fs').rmSync('apps/web/.angular/cache', { recursive: true, force: true })\" && npm run dev:web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "lint": "node scripts/sync-agent-rules.mjs --check && node scripts/check-structure.mjs && prettier --check . && knip && eslint . && npm run lint --workspaces --if-present",
+    "lint": "node scripts/sync-agent-rules.mjs --check && node scripts/check-structure.mjs && node scripts/check-plugin.mjs && prettier --check . && knip && eslint . && npm run lint --workspaces --if-present",
     "lint:structure": "node scripts/check-structure.mjs",
     "lint:unused": "knip",
     "rules:sync": "node scripts/sync-agent-rules.mjs",
-    "test": "npm run test --workspaces --if-present"
+    "test": "node --test plugins/claude-code/scripts/version.test.mjs && npm run test --workspaces --if-present"
   },
   "devDependencies": {
     "@alexevs/prettier-config": "1.0.1",

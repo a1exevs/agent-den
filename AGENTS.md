@@ -51,8 +51,12 @@ Key constraints:
 The plugin is self-contained: `plugins/claude-code/den/` holds the bundled collector and the built web app, generated
 by `npm run build:plugin` and committed (marketplaces install the folder as it is in git). Never edit `den/` by hand.
 The `SessionStart` hook (`scripts/start-den.mjs`) starts that collector detached when nothing answers on 4317, and
-replaces one from an older plugin version (`/health` reports the version, `POST /shutdown` stops it). A collector
-reporting version `dev` (`npm run dev:collector`) is left alone. `/agent-den:den` (`skills/den`) opens the den.
+upgrades one from an older plugin version (`/health` reports the version, `POST /shutdown` stops it). It never
+downgrades: SessionStart also fires on `/clear`, `/compact` and resume in sessions still on the previous version. A
+collector reporting `dev` (`npm run dev:collector`) and a foreign program on the port are left alone — every case is
+`decide()` in `scripts/version.mjs`, tested with `node --test`. `/agent-den:den` (`skills/den`) opens the den.
+`npm run build:plugin` refuses to pack changed sources under an already built version, and `npm run lint` fails when
+`plugin.json` and `den/build-info.json` disagree — users only get an update when the version changes.
 
 The installed plugin is a cached copy (`~/.claude/plugins/cache/agent-den/agent-den/<version>`). After changing
 `plugins/claude-code`, bump `version` in `.claude-plugin/plugin.json`, run `npm run build:plugin`, then

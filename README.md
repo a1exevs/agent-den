@@ -110,12 +110,14 @@ Run from the **repository root**.
 
 ## Releasing the plugin
 
-1. Bump `version` in `plugins/claude-code/.claude-plugin/plugin.json`.
+1. Bump `version` in `plugins/claude-code/.claude-plugin/plugin.json` — users only get an update when it changes.
 2. `npm run build:plugin` — packs the collector and the den into `plugins/claude-code/den`. Commit the result:
-   marketplaces install the plugin folder exactly as it is in git.
+   marketplaces install the plugin folder exactly as it is in git. The build refuses changed sources under an
+   already built version, and `npm run lint` fails when `plugin.json` and the build disagree.
 3. Push to `main`.
 4. Users with auto-update get it on the next start; others run `/plugin marketplace update agent-den`. The first new
-   session replaces a collector left over from the previous version.
+   session replaces a collector left over from the previous version; sessions still on an older version never
+   downgrade it.
 
 ## Features
 

@@ -7,7 +7,7 @@ import { WebSocketServer } from 'ws';
 import { type ClaudeCodeHookPayload, fromClaudeCodeHook } from './adapters/claude-code';
 import { type CursorHookPayload, fromCursorHook } from './adapters/cursor';
 import { DenStore } from './den-store';
-import { isAllowedOrigin } from './local-origin';
+import { isAllowedHost, isAllowedOrigin } from './local-origin';
 import { readStaticFile } from './static-web';
 import { followTranscript } from './transcripts/transcript-follower';
 import { TranscriptRegistry } from './transcripts/transcript-registry';
@@ -35,6 +35,9 @@ function remember(payload: unknown): void {
 }
 
 app.use('*', async (c, next) => {
+  if (!isAllowedHost(c.req.header('host'))) {
+    return c.text('forbidden host', 403);
+  }
   if (!isAllowedOrigin(c.req.header('origin'))) {
     return c.text('forbidden origin', 403);
   }
@@ -82,7 +85,12 @@ app.post('/events', async c => {
 if (webDir) {
   app.get('*', async c => {
     const file = await readStaticFile(webDir, c.req.path);
-    return file ? c.body(new Uint8Array(file.body), 200, { 'content-type': file.contentType }) : c.notFound();
+    if (!file) {
+      return c.notFound();
+    }
+    // Hashed bundles may be cached forever; the page itself must pick up a new plugin version at once.
+    const cacheControl = file.contentType.startsWith('text/html') ? 'no-cache' : 'public, max-age=3600';
+    return c.body(new Uint8Array(file.body), 200, { 'content-type': file.contentType, 'cache-control': cacheControl });
   });
 }
 
@@ -95,7 +103,8 @@ const server = serve({ fetch: app.fetch, port, hostname: '127.0.0.1' }, info => 
 const wss = new WebSocketServer({
   server: server as never,
   path: '/ws',
-  verifyClient: ({ origin }: { origin?: string }) => isAllowedOrigin(origin),
+  verifyClient: ({ origin, req }: { origin?: string; req: { headers: { host?: string } } }) =>
+    isAllowedOrigin(origin) && isAllowedHost(req.headers.host),
 });
 
 const SCAN_INTERVAL_MS = 30_000;

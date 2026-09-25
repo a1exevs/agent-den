@@ -14,3 +14,18 @@ export function isAllowedOrigin(origin: string | undefined): boolean {
     return false;
   }
 }
+
+/**
+ * DNS rebinding guard: a website can point its own domain at 127.0.0.1 and then read us with same-origin requests,
+ * which carry no Origin header. The Host header still names that domain — only local host names are accepted.
+ */
+export function isAllowedHost(host: string | undefined): boolean {
+  if (!host) {
+    return false;
+  }
+  try {
+    return LOCAL_HOSTS.has(new URL(`http://${host}`).hostname);
+  } catch {
+    return false;
+  }
+}
