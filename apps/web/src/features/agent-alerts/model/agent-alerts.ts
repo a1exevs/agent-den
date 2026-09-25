@@ -67,7 +67,13 @@ export class AgentAlerts {
 
   private notify(alert: Alert): void {
     // One notification per agent: a newer one replaces the older.
-    const notification = new Notification(alert.title, { body: alert.body, tag: alert.agentId, icon: 'favicon.ico' });
+    // Our meow already plays: keep the system notification chime quiet so there is one sound, not two.
+    const notification = new Notification(alert.title, {
+      body: alert.body,
+      tag: alert.agentId,
+      icon: 'favicon.ico',
+      silent: this.settings.sound(),
+    });
     notification.onclick = (): void => {
       window.focus();
       this.selection.select(alert.agentId);
