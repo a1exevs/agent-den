@@ -25,6 +25,10 @@ const SRC_ROOT_FILES = new Set(['main.ts', 'styles.css', 'index.html']);
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*$/;
 const KEBAB_ROOTS = ['apps/web/src', 'apps/collector/src', 'packages', 'tools', 'plugins', 'scripts', '.cursor/rules'];
 const SKIP_DIRS = new Set(['node_modules', 'dist', '.angular', 'coverage', '.claude-plugin']);
+/** Build output committed into the plugin (`npm run build:plugin`): hashed chunk names, not ours to name. */
+const SKIP_PATHS = new Set(['plugins/claude-code/den']);
+/** Names fixed by a tool's convention (Claude Code skills). */
+const CONVENTIONAL_NAMES = new Set(['SKILL.md']);
 
 const problems = [];
 const rel = path => relative(root, path).split('\\').join('/');
@@ -100,11 +104,11 @@ function checkFsd() {
 
 function checkKebab(dir) {
   for (const entry of entries(dir)) {
-    if (SKIP_DIRS.has(entry.name)) {
+    const path = join(dir, entry.name);
+    if (SKIP_DIRS.has(entry.name) || SKIP_PATHS.has(rel(path))) {
       continue;
     }
-    const path = join(dir, entry.name);
-    if (!KEBAB.test(entry.name)) {
+    if (!KEBAB.test(entry.name) && !CONVENTIONAL_NAMES.has(entry.name)) {
       problems.push(`${rel(path)}: name is not kebab-case`);
     }
     if (entry.isDirectory()) {

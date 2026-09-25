@@ -8,12 +8,17 @@ import { type ClaudeCodeHookPayload, fromClaudeCodeHook } from './adapters/claud
 import { type CursorHookPayload, fromCursorHook } from './adapters/cursor';
 import { DenStore } from './den-store';
 import { isAllowedOrigin } from './local-origin';
+import { readStaticFile } from './static-web';
 import { followTranscript } from './transcripts/transcript-follower';
 import { TranscriptRegistry } from './transcripts/transcript-registry';
 import { TranscriptReconciler } from './transcripts/reconcile';
 import { scanTranscripts } from './transcripts/transcript-scanner';
 
 const port = Number(process.env['AGENT_DEN_PORT'] ?? COLLECTOR_PORT);
+/** Set by the plugin's launcher: the version it started, so a newer plugin can replace an older collector. */
+const version = process.env['AGENT_DEN_VERSION'] ?? 'dev';
+/** Built web app to serve on the same port (the packaged plugin); in development `ng serve` serves it. */
+const webDir = process.env['AGENT_DEN_WEB_DIR'];
 const store = new DenStore();
 const transcripts = new TranscriptRegistry();
 const app = new Hono();
@@ -37,7 +42,7 @@ app.use('*', async (c, next) => {
 });
 app.use('*', cors({ origin: origin => (isAllowedOrigin(origin) ? origin : null) }));
 
-app.get('/health', c => c.json({ ok: true }));
+app.get('/health', c => c.json({ ok: true, version }));
 app.get('/agents', c => c.json(store.snapshot()));
 app.get('/debug/hooks', c => c.json(recentHooks));
 
@@ -62,15 +67,29 @@ app.post('/hooks/cursor', async c => {
   return c.body(null, 204);
 });
 
+/** Lets a newer plugin version replace this collector. Local origins only, like everything else here. */
+app.post('/shutdown', c => {
+  setTimeout(() => process.exit(0), 100);
+  return c.body(null, 204);
+});
+
 /** Already normalized events — used by the mock generator. */
 app.post('/events', async c => {
   store.push(await c.req.json<DenEvent>());
   return c.body(null, 204);
 });
 
+if (webDir) {
+  app.get('*', async c => {
+    const file = await readStaticFile(webDir, c.req.path);
+    return file ? c.body(new Uint8Array(file.body), 200, { 'content-type': file.contentType }) : c.notFound();
+  });
+}
+
 // Bind to loopback only: hook payloads contain prompts and file paths.
 const server = serve({ fetch: app.fetch, port, hostname: '127.0.0.1' }, info => {
-  process.stdout.write(`agent-den collector listening on http://127.0.0.1:${info.port}\n`);
+  const den = webDir ? `, the den is at http://localhost:${info.port}` : '';
+  process.stdout.write(`agent-den collector ${version} listening on http://127.0.0.1:${info.port}${den}\n`);
 });
 
 const wss = new WebSocketServer({

@@ -60,7 +60,7 @@ export class CollectorSocket {
 
   private open(): void {
     this.connection.set('connecting');
-    const socket = new WebSocket(collectorSocketUrl);
+    const socket = new WebSocket(collectorSocketUrl());
     this.socket = socket;
 
     socket.addEventListener('open', (): void => {

@@ -14,6 +14,7 @@
   ],
   "scripts": {
     "build": "npm run build --workspaces --if-present",
+    "build:plugin": "node scripts/build-plugin.mjs",
     "dev:collector": "npm run dev -w @agent-den/collector",
     "dev:mock": "npm run start -w @agent-den/mock",
     "dev:web": "npm run start -w @agent-den/web",
@@ -30,6 +31,7 @@
   "devDependencies": {
     "@alexevs/prettier-config": "1.0.1",
     "@eslint/js": "9.39.5",
+    "esbuild": "0.28.2",
     "eslint": "9.39.5",
     "eslint-config-prettier": "10.1.8",
     "globals": "17.12.0",

@@ -33,30 +33,33 @@ Claude Code ──hooks──▶ plugin (send.mjs) ──HTTP──▶ collector
                                   ~/.claude/projects/*.jsonl (transcripts: backfill + reconciliation)
 ```
 
-## Prerequisites
+## Use it (no repository needed)
 
-- Node **22.22.3** or newer (`^22.22.3 || ^24.15.0 || >=26`), npm **10.9.8**
-- [Claude Code](https://claude.com/claude-code) for live sessions (the mock works without it)
-
-## Install
-
-From the **repository root**:
-
-```bash
-npm install
-```
-
-Install the plugin in Claude Code (once):
+Needs [Claude Code](https://claude.com/claude-code) and `node` 22+ on `PATH`. In Claude Code:
 
 ```
 /plugin marketplace add a1exevs/agent-den
 /plugin install agent-den@agent-den
 ```
 
-New Claude Code sessions start reporting to the collector; already running ones show up from their transcripts.
-The plugin only forwards hook events to the local collector: if the collector isn't running, hooks silently do nothing.
+Start a new session: the plugin starts the den in the background by itself. Then run `/agent-den:den` to open it
+(http://localhost:4317). Sessions that were already running show up from their transcripts.
 
-## Quick start
+To get new versions automatically, turn on auto-update for the `agent-den` marketplace in `/plugin` → Marketplaces
+(it is off by default for third-party marketplaces). Or update by hand: `/plugin marketplace update agent-den`.
+
+The collector listens on `127.0.0.1` only and keeps everything in memory; its log, `collector.log`, is in the plugin data folder Claude Code gives the plugin
+(`CLAUDE_PLUGIN_DATA`).
+
+## Develop
+
+Prerequisites: Node **22.22.3** or newer (`^22.22.3 || ^24.15.0 || >=26`), npm **10.9.8**.
+
+From the **repository root**:
+
+```bash
+npm install
+```
 
 ```bash
 npm run dev:collector
@@ -66,7 +69,9 @@ npm run dev:collector
 npm run dev:web
 ```
 
-Open http://localhost:4210. No Claude Code at hand? Run `npm run dev:mock` for a den full of fake agents.
+Open http://localhost:4210 (the dev server proxies `/ws` to the collector). No Claude Code at hand? Run
+`npm run dev:mock` for a den full of fake agents. With the dev collector running, the installed plugin's launcher
+leaves it alone (it reports version `dev`).
 
 ## Available scripts
 
@@ -91,6 +96,7 @@ Run from the **repository root**.
 | `npm run format` / `npm run format:check` | Prettier                                                                                       |
 | `npm test`                                | Vitest in every workspace                                                                      |
 | `npm run build`                           | Build every workspace                                                                          |
+| `npm run build:plugin`                    | Pack the collector and the built den into `plugins/claude-code/den` (committed)                |
 
 ### Tooling
 
@@ -101,10 +107,12 @@ Run from the **repository root**.
 
 ## Releasing the plugin
 
-1. Change `plugins/claude-code` and bump `version` in `plugins/claude-code/.claude-plugin/plugin.json`.
-2. Push to `main`.
-3. Users update with `/plugin` (or `claude plugin marketplace update agent-den` and
-   `claude plugin update agent-den@agent-den`); new sessions pick up the new hooks.
+1. Bump `version` in `plugins/claude-code/.claude-plugin/plugin.json`.
+2. `npm run build:plugin` — packs the collector and the den into `plugins/claude-code/den`. Commit the result:
+   marketplaces install the plugin folder exactly as it is in git.
+3. Push to `main`.
+4. Users with auto-update get it on the next start; others run `/plugin marketplace update agent-den`. The first new
+   session replaces a collector left over from the previous version.
 
 ## Features
 

@@ -1,0 +1,14 @@
+{
+  "name": "agent-den",
+  "short_name": "agent-den",
+  "description": "Watch your AI coding agents live in a pixel-art den.",
+  "icons": [
+    { "src": "favicon-192x192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "favicon-512x512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "start_url": ".",
+  "display": "standalone",
+  "theme_color": "#1d1a24",
+  "background_color": "#1d1a24"
+}

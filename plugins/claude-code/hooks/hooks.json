@@ -5,8 +5,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/send.mjs\"",
-            "timeout": 3
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/scripts/start-den.mjs\"",
+            "timeout": 10
           }
         ]
       }

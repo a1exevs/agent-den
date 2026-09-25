@@ -14,7 +14,8 @@ This file is read by every coding agent (Cursor natively, Claude Code through `C
   reconciles agents silent in hooks with their transcripts (Esc interruptions, killed subagents, sessions without the
   plugin).
 - `packages/contracts` — `DenEvent`, `AgentState`, `TranscriptItem`, `reduceAgents()` shared by collector and web.
-- `plugins/claude-code` — Claude Code plugin (hooks → `scripts/send.mjs` → collector). Marketplace:
+- `plugins/claude-code` — Claude Code plugin (hooks → `scripts/send.mjs` → collector; bundled collector + den in
+  `den/`). Marketplace:
   `.claude-plugin/marketplace.json`.
 - `tools/mock` — dev-only scenario generator.
 
@@ -47,8 +48,14 @@ Key constraints:
 
 ## Plugin development
 
-The installed Claude Code plugin is a cached copy (`~/.claude/plugins/cache/agent-den/agent-den/<version>`). After
-changing `plugins/claude-code`, bump `version` in `.claude-plugin/plugin.json`, then run
+The plugin is self-contained: `plugins/claude-code/den/` holds the bundled collector and the built web app, generated
+by `npm run build:plugin` and committed (marketplaces install the folder as it is in git). Never edit `den/` by hand.
+The `SessionStart` hook (`scripts/start-den.mjs`) starts that collector detached when nothing answers on 4317, and
+replaces one from an older plugin version (`/health` reports the version, `POST /shutdown` stops it). A collector
+reporting version `dev` (`npm run dev:collector`) is left alone. `/agent-den:den` (`skills/den`) opens the den.
+
+The installed plugin is a cached copy (`~/.claude/plugins/cache/agent-den/agent-den/<version>`). After changing
+`plugins/claude-code`, bump `version` in `.claude-plugin/plugin.json`, run `npm run build:plugin`, then
 `claude plugin marketplace update agent-den` and `claude plugin update agent-den@agent-den`; new sessions pick it up.
 Raw payloads the collector received: `GET http://127.0.0.1:4317/debug/hooks`.
 
