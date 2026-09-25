@@ -54,6 +54,22 @@ function isIdleReminder(payload: ClaudeCodeHookPayload): boolean {
   );
 }
 
+const normalizeDir = (dir: string): string => dir.replaceAll('\\', '/').replace(/\/+$/, '').toLowerCase();
+
+/**
+ * The room is the project root. `CLAUDE_PROJECT_DIR` is right while the agent only `cd`s into subfolders, but it is
+ * fixed at session start — when the session moves to another folder, `cwd` leaves the project and wins.
+ */
+export function roomDir(payload: Pick<ClaudeCodeHookPayload, 'cwd' | 'project_dir'>): string | undefined {
+  const { cwd, project_dir: projectDir } = payload;
+  if (!projectDir || !cwd) {
+    return projectDir ?? cwd;
+  }
+  const project = normalizeDir(projectDir);
+  const current = normalizeDir(cwd);
+  return current === project || current.startsWith(`${project}/`) ? projectDir : cwd;
+}
+
 export function fromClaudeCodeHook(payload: ClaudeCodeHookPayload): DenEvent | null {
   const kind = kindByHook[payload.hook_event_name];
   if (!kind || !payload.session_id || isIdleReminder(payload)) {
@@ -69,7 +85,7 @@ export function fromClaudeCodeHook(payload: ClaudeCodeHookPayload): DenEvent | n
     sessionId: payload.session_id,
     agentId: payload.agent_id ?? payload.session_id,
     parentAgentId: isSubagent ? payload.session_id : undefined,
-    cwd: payload.project_dir ?? payload.cwd,
+    cwd: roomDir(payload),
     toolName: payload.tool_name,
     toolCategory: payload.tool_name ? categorizeTool(payload.tool_name) : undefined,
     detail:
