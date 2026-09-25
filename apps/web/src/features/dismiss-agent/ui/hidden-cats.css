@@ -1,0 +1,64 @@
+.hidden__head {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.hidden__title {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hidden__list {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.hidden__item {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.hidden__who {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+}
+
+.hidden__name {
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.hidden__room {
+  overflow: hidden;
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.7;
+}
+
+.hidden__all,
+.hidden__recall {
+  padding: 1px 6px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--den-fg);
+  background: transparent;
+  border: 2px solid var(--den-ink);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--den-bubble-bg);
+    background: var(--den-accent);
+    border-color: var(--den-accent);
+    outline: none;
+  }
+}

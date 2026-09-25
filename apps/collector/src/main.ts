@@ -104,7 +104,8 @@ setInterval(() => {
 function parseClientMessage(data: unknown): ClientMessage | null {
   try {
     const message = JSON.parse(String(data)) as ClientMessage;
-    return message.type === 'watch-transcript' || message.type === 'unwatch-transcript' ? message : null;
+    const known: ClientMessage['type'][] = ['watch-transcript', 'unwatch-transcript', 'dismiss', 'recall'];
+    return known.includes(message.type) ? message : null;
   } catch {
     return null;
   }
@@ -121,6 +122,11 @@ wss.on('connection', socket => {
   socket.on('message', data => {
     const message = parseClientMessage(data);
     if (!message) {
+      return;
+    }
+    if (message.type === 'dismiss' || message.type === 'recall') {
+      // Shared state: every open tab sees the cat leave (or come back).
+      store.setDismissed(message.agentId, message.type === 'dismiss');
       return;
     }
     stopFollowing?.();

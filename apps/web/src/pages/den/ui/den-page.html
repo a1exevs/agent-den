@@ -4,8 +4,12 @@
       <h1 class="page__title">agent-den</h1>
       <p class="page__subtitle">where your agents nap between tool calls</p>
     </div>
-    <den-alert-toggles />
+    <div class="page__tools">
+      <den-hidden-cats />
+      <den-alert-toggles />
+    </div>
   </header>
   <den-world [selectedAgentId]="selection.agentId()" (agentPicked)="selection.toggle($event)" />
 </main>
 <den-agent-panel [agentId]="selection.agentId()" (closed)="selection.select(null)" />
+<den-dismiss-undo />

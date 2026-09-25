@@ -28,6 +28,23 @@ export class DenStore {
   }
 
   /** Known in any state, including `gone` — so backfill never resurrects a session that ended. */
+  /** Hide an agent (its kittens too, for a session) or call it back. Unknown or ended agents are ignored. */
+  setDismissed(agentId: string, dismissed: boolean): void {
+    const agent = this.agents.get(agentId);
+    if (!agent || agent.activity === 'gone') {
+      return;
+    }
+    this.push({
+      id: randomUUID(),
+      source: agent.source,
+      kind: dismissed ? 'dismissed' : 'recalled',
+      sessionId: agent.sessionId,
+      agentId,
+      parentAgentId: agent.parentAgentId,
+      timestamp: Date.now(),
+    });
+  }
+
   has(agentId: string): boolean {
     return this.agents.has(agentId);
   }

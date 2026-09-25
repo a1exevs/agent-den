@@ -8,6 +8,10 @@
     ".": "./src/index.ts"
   },
   "scripts": {
-    "lint": "tsc --noEmit -p ."
+    "lint": "tsc --noEmit -p .",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "vitest": "5.0.1"
   }
 }

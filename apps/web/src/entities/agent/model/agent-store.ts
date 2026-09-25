@@ -42,11 +42,26 @@ export class AgentStore {
   readonly visible = computed(() => {
     const now = this.now();
     return [...this.agents().values()].filter(agent => {
+      if (agent.dismissed) {
+        return false;
+      }
       const since = now - agent.updatedAt;
       if (agent.activity === 'gone') {
         return since < LEAVE_MS;
       }
       return !(agent.parentAgentId && isResting(agent) && since > KITTEN_LINGER_MS);
+    });
+  });
+
+  /** Agents the user sent home that are still around — they can be called back. Kittens of a hidden cat are not listed. */
+  readonly hidden = computed(() => {
+    const agents = this.agents();
+    return [...agents.values()].filter(agent => {
+      if (!agent.dismissed || agent.activity === 'gone') {
+        return false;
+      }
+      // A kitten hidden together with its cat comes back with it — list only the cat.
+      return !agent.parentAgentId || agents.get(agent.parentAgentId)?.dismissed !== true;
     });
   });
 

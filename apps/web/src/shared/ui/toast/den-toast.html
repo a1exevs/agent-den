@@ -1,0 +1,6 @@
+<div class="toast" role="status" aria-live="polite">
+  <span class="toast__message">{{ message() }}</span>
+  @if (action(); as label) {
+    <button type="button" class="toast__action" (click)="acted.emit()">{{ label }}</button>
+  }
+</div>

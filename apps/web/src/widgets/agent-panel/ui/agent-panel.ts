@@ -5,6 +5,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, inject, input, ou
 import { AgentStore } from '@entities/agent';
 import { catsSkin, DenAgentAvatar } from '@entities/skin';
 import { TranscriptStore } from '@entities/transcript';
+import { DenDismissButton } from '@features/dismiss-agent';
 import { injectNow } from '@shared/lib';
 import { DenSheet } from '@shared/ui';
 
@@ -15,7 +16,7 @@ import { buildFeed } from '../model/build-feed';
 /** Details of one agent: who, where, what it's doing, and its live transcript. */
 @Component({
   selector: 'den-agent-panel',
-  imports: [DatePipe, DenAgentAvatar, DenSheet, DenTranscriptFeed],
+  imports: [DatePipe, DenAgentAvatar, DenDismissButton, DenSheet, DenTranscriptFeed],
   templateUrl: './agent-panel.html',
   styleUrl: './agent-panel.css',
   changeDetection: ChangeDetectionStrategy.OnPush,

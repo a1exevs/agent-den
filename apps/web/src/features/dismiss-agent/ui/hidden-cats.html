@@ -1,0 +1,24 @@
+@if (hidden().length) {
+  <den-popover label="Hidden cats">
+    <span denPopoverTrigger>🙈 hidden ({{ hidden().length }})</span>
+
+    <div class="hidden">
+      <div class="hidden__head">
+        <span class="hidden__title">Sent home</span>
+        <button type="button" class="hidden__all" (click)="recallAll()">call all back</button>
+      </div>
+      <ul class="hidden__list">
+        @for (agent of hidden(); track agent.agentId) {
+          <li class="hidden__item">
+            <den-agent-avatar [agent]="agent" [skin]="skin" [scale]="2" />
+            <span class="hidden__who">
+              <span class="hidden__name">{{ nameOf(agent) }}</span>
+              <span class="hidden__room">{{ roomOf(agent) }}</span>
+            </span>
+            <button type="button" class="hidden__recall" (click)="recall(agent)">call back</button>
+          </li>
+        }
+      </ul>
+    </div>
+  </den-popover>
+}

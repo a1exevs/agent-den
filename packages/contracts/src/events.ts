@@ -19,7 +19,11 @@ export type DenEventKind =
   | 'waiting'
   | 'stop'
   /** The user interrupted the turn (Esc) — Claude Code sends no `Stop` hook then; comes from the transcript. */
-  | 'interrupted';
+  | 'interrupted'
+  /** The user sent the agent home (hid it). Changes nothing but the `dismissed` flag. */
+  | 'dismissed'
+  /** The user called a hidden agent back. */
+  | 'recalled';
 
 /** Normalized event — every adapter (hooks, JSONL, mock) emits this shape. */
 export type DenEvent = {
@@ -67,7 +71,12 @@ export type ServerMessage =
   | { type: 'transcript-missing'; agentId: string };
 
 /** Messages sent from web clients to the collector. One watched transcript per connection. */
-export type ClientMessage = { type: 'watch-transcript'; agentId: string } | { type: 'unwatch-transcript' };
+export type ClientMessage =
+  | { type: 'watch-transcript'; agentId: string }
+  | { type: 'unwatch-transcript' }
+  /** Hide an agent (and its kittens); it comes back by itself on its next activity. */
+  | { type: 'dismiss'; agentId: string }
+  | { type: 'recall'; agentId: string };
 
 export type AgentActivity = 'idle' | 'thinking' | 'tool' | 'waiting' | 'done' | 'interrupted' | 'error' | 'gone';
 
@@ -85,4 +94,6 @@ export interface AgentState {
   startedAt: number;
   updatedAt: number;
   toolCounts: Partial<Record<ToolCategory, number>>;
+  /** Hidden by the user. Cleared by any new activity of the agent — a live agent can never get lost. */
+  dismissed?: boolean;
 }

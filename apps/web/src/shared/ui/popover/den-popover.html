@@ -1,0 +1,8 @@
+<brn-popover [align]="align()" sideOffset="6">
+  <button brnPopoverTrigger type="button" class="trigger" [attr.aria-label]="label()">
+    <ng-content select="[denPopoverTrigger]" />
+  </button>
+  <div *brnPopoverContent class="panel">
+    <ng-content />
+  </div>
+</brn-popover>

@@ -56,3 +56,26 @@ describe('DenStore.sweep — interrupted', () => {
     expect(store.snapshot()).toEqual([]);
   });
 });
+
+describe('DenStore.setDismissed', () => {
+  it('hides an agent for every client and keeps it in the snapshot for recall', () => {
+    const store = new DenStore();
+    const seen: string[] = [];
+    store.subscribe(e => seen.push(e.kind));
+    store.push(event({ kind: 'stop', agentId: 's1' }));
+    store.setDismissed('s1', true);
+
+    expect(seen).toEqual(['stop', 'dismissed']);
+    expect(store.snapshot()[0]).toMatchObject({ activity: 'done', dismissed: true });
+    store.setDismissed('s1', false);
+    expect(store.snapshot()[0]?.dismissed).toBe(false);
+  });
+
+  it('ignores unknown and ended agents', () => {
+    const store = new DenStore();
+    store.setDismissed('nobody', true);
+    store.push(event({ kind: 'session-end', agentId: 's1' }));
+    store.setDismissed('s1', true);
+    expect(store.snapshot()).toEqual([]);
+  });
+});

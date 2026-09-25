@@ -223,7 +223,8 @@ src/
 │   └── agent-panel/ index.ts, ui/ (agent-panel, transcript-feed), model/ (build-feed, filter-feed),
 │                    lib/ (describe-agent), config/ (feed)
 ├── features/
-│   └── agent-alerts/ index.ts, ui/ (alert-toggles), model/ (agent-alerts, alert-settings, decide-alert), config/
+│   ├── agent-alerts/ index.ts, ui/ (alert-toggles), model/ (agent-alerts, alert-settings, decide-alert), config/
+│   └── dismiss-agent/ index.ts, ui/ (dismiss-button, hidden-cats, dismiss-undo), model/, lib/, config/
 ├── entities/
 │   ├── agent/       index.ts, model/ (agent-store, agent-selection, rooms)
 │   ├── skin/        index.ts, model/ (skin, cats/… incl. cat-sounds), ui/ (agent-avatar)
@@ -232,5 +233,6 @@ src/
     ├── api/         index.ts, collector-socket
     ├── config/      index.ts
     ├── lib/         index.ts, audio, hash, now, pixel-art
-    └── ui/          index.ts, collapsible/, pixel-sprite/, scroll-strip/, search-field/, sheet/, toggle/
+    └── ui/          index.ts, collapsible/, pixel-sprite/, popover/, scroll-strip/, search-field/, sheet/, toast/,
+                     toggle/
 ```

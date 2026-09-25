@@ -24,6 +24,9 @@
 
   @if (agent(); as agent) {
     <div class="details">
+      <div class="actions">
+        <den-dismiss-button [agent]="agent" [name]="name()" />
+      </div>
       <dl class="facts">
         <div class="facts__row">
           <dt>room</dt>

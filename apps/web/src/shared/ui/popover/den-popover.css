@@ -1,0 +1,28 @@
+.trigger {
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--den-fg);
+  background: transparent;
+  border: 2px solid var(--den-ink);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--den-bubble-bg);
+    background: var(--den-ink);
+    outline: none;
+  }
+}
+
+.panel {
+  min-width: 240px;
+  max-width: min(360px, 90vw);
+  max-height: 60vh;
+  overflow-y: auto;
+  padding: 8px;
+  color: var(--den-fg);
+  background: var(--den-paper);
+  border: 3px solid var(--den-ink);
+  box-shadow: 4px 4px 0 var(--den-ink);
+}

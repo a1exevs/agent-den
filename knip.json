@@ -13,7 +13,8 @@
       "project": ["src/**/*.ts"]
     },
     "packages/contracts": {
-      "project": ["src/**/*.ts"]
+      "project": ["src/**/*.ts"],
+      "entry": ["src/index.ts", "src/**/*.spec.ts"]
     },
     "tools/mock": {
       "project": ["src/**/*.ts"]

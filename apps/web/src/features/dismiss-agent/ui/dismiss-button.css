@@ -1,0 +1,16 @@
+.dismiss {
+  padding: 2px 8px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--den-fg);
+  background: transparent;
+  border: 2px solid var(--den-ink);
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--den-bubble-bg);
+    background: var(--den-ink);
+    outline: none;
+  }
+}
