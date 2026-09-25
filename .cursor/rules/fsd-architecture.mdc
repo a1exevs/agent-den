@@ -223,7 +223,8 @@ src/
 │   └── agent-panel/ index.ts, ui/ (agent-panel, transcript-feed), model/ (build-feed, filter-feed),
 │                    lib/ (describe-agent), config/ (feed)
 ├── features/
-│   ├── agent-alerts/ index.ts, ui/ (alert-toggles), model/ (agent-alerts, alert-settings, decide-alert), config/
+│   ├── agent-alerts/ index.ts, ui/ (alert-toggles), model/ (agent-alerts, alert-settings, decide-alert, voice-pitch),
+│   │                 config/
 │   └── dismiss-agent/ index.ts, ui/ (dismiss-button, hidden-cats, dismiss-undo), model/, lib/, config/
 ├── entities/
 │   ├── agent/       index.ts, model/ (agent-store, agent-selection, rooms)
