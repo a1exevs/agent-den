@@ -2,10 +2,11 @@ import { DestroyRef, effect, inject, Injectable } from '@angular/core';
 
 import { AgentSelection, AgentStore, type AgentTransition } from '@entities/agent';
 import { catsSkin } from '@entities/skin';
-import { playSound, unlockAudioOnFirstGesture } from '@shared/lib';
+import { playSound, preloadSound, unlockAudio, unlockAudioOnFirstGesture } from '@shared/lib';
 
 import { AlertSettings } from './alert-settings';
 import { type Alert, decideAlert } from './decide-alert';
+import { voicePitch } from './voice-pitch';
 import { PER_AGENT_COOLDOWN_MS } from '../config/alerts';
 
 const BASE_TITLE = 'agent-den';
@@ -38,8 +39,14 @@ export class AgentAlerts {
     }
     this.started = true;
     unlockAudioOnFirstGesture();
+    Object.values(this.skin.sounds).forEach(preloadSound);
     const unsubscribe = this.agents.onTransition(transition => this.handle(transition));
     this.destroyRef.onDestroy(unsubscribe);
+  }
+
+  /** A sample meow, so switching the sound on answers right away. Call from a user gesture. */
+  preview(): void {
+    void unlockAudio().then(() => playSound(this.skin.sounds['needs-you']));
   }
 
   private handle(transition: AgentTransition): void {
@@ -51,7 +58,7 @@ export class AgentAlerts {
     this.lastAlertAt.set(alert.agentId, now);
 
     if (this.settings.sound()) {
-      playSound(this.skin.sounds[alert.sound]);
+      playSound(this.skin.sounds[alert.sound], { pitchScale: voicePitch(transition.agent) });
     }
     if (this.settings.notifications() && document.hidden) {
       this.notify(alert);

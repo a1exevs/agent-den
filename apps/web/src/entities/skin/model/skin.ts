@@ -1,6 +1,6 @@
 import type { AgentState, ToolCategory } from '@agent-den/contracts';
 
-import type { Palette, PixelArt, SoundSpec } from '@shared/lib';
+import type { Palette, PixelArt, Sound } from '@shared/lib';
 
 /** What the character is doing, independent of the skin. */
 export type Action =
@@ -45,7 +45,7 @@ export interface Skin {
   /** Speech bubble text per action, if any. */
   bubble: Partial<Record<Action, string>>;
   /** What the den sounds like when an agent needs the user / finished its turn. */
-  sounds: Record<SkinSound, SoundSpec>;
+  sounds: Record<SkinSound, Sound>;
 }
 
 const actionByCategory: Record<ToolCategory, Action> = {

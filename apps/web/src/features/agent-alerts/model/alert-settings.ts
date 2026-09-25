@@ -39,7 +39,7 @@ export class AlertSettings {
   /** Call from the toggle's click — the gesture also unlocks browser audio. */
   setSound(on: boolean): void {
     if (on) {
-      unlockAudio();
+      void unlockAudio();
     }
     this.soundState.set(on);
     this.save();

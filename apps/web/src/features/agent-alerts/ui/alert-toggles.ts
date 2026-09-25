@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/c
 
 import { DenToggle } from '@shared/ui';
 
+import { AgentAlerts } from '../model/agent-alerts';
 import { AlertSettings } from '../model/alert-settings';
 
 /** Sound and browser-notification switches for agent alerts. */
@@ -14,6 +15,7 @@ import { AlertSettings } from '../model/alert-settings';
 })
 export class DenAlertToggles {
   protected readonly settings = inject(AlertSettings);
+  private readonly alerts = inject(AgentAlerts);
 
   protected readonly notificationsBlocked = computed(() => {
     const permission = this.settings.permission();
@@ -30,6 +32,13 @@ export class DenAlertToggles {
         return 'Notify me while the tab is in the background';
     }
   });
+
+  protected onSoundChange(on: boolean): void {
+    this.settings.setSound(on);
+    if (on) {
+      this.alerts.preview();
+    }
+  }
 
   protected onNotificationsChange(on: boolean): void {
     void this.settings.setNotifications(on);
