@@ -1,0 +1,11 @@
+<div class="alerts" role="group" aria-label="Alerts">
+  <den-toggle [pressed]="settings.sound()" (pressedChange)="settings.setSound($event)">🔊 sound</den-toggle>
+  <den-toggle
+    [pressed]="settings.notifications()"
+    [disabled]="notificationsBlocked()"
+    [hint]="notificationsHint()"
+    (pressedChange)="onNotificationsChange($event)"
+  >
+    🔔 notifications
+  </den-toggle>
+</div>

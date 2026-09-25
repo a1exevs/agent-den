@@ -1,5 +1,6 @@
 import type { Action, Skin } from '../skin';
 import { catName, catPalette } from './cat-palettes';
+import { catSounds } from './cat-sounds';
 import { type CatPose, catSprites } from './cat-sprites';
 import { stationPalette, stationSprites } from './station-sprites';
 
@@ -35,6 +36,7 @@ export const catsSkin: Skin = {
   characterArt: action => catSprites[poseByAction[action]],
   characterPalette: catPalette,
   characterName: catName,
+  sounds: catSounds,
   bubble: {
     think: '…',
     wait: 'MEOW!',

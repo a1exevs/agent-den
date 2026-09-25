@@ -1,4 +1,11 @@
-import { type AgentState, isStale, reduceAgents, type ServerMessage } from '@agent-den/contracts';
+import {
+  type AgentActivity,
+  type AgentState,
+  type DenEvent,
+  isStale,
+  reduceAgents,
+  type ServerMessage,
+} from '@agent-den/contracts';
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 
 import { CollectorSocket } from '@shared/api';
@@ -9,6 +16,16 @@ const KITTEN_LINGER_MS = 3000;
 /** How long a leaving character stays on screen: time to walk out of the door. */
 const LEAVE_MS = 2500;
 
+/** One agent changed because of a live event (never from a snapshot). */
+export type AgentTransition = {
+  agent: AgentState;
+  /** Activity before the event; undefined for an agent we see for the first time. */
+  from: AgentActivity | undefined;
+  event: DenEvent;
+};
+
+type TransitionListener = (transition: AgentTransition) => void;
+
 const isResting = (agent: AgentState): boolean => agent.activity === 'done' || agent.activity === 'interrupted';
 
 /** Live agents streamed from the collector. */
@@ -17,6 +34,7 @@ export class AgentStore {
   private readonly socket = inject(CollectorSocket);
   private readonly agents = signal<ReadonlyMap<string, AgentState>>(new Map());
   private readonly now = injectNow(1000);
+  private readonly transitionListeners = new Set<TransitionListener>();
 
   readonly status = this.socket.status;
 
@@ -52,6 +70,12 @@ export class AgentStore {
     this.socket.connect();
   }
 
+  /** Called for every agent change caused by a live event — alerts, sounds, counters subscribe here. */
+  onTransition(listener: TransitionListener): () => void {
+    this.transitionListeners.add(listener);
+    return () => this.transitionListeners.delete(listener);
+  }
+
   /** Live state of one agent (including ones that already left). */
   byId(agentId: string): AgentState | undefined {
     return this.agents().get(agentId);
@@ -61,7 +85,13 @@ export class AgentStore {
     if (message.type === 'snapshot') {
       this.agents.set(new Map(message.agents.map(agent => [agent.agentId, agent])));
     } else if (message.type === 'event') {
-      this.agents.update(agents => reduceAgents(agents, message.event));
+      const { event } = message;
+      const from = this.agents().get(event.agentId)?.activity;
+      this.agents.update(agents => reduceAgents(agents, event));
+      const agent = this.agents().get(event.agentId);
+      if (agent) {
+        this.transitionListeners.forEach(listener => listener({ agent, from, event }));
+      }
     }
   }
 }

@@ -1,6 +1,6 @@
 import type { AgentState, ToolCategory } from '@agent-den/contracts';
 
-import type { Palette, PixelArt } from '@shared/lib';
+import type { Palette, PixelArt, SoundSpec } from '@shared/lib';
 
 /** What the character is doing, independent of the skin. */
 export type Action =
@@ -18,6 +18,9 @@ export type Action =
   | 'interrupted'
   /** Busy but silent for too long — drawn dusty. Set by the scene (see `isStale`), not derived from activity. */
   | 'stale';
+
+/** Moments a skin has a sound for. */
+export type SkinSound = 'needs-you' | 'finished';
 
 /** Station slots every skin must draw. `entrance` doubles as the "waiting for you" spot. */
 export type StationSlot = 'entrance' | 'web' | 'read' | 'center' | 'edit' | 'shell' | 'spawn' | 'rest';
@@ -41,6 +44,8 @@ export interface Skin {
   characterName: (agentId: string) => string;
   /** Speech bubble text per action, if any. */
   bubble: Partial<Record<Action, string>>;
+  /** What the den sounds like when an agent needs the user / finished its turn. */
+  sounds: Record<SkinSound, SoundSpec>;
 }
 
 const actionByCategory: Record<ToolCategory, Action> = {

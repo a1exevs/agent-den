@@ -3,6 +3,8 @@
   type="button"
   class="toggle"
   [state]="pressed() ? 'on' : 'off'"
+  [disabled]="disabled()"
+  [attr.title]="hint()"
   (stateChange)="pressed.set($event === 'on')"
 >
   <ng-content />

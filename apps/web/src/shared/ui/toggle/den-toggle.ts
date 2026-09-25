@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, model } from '@angular/core';
 import { BrnToggle } from '@spartan-ng/brain/toggle';
 
 /** Pixel-style on/off chip button (Spartan toggle: aria-pressed, keyboard). */
@@ -11,4 +11,7 @@ import { BrnToggle } from '@spartan-ng/brain/toggle';
 })
 export class DenToggle {
   readonly pressed = model<boolean>(false);
+  readonly disabled = input<boolean>(false);
+  /** Tooltip, e.g. why the toggle is disabled. */
+  readonly hint = input<string | undefined>(undefined);
 }

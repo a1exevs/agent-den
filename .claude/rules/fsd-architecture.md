@@ -28,7 +28,7 @@ app → pages → widgets → features → entities → shared        (arrows = 
 | `shared/` | domain-agnostic code: UI kit, collector socket, config, helpers | no | — (only other `shared` segments) |
 
 - Only **downwards**. Never sideways between slices of one layer (see §6), never upwards.
-- A layer is created when its first slice appears — no empty folders (there is no `features/` yet).
+- A layer is created when its first slice appears — no empty folders.
 - `app/` is imported only by `main.ts`, directly by file. While it is small (root component, config, routes) its
   files sit in `app/` itself; split it into segments by purpose (`routes/`, `providers/`, `styles/`) once it grows.
 
@@ -53,7 +53,8 @@ Our examples:
 | `DenPage` | `pages/den/ui` | a screen |
 | rooms with cats and stations | `widgets/den-world` | big block over the agent + skin entities |
 | details sheet with the transcript | `widgets/agent-panel` | big block over agent + transcript + skin |
-| sound on/off, skin switcher | `features/toggle-sound`, `features/switch-skin` | a user action |
+| sound + notifications (toggles and the alerting itself) | `features/agent-alerts` | a user-facing capability with its own settings |
+| skin switcher | `features/switch-skin` | a user action |
 | `AgentStore`, `groupIntoRooms` | `entities/agent/model` | domain state and logic |
 | cat sprites, stations, poses | `entities/skin/model` | domain (how an agent looks) |
 | `DenAgentAvatar` (pose sprite in session colors) | `entities/skin/ui` | entity UI: how an agent looks, reused by `den-world` and `agent-panel` |
@@ -211,13 +212,15 @@ src/
 │   │                model/ (placements, roster, collapsed-rooms), config/ (scene)
 │   └── agent-panel/ index.ts, ui/ (agent-panel, transcript-feed), model/ (build-feed, filter-feed),
 │                    lib/ (describe-agent), config/ (feed)
+├── features/
+│   └── agent-alerts/ index.ts, ui/ (alert-toggles), model/ (agent-alerts, alert-settings, decide-alert), config/
 ├── entities/
-│   ├── agent/       index.ts, model/ (agent-store, rooms)
-│   ├── skin/        index.ts, model/ (skin, cats/…), ui/ (agent-avatar)
+│   ├── agent/       index.ts, model/ (agent-store, agent-selection, rooms)
+│   ├── skin/        index.ts, model/ (skin, cats/… incl. cat-sounds), ui/ (agent-avatar)
 │   └── transcript/  index.ts, model/ (transcript-store)
 └── shared/
     ├── api/         index.ts, collector-socket
     ├── config/      index.ts
-    ├── lib/         index.ts, hash, now, pixel-art
+    ├── lib/         index.ts, audio, hash, now, pixel-art
     └── ui/          index.ts, collapsible/, pixel-sprite/, scroll-strip/, search-field/, sheet/, toggle/
 ```
