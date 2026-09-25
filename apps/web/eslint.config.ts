@@ -9,7 +9,7 @@ import plugins from './linter/plugins';
 import curlyRule from './linter/rules/curly-rule';
 import importOrderRule from './linter/rules/import-order-rule';
 import { fsdLayers, restrictedImportsRule } from './linter/rules/restricted-imports-rule';
-import { segmentDirectionRule } from './linter/rules/segment-direction-rule';
+import { MODEL_TYPE_READERS, modelTypeOnlyRule, segmentDirectionRule } from './linter/rules/segment-direction-rule';
 import sortImportsRule from './linter/rules/sort-imports-rule';
 import unusedVarsRule from './linter/rules/unused-vars-rule';
 import settings from './linter/settings';
@@ -88,6 +88,10 @@ export default tsEslint.config(
         },
       ],
     },
+  },
+  {
+    files: MODEL_TYPE_READERS.map(segment => `src/**/${segment}/**/*.ts`),
+    rules: modelTypeOnlyRule(),
   },
   // FSD import boundaries + "Spartan only in shared", one block per layer.
   ...fsdLayers.map(layer => ({

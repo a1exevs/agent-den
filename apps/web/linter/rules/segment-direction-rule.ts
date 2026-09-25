@@ -6,13 +6,15 @@ const SLICED_LAYERS = ['pages', 'widgets', 'features', 'entities'];
 
 /**
  * Inside one slice (or inside `shared`), a segment may import only the segments to its right:
- * `ui → model → api → lib, config`. Keys are the importing segment, values the segments it must not import.
+ * `ui → model → api → lib, config`. Keys are the importing segment, values the segments it must not import —
+ * not even types. `model` is missing for api/lib/config on purpose: they may `import type` from it
+ * (see `modelTypeOnlyRule`), just not its code.
  */
 const forbiddenBySegment: Record<string, string[]> = {
   model: ['ui'],
-  api: ['ui', 'model'],
-  lib: ['ui', 'model', 'api'],
-  config: ['ui', 'model', 'api', 'lib'],
+  api: ['ui'],
+  lib: ['ui', 'api'],
+  config: ['ui', 'api', 'lib'],
 };
 
 function sliceRoots(srcDir: string): string[] {
@@ -46,4 +48,29 @@ export function segmentDirectionRule(srcDir: string): Linter.RulesRecord {
     ),
   );
   return { 'import/no-restricted-paths': ['error', { zones }] };
+}
+
+/** Segments below `model` that may use its domain types. */
+export const MODEL_TYPE_READERS = ['api', 'lib', 'config'] as const;
+
+/**
+ * `api`, `lib` and `config` may `import type` from their slice's `model` (a mapper returning a domain type, a
+ * typed helper) but never import its code — type imports are erased, so the runtime direction stays one-way.
+ */
+export function modelTypeOnlyRule(): Linter.RulesRecord {
+  return {
+    '@typescript-eslint/no-restricted-imports': [
+      'error',
+      {
+        patterns: [
+          {
+            regex: '(^|/)model(/|$)',
+            allowTypeImports: true,
+            message:
+              'FSD segments: only `import type` from model here — model uses this segment, not the other way round.',
+          },
+        ],
+      },
+    ],
+  };
 }

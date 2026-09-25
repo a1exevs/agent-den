@@ -100,8 +100,18 @@ ui ──→ model ──→ api
  └───────┴────────┴──→ lib, config
 ```
 
-- `ui` may use `model`, `api`, `lib`, `config`; `model` may use `api`, `lib`, `config`; `api` — `lib`, `config`.
-- `model` never imports `ui`; `lib` and `config` don't depend on other segments of the slice.
+| Segment | may import (code) | may also `import type` from |
+|---|---|---|
+| `ui` | `model`, `api`, `lib`, `config` | — |
+| `model` | `api`, `lib`, `config` | — |
+| `api` | `lib`, `config` | `model` |
+| `lib` | — | `model` |
+| `config` | — | `model` |
+
+- **Types flow down, code doesn't:** `api`, `lib` and `config` may `import type` domain types from their slice's
+  `model` (a mapper returning `AgentState`, a typed helper) — type imports are erased, so at runtime `model` still
+  depends on them, never the other way round.
+- **`ui` stays on top:** no segment imports `ui`, not even its types.
 - The same applies to the segments of `shared` (`shared/ui` may use `shared/lib`, `shared/api` uses `shared/config`).
 
 ## 5. Public API (`index.ts`)
@@ -188,6 +198,7 @@ import { BrnSheet } from '@spartan-ng/brain/sheet';               // ❌ outside
 | No import of your own slice/segment index | ESLint `no-restricted-imports` (`.` / `..`) |
 | No dependency cycles | ESLint `import/no-cycle`, `import/no-self-import` |
 | Segment direction `ui → model → api → lib, config` | ESLint `import/no-restricted-paths` (zones generated per slice: `linter/rules/segment-direction-rule.ts`) |
+| api / lib / config → model: `import type` only | ESLint `@typescript-eslint/no-restricted-imports` with `allowTypeImports` (`modelTypeOnlyRule`) |
 | `index.ts` placement (§5), no `export *` | `scripts/check-structure.mjs`, Steiger `public-api`, `no-layer-public-api`, `no-wildcard-exports` |
 | Only the five standard segments; nothing but `index.ts` in a slice root | `scripts/check-structure.mjs` |
 | kebab-case names | `scripts/check-structure.mjs` |
