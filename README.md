@@ -6,11 +6,14 @@
 
 ## Description
 
-Watch your AI coding agents live as pixel-art cats. Every Claude Code session is a cat, its subagents are kittens,
-and every project folder is a room. They walk to the station of the tool they're using: sniff books while reading,
-scratch the post while editing, knock things off the table while running shell commands, stare out of the window while
-browsing the web and yowl at the door when they need your permission. Kittens hop out of a box, done cats nap on the
-cushion.
+Watch your AI coding agents live in a pixel-art den. Every Claude Code session is a character, its subagents are
+its young, and every project folder is a room. Characters walk to the station of the tool they're using and show what
+they are doing at a glance: thinking, working, waiting for you, done.
+
+The den is skinnable. It ships with the **cats** skin: sessions are cats, subagents are kittens. Cats sniff books while
+reading, scratch the post while editing, knock things off the table while running shell commands, stare out of the
+window while browsing the web and yowl at the door when they need your permission. Kittens hop out of a box, done cats
+nap on the cushion. More skins are on the way.
 
 Workspaces:
 
@@ -63,7 +66,7 @@ npm run dev:collector
 npm run dev:web
 ```
 
-Open http://localhost:4210. No Claude Code at hand? Run `npm run dev:mock` for a den full of fake cats.
+Open http://localhost:4210. No Claude Code at hand? Run `npm run dev:mock` for a den full of fake agents.
 
 ## Available scripts
 
@@ -91,10 +94,10 @@ Run from the **repository root**.
 
 ### Tooling
 
-| Command                  | Description                                                                                            |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `npm run generate:icons` | Regenerate favicons, app icons and the OG image in `apps/web/public` from the code-defined cat sprites |
-| `npm run rules:sync`     | Regenerate `.claude/rules` from `.cursor/rules` (the single source of coding rules)                    |
+| Command                  | Description                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `npm run generate:icons` | Regenerate favicons, app icons and the OG image in `apps/web/public` from the code-defined sprites |
+| `npm run rules:sync`     | Regenerate `.claude/rules` from `.cursor/rules` (the single source of coding rules)                |
 
 ## Releasing the plugin
 
@@ -106,14 +109,16 @@ Run from the **repository root**.
 ## Features
 
 - Live sessions from Claude Code hooks, plus transcript backfill for sessions started before the plugin
-- Kittens for subagents, always in their parent's room
-- Stations per tool: books (read), scratching post (edit), table (shell), window (web), box (subagents), door, cushion
-- Precise statuses: thinking, using a tool, waiting for you, done, interrupted (Esc), error; dusty cats for stale sessions
-- Details panel with the live transcript of a cat or kitten
-- Collapsible rooms and a roster toolbar to find a cat quickly
-- A meow when an agent needs you, a purr when a session is done — every cat has its own voice
-- Browser notifications while the tab is in the background; click one to open that cat
-- Send cats home: hide finished sessions with undo, nothing is ever lost
+- Subagents live next to their parent, always in its room
+- A station per tool category: read, edit, shell, web, subagents, rest, the door in and out
+- Precise statuses: thinking, using a tool, waiting for you, done, interrupted (Esc), error; dusty characters for stale
+  sessions
+- Details panel with the live transcript of any session or subagent
+- Collapsible rooms and a roster toolbar to find an agent quickly
+- A sound when an agent needs you and when a session is done, a different voice per character (cats: meow and purr)
+- Browser notifications while the tab is in the background; click one to open that agent
+- Send agents home: hide finished sessions with undo, nothing is ever lost
+- Skins: every look (sprites, stations, sounds, names) is one pluggable skin; cats come first
 - Private by design: the collector listens on loopback only and rejects non-local origins
 
 ## Coding rules

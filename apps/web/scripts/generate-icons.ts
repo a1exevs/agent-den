@@ -1,6 +1,6 @@
 /**
  * Renders the favicons, app icons and the OG image from the same code-defined pixel art the den uses, so the
- * branding always matches the cats. Run `npm run generate:icons -w @agent-den/web` after changing a sprite.
+ * branding always matches the den (cats skin). Run `npm run generate:icons -w @agent-den/web` after changing a sprite.
  */
 import { Resvg } from '@resvg/resvg-js';
 import { writeFileSync } from 'node:fs';
@@ -155,7 +155,7 @@ const og = svg(
     cats.join('') +
     kitten +
     `<text x="80" y="150" font-family="${FONT}" font-size="104" font-weight="700" fill="${FG}">agent-den</text>` +
-    `<text x="84" y="214" font-family="${FONT}" font-size="34" font-weight="700" fill="${FG}" fill-opacity="0.8">Your AI agents, living as pixel cats</text>` +
+    `<text x="84" y="214" font-family="${FONT}" font-size="34" font-weight="700" fill="${FG}" fill-opacity="0.8">Your AI agents, living in a pixel-art den</text>` +
     `<rect x="84" y="250" width="332" height="56" fill="${ACCENT}"/>` +
     `<text x="250" y="288" text-anchor="middle" font-family="${FONT}" font-size="28" font-weight="700" fill="${INK}">Claude Code plugin</text>`,
 );

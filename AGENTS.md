@@ -1,6 +1,7 @@
 # agent-den
 
-Pixel-art den where AI agent sessions are cats and subagents are kittens. Requirements: `docs/requirements.md`.
+Pixel-art den for AI agent sessions and their subagents, with switchable skins (ships with cats: sessions are cats,
+subagents are kittens). Requirements: `docs/requirements.md`.
 
 This file is read by every coding agent (Cursor natively, Claude Code through `CLAUDE.md`). Keep it tool-agnostic.
 
