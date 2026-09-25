@@ -54,7 +54,9 @@ The `SessionStart` hook (`scripts/start-den.mjs`) starts that collector detached
 upgrades one from an older plugin version (`/health` reports the version, `POST /shutdown` stops it). It never
 downgrades: SessionStart also fires on `/clear`, `/compact` and resume in sessions still on the previous version. A
 collector reporting `dev` (`npm run dev:collector`) and a foreign program on the port are left alone — every case is
-`decide()` in `scripts/version.mjs`, tested with `node --test`. `/agent-den:den` (`skills/den`) opens the den.
+`decide()` in `scripts/version.mjs`, tested with `node --test`. The launcher also passes `AGENT_DEN_STATE_FILE`
+(in `CLAUDE_PLUGIN_DATA`): the collector restores the den from it on start and saves it every minute and on
+shutdown, so an update or a reboot keeps the cats (the dev collector doesn't persist). `/agent-den:den` (`skills/den`) opens the den.
 `npm run build:plugin` refuses to pack changed sources under an already built version, and `npm run lint` fails when
 `plugin.json` and `den/build-info.json` disagree — users only get an update when the version changes.
 

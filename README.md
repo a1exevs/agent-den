@@ -51,8 +51,8 @@ Start a new session: the plugin starts the den in the background by itself. Then
 To get new versions automatically, turn on auto-update for the `agent-den` marketplace in `/plugin` → Marketplaces
 (it is off by default for third-party marketplaces). Or update by hand: `/plugin marketplace update agent-den`.
 
-The collector listens on `127.0.0.1` only and keeps everything in memory; its log, `collector.log`, is in the plugin data folder Claude Code gives the plugin
-(`CLAUDE_PLUGIN_DATA`).
+The collector listens on `127.0.0.1` only. It keeps the den in `den-state.json` (so updates and reboots don't empty
+it) and writes `collector.log`, both in the data folder Claude Code gives the plugin (`CLAUDE_PLUGIN_DATA`).
 
 ## Develop
 

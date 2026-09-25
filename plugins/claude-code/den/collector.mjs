@@ -7386,9 +7386,49 @@ function fromCursorHook(payload) {
   };
 }
 
+// apps/collector/src/den-state.ts
+import { readFile, rename, writeFile } from "node:fs/promises";
+function isSavedDen(value) {
+  if (typeof value !== "object" || value === null) {
+    return false;
+  }
+  const saved = value;
+  return saved.format === 1 && Array.isArray(saved.agents) && Array.isArray(saved.transcripts);
+}
+async function saveDen(file, store2, transcripts2) {
+  const saved = {
+    format: 1,
+    savedAt: Date.now(),
+    agents: store2.export(),
+    transcripts: transcripts2.entries()
+  };
+  const temp = `${file}.tmp`;
+  await writeFile(temp, JSON.stringify(saved));
+  await rename(temp, file);
+}
+async function loadDen(file, store2, transcripts2) {
+  let saved;
+  try {
+    saved = JSON.parse(await readFile(file, "utf8"));
+  } catch {
+    return 0;
+  }
+  if (!isSavedDen(saved)) {
+    return 0;
+  }
+  store2.restore(saved.agents.filter((agent) => typeof agent?.agentId === "string"));
+  for (const [agentId, path] of saved.transcripts) {
+    if (typeof agentId === "string" && typeof path === "string") {
+      transcripts2.set(agentId, path);
+    }
+  }
+  return store2.snapshot().length;
+}
+
 // apps/collector/src/den-store.ts
 import { randomUUID as randomUUID3 } from "node:crypto";
 var MINUTE2 = 6e4;
+var DAY = 24 * 60 * MINUTE2;
 var SILENT_BUSY_MS = 30 * MINUTE2;
 var SLEEPING_MS = 60 * MINUTE2;
 var RESTING = /* @__PURE__ */ new Set(["done", "interrupted", "idle"]);
@@ -7424,6 +7464,17 @@ var DenStore = class {
   }
   snapshot() {
     return [...this.agents.values()].filter((agent) => agent.activity !== "gone");
+  }
+  /**
+   * Everything worth keeping across a collector restart (plugin update, reboot). Ended agents stay for a day, so
+   * transcript backfill doesn't bring back a session that already left.
+   */
+  export(now = Date.now()) {
+    return [...this.agents.values()].filter((agent) => agent.activity !== "gone" || now - agent.updatedAt < DAY);
+  }
+  /** Loads saved agents before anyone subscribes; the next `sweep` retires those that went quiet meanwhile. */
+  restore(agents) {
+    this.agents = new Map(agents.map((agent) => [agent.agentId, agent]));
   }
   subscribe(listener) {
     this.listeners.add(listener);
@@ -7492,7 +7543,7 @@ function isAllowedHost(host) {
 }
 
 // apps/collector/src/static-web.ts
-import { readFile, stat } from "node:fs/promises";
+import { readFile as readFile2, stat } from "node:fs/promises";
 import { extname, join, normalize, resolve, sep } from "node:path";
 var CONTENT_TYPES = {
   ".html": "text/html; charset=utf-8",
@@ -7525,7 +7576,7 @@ async function readStaticFile(root, urlPath) {
   }
   try {
     return {
-      body: await readFile(file),
+      body: await readFile2(file),
       contentType: CONTENT_TYPES[extname(file).toLowerCase()] ?? "application/octet-stream"
     };
   } catch {
@@ -7700,6 +7751,9 @@ var TranscriptRegistry = class {
   get(agentId) {
     return this.paths.get(agentId);
   }
+  entries() {
+    return [...this.paths.entries()];
+  }
   /**
    * Hooks always carry the session `transcript_path`; subagent hooks add `agent_id` (and sometimes
    * `agent_transcript_path`). Subagent transcripts live in `<session>/subagents/agent-<id>.jsonl` next to it.
@@ -7814,7 +7868,7 @@ function inferSubagentVerdict(parentEntries, toolUseId) {
 }
 
 // apps/collector/src/transcripts/transcript-files.ts
-import { open as open2, readFile as readFile2 } from "node:fs/promises";
+import { open as open2, readFile as readFile3 } from "node:fs/promises";
 import { dirname as dirname2, join as join3 } from "node:path";
 var TAIL_BYTES = 256 * 1024;
 async function readTail(path) {
@@ -7839,7 +7893,7 @@ async function readTail(path) {
 }
 async function readJson(path) {
   try {
-    return JSON.parse(await readFile2(path, "utf8"));
+    return JSON.parse(await readFile3(path, "utf8"));
   } catch {
     return void 0;
   }
@@ -8029,6 +8083,36 @@ var version = process.env["AGENT_DEN_VERSION"] ?? "dev";
 var webDir = process.env["AGENT_DEN_WEB_DIR"];
 var store = new DenStore();
 var transcripts = new TranscriptRegistry();
+var stateFile = process.env["AGENT_DEN_STATE_FILE"];
+var SAVE_INTERVAL_MS = 6e4;
+var unsaved = false;
+async function save() {
+  if (!stateFile || !unsaved) {
+    return;
+  }
+  unsaved = false;
+  await saveDen(stateFile, store, transcripts).catch((error) => {
+    unsaved = true;
+    process.stderr.write(`saving the den failed: ${String(error)}
+`);
+  });
+}
+if (stateFile) {
+  const restored = await loadDen(stateFile, store, transcripts);
+  store.sweep();
+  process.stdout.write(`restored ${restored} agent(s) from ${stateFile}
+`);
+  store.subscribe(() => {
+    unsaved = true;
+  });
+  setInterval(() => void save(), SAVE_INTERVAL_MS);
+}
+async function shutdown() {
+  await save();
+  process.exit(0);
+}
+process.on("SIGINT", () => void shutdown());
+process.on("SIGTERM", () => void shutdown());
 var app = new Hono2();
 var recentHooks = [];
 var RECENT_HOOKS_LIMIT = 50;
@@ -8071,7 +8155,7 @@ app.post("/hooks/cursor", async (c) => {
   return c.body(null, 204);
 });
 app.post("/shutdown", (c) => {
-  setTimeout(() => process.exit(0), 100);
+  setTimeout(() => void shutdown(), 100);
   return c.body(null, 204);
 });
 app.post("/events", async (c) => {

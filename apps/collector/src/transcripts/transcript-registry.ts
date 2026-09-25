@@ -12,6 +12,10 @@ export class TranscriptRegistry {
     return this.paths.get(agentId);
   }
 
+  entries(): [agentId: string, path: string][] {
+    return [...this.paths.entries()];
+  }
+
   /**
    * Hooks always carry the session `transcript_path`; subagent hooks add `agent_id` (and sometimes
    * `agent_transcript_path`). Subagent transcripts live in `<session>/subagents/agent-<id>.jsonl` next to it.

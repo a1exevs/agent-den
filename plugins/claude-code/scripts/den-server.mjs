@@ -51,10 +51,14 @@ async function waitFor(check, timeoutMs) {
   return false;
 }
 
-export function logFile() {
+function dataDir() {
   const dir = process.env.CLAUDE_PLUGIN_DATA ?? join(tmpdir(), 'agent-den');
   mkdirSync(dir, { recursive: true });
-  return join(dir, 'collector.log');
+  return dir;
+}
+
+export function logFile() {
+  return join(dataDir(), 'collector.log');
 }
 
 function openLog() {
@@ -91,7 +95,13 @@ export async function ensureCollector() {
     detached: true,
     windowsHide: true,
     stdio: ['ignore', log, log],
-    env: { ...process.env, AGENT_DEN_VERSION: version, AGENT_DEN_WEB_DIR: join(pluginRoot, 'den', 'web') },
+    env: {
+      ...process.env,
+      AGENT_DEN_VERSION: version,
+      AGENT_DEN_WEB_DIR: join(pluginRoot, 'den', 'web'),
+      // Outside the versioned plugin folder: the next version loads what this one saved.
+      AGENT_DEN_STATE_FILE: join(dataDir(), 'den-state.json'),
+    },
   });
   child.unref();
   const up = await waitFor(async () => {

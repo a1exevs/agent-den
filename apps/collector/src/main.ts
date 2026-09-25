@@ -6,6 +6,7 @@ import { WebSocketServer } from 'ws';
 
 import { type ClaudeCodeHookPayload, fromClaudeCodeHook } from './adapters/claude-code';
 import { type CursorHookPayload, fromCursorHook } from './adapters/cursor';
+import { loadDen, saveDen } from './den-state';
 import { DenStore } from './den-store';
 import { isAllowedHost, isAllowedOrigin } from './local-origin';
 import { readStaticFile } from './static-web';
@@ -21,6 +22,40 @@ const version = process.env['AGENT_DEN_VERSION'] ?? 'dev';
 const webDir = process.env['AGENT_DEN_WEB_DIR'];
 const store = new DenStore();
 const transcripts = new TranscriptRegistry();
+
+/** Set by the plugin's launcher: the den survives restarts (updates, reboots). Unset in development. */
+const stateFile = process.env['AGENT_DEN_STATE_FILE'];
+const SAVE_INTERVAL_MS = 60_000;
+let unsaved = false;
+
+async function save(): Promise<void> {
+  if (!stateFile || !unsaved) {
+    return;
+  }
+  unsaved = false;
+  await saveDen(stateFile, store, transcripts).catch((error: unknown) => {
+    unsaved = true;
+    process.stderr.write(`saving the den failed: ${String(error)}\n`);
+  });
+}
+
+if (stateFile) {
+  const restored = await loadDen(stateFile, store, transcripts);
+  // Retire right away whatever went quiet while the collector was down (a reboot overnight).
+  store.sweep();
+  process.stdout.write(`restored ${restored} agent(s) from ${stateFile}\n`);
+  store.subscribe(() => {
+    unsaved = true;
+  });
+  setInterval(() => void save(), SAVE_INTERVAL_MS);
+}
+
+async function shutdown(): Promise<never> {
+  await save();
+  process.exit(0);
+}
+process.on('SIGINT', () => void shutdown());
+process.on('SIGTERM', () => void shutdown());
 const app = new Hono();
 
 /** Last raw hook payloads — to inspect what agents actually send (`GET /debug/hooks`). */
@@ -72,7 +107,8 @@ app.post('/hooks/cursor', async c => {
 
 /** Lets a newer plugin version replace this collector. Local origins only, like everything else here. */
 app.post('/shutdown', c => {
-  setTimeout(() => process.exit(0), 100);
+  // Answer first, then save and exit: the new version loads what this one saved.
+  setTimeout(() => void shutdown(), 100);
   return c.body(null, 204);
 });
 

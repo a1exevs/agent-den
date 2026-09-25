@@ -5,6 +5,7 @@ import { type AgentState, type DenEvent, type DenEventKind, reduceAgents } from 
 type Listener = (event: DenEvent) => void;
 
 const MINUTE = 60_000;
+const DAY = 24 * 60 * MINUTE;
 /** A busy agent that went silent this long has most likely crashed or was closed without `SessionEnd`. */
 const SILENT_BUSY_MS = 30 * MINUTE;
 /** A sleeping cat leaves the den after this long. */
@@ -51,6 +52,19 @@ export class DenStore {
 
   snapshot(): AgentState[] {
     return [...this.agents.values()].filter(agent => agent.activity !== 'gone');
+  }
+
+  /**
+   * Everything worth keeping across a collector restart (plugin update, reboot). Ended agents stay for a day, so
+   * transcript backfill doesn't bring back a session that already left.
+   */
+  export(now = Date.now()): AgentState[] {
+    return [...this.agents.values()].filter(agent => agent.activity !== 'gone' || now - agent.updatedAt < DAY);
+  }
+
+  /** Loads saved agents before anyone subscribes; the next `sweep` retires those that went quiet meanwhile. */
+  restore(agents: readonly AgentState[]): void {
+    this.agents = new Map(agents.map(agent => [agent.agentId, agent]));
   }
 
   subscribe(listener: Listener): () => void {
