@@ -42,6 +42,9 @@ Needs [Claude Code](https://claude.com/claude-code) and `node` 22+ on `PATH`. In
 /plugin install agent-den@agent-den
 ```
 
+`a1exevs/agent-den` is cloned over SSH; without a GitHub SSH key add `https://github.com/a1exevs/agent-den.git`
+instead.
+
 Start a new session: the plugin starts the den in the background by itself. Then run `/agent-den:den` to open it
 (http://localhost:4317). Sessions that were already running show up from their transcripts.
 
