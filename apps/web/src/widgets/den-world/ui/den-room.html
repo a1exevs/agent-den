@@ -1,39 +1,52 @@
 <section class="room">
-  <header class="room__header">
-    <h2 class="room__name">{{ room().name }}</h2>
-    <span class="room__count">
-      🐈 {{ catCount() }}
-      @if (kittenCount()) {
-        · kittens {{ kittenCount() }}
+  <den-collapsible [(expanded)]="expanded">
+    <span class="room__header" [class.room__header--alert]="waitingCount() > 0" denCollapsibleHeader>
+      <span class="room__chevron" [class.room__chevron--closed]="!expanded()" aria-hidden="true">▾</span>
+      <span class="room__name">{{ room().name }}</span>
+      @if (!expanded()) {
+        <span class="room__avatars" aria-hidden="true">
+          @for (cat of cats(); track cat.agentId) {
+            <den-agent-avatar [agent]="cat" [skin]="skin()" [scale]="1" />
+          }
+        </span>
       }
+      <span class="room__count">
+        🐈 {{ cats().length }}
+        @if (kittenCount()) {
+          · kittens {{ kittenCount() }}
+        }
+        @if (waitingCount()) {
+          <span class="room__waiting">· 🔔 {{ waitingCount() }} waiting</span>
+        }
+      </span>
     </span>
-  </header>
 
-  <div class="room__scene">
-    <div class="room__wall"></div>
-    <div class="room__floor"></div>
+    <div class="room__scene">
+      <div class="room__wall"></div>
+      <div class="room__floor"></div>
 
-    @for (station of skin().stations; track station.slot) {
-      <den-pixel-sprite
-        class="room__station"
-        [style.left.%]="station.x"
-        [style.--lift]="station.lift ?? 0"
-        [art]="station.art"
-        [palette]="skin().stationPalette"
-        [scale]="stationScale"
-      />
-    }
+      @for (station of skin().stations; track station.slot) {
+        <den-pixel-sprite
+          class="room__station"
+          [style.left.%]="station.x"
+          [style.--lift]="station.lift ?? 0"
+          [art]="station.art"
+          [palette]="skin().stationPalette"
+          [scale]="stationScale"
+        />
+      }
 
-    @for (placement of placements(); track placement.agent.agentId) {
-      <den-cat
-        [agent]="placement.agent"
-        [skin]="skin()"
-        [targetX]="placement.targetX"
-        [originX]="placement.originX"
-        [offset]="placement.offset"
-        [selected]="placement.agent.agentId === selectedAgentId()"
-        (picked)="agentPicked.emit($event)"
-      />
-    }
-  </div>
+      @for (placement of placements(); track placement.agent.agentId) {
+        <den-cat
+          [agent]="placement.agent"
+          [skin]="skin()"
+          [targetX]="placement.targetX"
+          [originX]="placement.originX"
+          [offset]="placement.offset"
+          [selected]="placement.agent.agentId === selectedAgentId()"
+          (picked)="agentPicked.emit($event)"
+        />
+      }
+    </div>
+  </den-collapsible>
 </section>

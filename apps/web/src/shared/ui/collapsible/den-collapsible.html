@@ -1,0 +1,10 @@
+<div brnCollapsible class="collapsible" [(expanded)]="expanded">
+  <div role="heading" [attr.aria-level]="headingLevel()">
+    <button brnCollapsibleTrigger type="button" class="collapsible__trigger">
+      <ng-content select="[denCollapsibleHeader]" />
+    </button>
+  </div>
+  <div brnCollapsibleContent class="collapsible__content">
+    <ng-content />
+  </div>
+</div>

@@ -11,3 +11,6 @@ export const SPREAD_PX = 30;
 
 /** Station position used when a skin doesn't define the slot, percent of the room width. */
 export const FALLBACK_STATION_X = 50;
+
+/** localStorage key for the rooms the viewer folded. */
+export const COLLAPSED_ROOMS_STORAGE_KEY = 'agent-den.collapsed-rooms';

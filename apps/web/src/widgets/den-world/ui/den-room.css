@@ -6,23 +6,62 @@
 
 .room__header {
   display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 1rem;
+  align-items: center;
+  gap: 10px;
   padding: 6px 12px;
   color: var(--den-bar-fg);
   background: var(--den-ink);
+
+  &.room__header--alert {
+    background: color-mix(in srgb, var(--den-accent) 55%, var(--den-ink));
+    animation: room-alert 1s steps(2) infinite;
+  }
+}
+
+.room__chevron {
+  display: inline-block;
+  font-size: 12px;
+  transition: rotate 0.15s steps(2);
+
+  &.room__chevron--closed {
+    rotate: -90deg;
+  }
 }
 
 .room__name {
   font-size: 14px;
+  font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
 }
 
+.room__avatars {
+  display: flex;
+  gap: 4px;
+  align-items: end;
+}
+
 .room__count {
+  margin-left: auto;
   font-size: 12px;
   opacity: 0.8;
+}
+
+.room__waiting {
+  font-weight: 700;
+  opacity: 1;
+}
+
+@keyframes room-alert {
+  50% {
+    background: var(--den-ink);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .room__header--alert {
+    animation: none;
+  }
 }
 
 .room__scene {

@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 
 import { type Room } from '@entities/agent';
-import { type Skin } from '@entities/skin';
-import { DenPixelSprite } from '@shared/ui';
+import { DenAgentAvatar, type Skin } from '@entities/skin';
+import { DenCollapsible, DenPixelSprite } from '@shared/ui';
 
 import { DenCat } from './den-cat';
 import { STATION_SCALE } from '../config/scene';
@@ -10,7 +10,7 @@ import { placeAgents } from '../model/placements';
 
 @Component({
   selector: 'den-room',
-  imports: [DenPixelSprite, DenCat],
+  imports: [DenAgentAvatar, DenCat, DenCollapsible, DenPixelSprite],
   templateUrl: './den-room.html',
   styleUrl: './den-room.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -20,11 +20,16 @@ export class DenRoom {
   readonly skin = input.required<Skin>();
   readonly selectedAgentId = input<string | null>(null);
   readonly agentPicked = output<string>();
+  /** Folded rooms show only the header: avatars, counts and who is waiting. */
+  readonly expanded = model<boolean>(true);
 
   protected readonly stationScale = STATION_SCALE;
 
-  protected readonly catCount = computed(() => this.room().agents.filter(agent => !agent.parentAgentId).length);
-  protected readonly kittenCount = computed(() => this.room().agents.length - this.catCount());
+  protected readonly cats = computed(() => this.room().agents.filter(agent => !agent.parentAgentId));
+  protected readonly kittenCount = computed(() => this.room().agents.length - this.cats().length);
+  protected readonly waitingCount = computed(
+    () => this.room().agents.filter(agent => agent.activity === 'waiting').length,
+  );
 
   protected readonly placements = computed(() => placeAgents(this.room().agents, this.skin()));
 }

@@ -9,6 +9,8 @@
     [room]="room"
     [skin]="skin"
     [selectedAgentId]="selectedAgentId()"
+    [expanded]="!collapsedRooms.isCollapsed(room.id)"
+    (expandedChange)="collapsedRooms.setCollapsed(room.id, !$event)"
     (agentPicked)="agentPicked.emit($event)"
   />
 } @empty {
