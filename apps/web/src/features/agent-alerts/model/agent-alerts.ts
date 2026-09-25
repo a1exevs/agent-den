@@ -1,11 +1,11 @@
 import { DestroyRef, effect, inject, Injectable } from '@angular/core';
 
-import { AgentSelection, AgentStore, type AgentTransition } from '@entities/agent';
+import { AgentSelection, AgentStore, type AgentTransition, isBusy } from '@entities/agent';
 import { catsSkin } from '@entities/skin';
 import { playSound, preloadSound, unlockAudio, unlockAudioOnFirstGesture } from '@shared/lib';
 
 import { AlertSettings } from './alert-settings';
-import { type Alert, decideAlert } from './decide-alert';
+import { type Alert, decideAlert, startsUserTurn } from './decide-alert';
 import { voicePitch } from './voice-pitch';
 import { PER_AGENT_COOLDOWN_MS } from '../config/alerts';
 
@@ -22,6 +22,8 @@ export class AgentAlerts {
   private readonly settings = inject(AlertSettings);
   private readonly destroyRef = inject(DestroyRef);
   private readonly lastAlertAt = new Map<string, number>();
+  /** Sessions that already purred since the user's last prompt. */
+  private readonly finishedThisTurn = new Set<string>();
   private readonly skin = catsSkin;
   private started = false;
 
@@ -50,15 +52,25 @@ export class AgentAlerts {
   }
 
   private handle(transition: AgentTransition): void {
+    const { agent, event } = transition;
+    if (startsUserTurn(event)) {
+      this.finishedThisTurn.delete(agent.agentId);
+    }
     const now = Date.now();
-    const alert = decideAlert(transition, this.skin.characterName(transition.agent.agentId), now);
+    const alert = decideAlert(transition, this.skin.characterName(agent.agentId), now, {
+      kittensBusy: this.agents.visible().some(other => other.parentAgentId === agent.agentId && isBusy(other)),
+      finishedThisTurn: this.finishedThisTurn.has(agent.agentId),
+    });
     if (!alert || now - (this.lastAlertAt.get(alert.agentId) ?? 0) < PER_AGENT_COOLDOWN_MS) {
       return;
     }
     this.lastAlertAt.set(alert.agentId, now);
+    if (alert.sound === 'finished') {
+      this.finishedThisTurn.add(alert.agentId);
+    }
 
     if (this.settings.sound()) {
-      playSound(this.skin.sounds[alert.sound], { pitchScale: voicePitch(transition.agent) });
+      playSound(this.skin.sounds[alert.sound], { pitchScale: voicePitch(agent) });
     }
     if (this.settings.notifications() && document.hidden) {
       this.notify(alert);

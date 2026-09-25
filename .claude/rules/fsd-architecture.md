@@ -228,7 +228,7 @@ src/
 │   │                 config/
 │   └── dismiss-agent/ index.ts, ui/ (dismiss-button, hidden-cats, dismiss-undo), model/, lib/, config/
 ├── entities/
-│   ├── agent/       index.ts, model/ (agent-store, agent-selection, rooms)
+│   ├── agent/       index.ts, model/ (activity, agent-store, agent-selection, rooms)
 │   ├── skin/        index.ts, model/ (skin, cats/… incl. cat-sounds), ui/ (agent-avatar)
 │   └── transcript/  index.ts, model/ (transcript-store)
 └── shared/

@@ -1,4 +1,3 @@
-import type { AgentState } from '@agent-den/contracts';
 import { DestroyRef, inject, Injectable, signal } from '@angular/core';
 
 import { AgentSelection } from '@entities/agent';
@@ -7,11 +6,6 @@ import { CollectorSocket } from '@shared/api';
 import { UNDO_MS } from '../config/dismiss';
 
 type LastDismissed = { agentId: string; name: string };
-
-/** Agents that are busy now — hiding them is temporary: they come back on their next activity. */
-export function isBusy(agent: AgentState): boolean {
-  return agent.activity === 'thinking' || agent.activity === 'tool' || agent.activity === 'waiting';
-}
 
 /**
  * Sends agents home (hides them for every open tab) and calls them back. Nothing is ever deleted: hidden agents

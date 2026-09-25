@@ -1,7 +1,9 @@
 import type { AgentState } from '@agent-den/contracts';
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 
-import { DismissAgent, isBusy } from '../model/dismiss-agent';
+import { isBusy } from '@entities/agent';
+
+import { DismissAgent } from '../model/dismiss-agent';
 
 /** "Send home" for a resting agent, "hide" for a busy one (it comes back on its next activity). */
 @Component({
