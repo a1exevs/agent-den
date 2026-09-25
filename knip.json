@@ -5,8 +5,8 @@
       "entry": ["scripts/*.mjs"]
     },
     "apps/web": {
-      "entry": ["src/**/*.spec.ts", "steiger.config.ts"],
-      "project": ["src/**/*.ts", "linter/**/*.ts"]
+      "entry": ["src/**/*.spec.ts", "steiger.config.ts", "scripts/*.ts"],
+      "project": ["src/**/*.ts", "linter/**/*.ts", "scripts/**/*.ts"]
     },
     "apps/collector": {
       "entry": ["src/**/*.spec.ts"],

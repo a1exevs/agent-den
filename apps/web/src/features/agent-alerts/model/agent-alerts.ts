@@ -83,7 +83,7 @@ export class AgentAlerts {
     const notification = new Notification(alert.title, {
       body: alert.body,
       tag: alert.agentId,
-      icon: 'favicon.ico',
+      icon: 'favicon-192x192.png',
       silent: this.settings.sound(),
     });
     notification.onclick = (): void => {

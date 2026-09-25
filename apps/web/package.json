@@ -9,7 +9,8 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test --watch=false",
     "lint": "eslint . && steiger ./src",
-    "lint:fsd": "steiger ./src"
+    "lint:fsd": "steiger ./src",
+    "generate:icons": "tsx --tsconfig tsconfig.json scripts/generate-icons.ts"
   },
   "dependencies": {
     "@agent-den/contracts": "0.0.0",
@@ -30,6 +31,7 @@
     "@angular/compiler-cli": "22.2.0",
     "@eslint/js": "9.39.5",
     "@feature-sliced/steiger-plugin": "0.7.0",
+    "@resvg/resvg-js": "2.6.2",
     "angular-eslint": "22.5.0",
     "eslint": "9.39.5",
     "eslint-config-prettier": "10.1.8",
@@ -42,6 +44,7 @@
     "jiti": "2.7.0",
     "jsdom": "30.1.1",
     "steiger": "0.6.0",
+    "tsx": "4.23.15",
     "typescript-eslint": "8.70.1",
     "vitest": "5.0.1"
   }

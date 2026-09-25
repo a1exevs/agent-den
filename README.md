@@ -1,27 +1,136 @@
-# agent-den 🐾
+# agent-den
 
-A living pixel-art den where your AI agents are cats. Every Claude Code / Cursor session is a cat, every subagent
-is a kitten. They walk to the station of the tool they're using: sniff books while reading, scratch the post while
-editing, knock things off the table while running shell commands and yowl at the door when they need your permission.
+<p align="center">
+  <img src="apps/web/public/logo-og.png" alt="agent-den" width="712" />
+</p>
+
+## Description
+
+Watch your AI coding agents live as pixel-art cats. Every Claude Code session is a cat, its subagents are kittens,
+and every project folder is a room. They walk to the station of the tool they're using: sniff books while reading,
+scratch the post while editing, knock things off the table while running shell commands, stare out of the window while
+browsing the web and yowl at the door when they need your permission. Kittens hop out of a box, done cats nap on the
+cushion.
+
+Workspaces:
+
+| Package                  | Path                                           | Description                                                                       |
+| ------------------------ | ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| **@agent-den/web**       | [`apps/web/`](apps/web/)                       | Angular 22 web app: the den (zoneless, signals, Feature-Sliced Design)            |
+| **@agent-den/collector** | [`apps/collector/`](apps/collector/)           | Node + Hono service on `127.0.0.1:4317`: hooks in, agent state out over WebSocket |
+| **@agent-den/contracts** | [`packages/contracts/`](packages/contracts/)   | Events, agent state and the reducer shared by collector and web                   |
+| **@agent-den/mock**      | [`tools/mock/`](tools/mock/)                   | Dev-only generator of fake sessions                                               |
+| Claude Code plugin       | [`plugins/claude-code/`](plugins/claude-code/) | Hooks that forward session, tool and subagent events to the collector             |
+
+How it fits together:
+
+```
+Claude Code ──hooks──▶ plugin (send.mjs) ──HTTP──▶ collector ──WebSocket──▶ den in the browser
+                                                     ▲
+                                  ~/.claude/projects/*.jsonl (transcripts: backfill + reconciliation)
+```
+
+## Prerequisites
+
+- Node **22.22.3** or newer (`^22.22.3 || ^24.15.0 || >=26`), npm **10.9.8**
+- [Claude Code](https://claude.com/claude-code) for live sessions (the mock works without it)
+
+## Install
+
+From the **repository root**:
+
+```bash
+npm install
+```
+
+Install the plugin in Claude Code (once):
+
+```
+/plugin marketplace add a1exevs/agent-den
+/plugin install agent-den@agent-den
+```
+
+New Claude Code sessions start reporting to the collector; already running ones show up from their transcripts.
+The plugin only forwards hook events to the local collector: if the collector isn't running, hooks silently do nothing.
 
 ## Quick start
 
 ```bash
-npm install
-npm run dev:collector   # 127.0.0.1:4317
-npm run dev:web         # http://localhost:4210
-npm run dev:mock        # optional: fake agents for development
+npm run dev:collector
 ```
 
-### Connect Claude Code
-
-```
-/plugin marketplace add D:/projects/agent-den
-/plugin install agent-den@agent-den
+```bash
+npm run dev:web
 ```
 
-The plugin forwards hook events to the local collector. If the collector isn't running, hooks silently do nothing.
+Open http://localhost:4210. No Claude Code at hand? Run `npm run dev:mock` for a den full of fake cats.
 
-## Structure
+## Available scripts
 
-See [CLAUDE.md](CLAUDE.md) and [docs/requirements.md](docs/requirements.md).
+Run from the **repository root**.
+
+### Development
+
+| Command                 | Description                                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------------------------ |
+| `npm run dev:collector` | Collector on `127.0.0.1:4317` with watch                                                               |
+| `npm run dev:web`       | Angular dev server on http://localhost:4210                                                            |
+| `npm run dev:web:fresh` | Same, after clearing `.angular/cache` (needed after changing `packages/contracts` or `tsconfig` paths) |
+| `npm run dev:mock`      | Streams fake sessions, tools and subagents into the collector                                          |
+
+### Quality
+
+| Command                                   | Description                                                                                    |
+| ----------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `npm run lint`                            | Everything below plus ESLint (FSD imports, cycles, segment direction), Steiger (FSD) and `tsc` |
+| `npm run lint:structure`                  | FSD folders and `index.ts` placement, kebab-case names                                         |
+| `npm run lint:unused`                     | knip: unused files, exports and dependencies                                                   |
+| `npm run format` / `npm run format:check` | Prettier                                                                                       |
+| `npm test`                                | Vitest in every workspace                                                                      |
+| `npm run build`                           | Build every workspace                                                                          |
+
+### Tooling
+
+| Command                  | Description                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------ |
+| `npm run generate:icons` | Regenerate favicons, app icons and the OG image in `apps/web/public` from the code-defined cat sprites |
+| `npm run rules:sync`     | Regenerate `.claude/rules` from `.cursor/rules` (the single source of coding rules)                    |
+
+## Releasing the plugin
+
+1. Change `plugins/claude-code` and bump `version` in `plugins/claude-code/.claude-plugin/plugin.json`.
+2. Push to `main`.
+3. Users update with `/plugin` (or `claude plugin marketplace update agent-den` and
+   `claude plugin update agent-den@agent-den`); new sessions pick up the new hooks.
+
+## Features
+
+- Live sessions from Claude Code hooks, plus transcript backfill for sessions started before the plugin
+- Kittens for subagents, always in their parent's room
+- Stations per tool: books (read), scratching post (edit), table (shell), window (web), box (subagents), door, cushion
+- Precise statuses: thinking, using a tool, waiting for you, done, interrupted (Esc), error; dusty cats for stale sessions
+- Details panel with the live transcript of a cat or kitten
+- Collapsible rooms and a roster toolbar to find a cat quickly
+- A meow when an agent needs you, a purr when a session is done — every cat has its own voice
+- Browser notifications while the tab is in the background; click one to open that cat
+- Send cats home: hide finished sessions with undo, nothing is ever lost
+- Private by design: the collector listens on loopback only and rejects non-local origins
+
+## Coding rules
+
+Coding rules for agents live in [`.cursor/rules`](.cursor/rules) and are generated into `.claude/rules`;
+[`AGENTS.md`](AGENTS.md) is the project guide for every coding agent.
+
+## Credits
+
+- Cat sounds: [BigSoundBank](https://bigsoundbank.com/) by Joseph Sardin, CC0 — see
+  [`apps/web/public/sounds/README.md`](apps/web/public/sounds/README.md)
+- UI primitives: [Spartan](https://www.spartan.ng/) brain
+
+## Repository
+
+- Repository: https://github.com/a1exevs/agent-den
+
+## License
+
+[MIT](LICENSE)

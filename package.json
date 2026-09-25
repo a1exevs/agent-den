@@ -17,6 +17,7 @@
     "dev:collector": "npm run dev -w @agent-den/collector",
     "dev:mock": "npm run start -w @agent-den/mock",
     "dev:web": "npm run start -w @agent-den/web",
+    "generate:icons": "npm run generate:icons -w @agent-den/web",
     "dev:web:fresh": "node -e \"require('fs').rmSync('apps/web/.angular/cache', { recursive: true, force: true })\" && npm run dev:web",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
