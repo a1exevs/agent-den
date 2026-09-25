@@ -1,5 +1,4 @@
 import type { Action, Skin } from '../skin';
-
 import { catName, catPalette } from './cat-palettes';
 import { type CatPose, catSprites } from './cat-sprites';
 import { stationPalette, stationSprites } from './station-sprites';

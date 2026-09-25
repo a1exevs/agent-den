@@ -64,6 +64,31 @@ export default tsEslint.config(
       '@typescript-eslint/consistent-type-definitions': 'off',
     },
   },
+  {
+    // A `ui` segment holds components only. Everything else has an FSD home in the same slice:
+    // constants → config/, types and logic → model/, helpers → lib/.
+    files: ['src/**/ui/**/*.ts'],
+    ignores: ['src/**/ui/**/index.ts', 'src/**/*.spec.ts'],
+    rules: {
+      'no-restricted-syntax': [
+        'error',
+        {
+          selector: 'Program > VariableDeclaration, Program > ExportNamedDeclaration > VariableDeclaration',
+          message: 'No constants in a ui file — move them to the slice\x27s config/ segment (e.g. config/scene.ts).',
+        },
+        {
+          selector:
+            'Program > :matches(TSTypeAliasDeclaration, TSInterfaceDeclaration, TSEnumDeclaration), Program > ExportNamedDeclaration > :matches(TSTypeAliasDeclaration, TSInterfaceDeclaration, TSEnumDeclaration)',
+          message:
+            'No types in a ui file — move them to the slice\x27s model/ segment next to the logic that uses them.',
+        },
+        {
+          selector: 'Program > FunctionDeclaration, Program > ExportNamedDeclaration > FunctionDeclaration',
+          message: 'No functions in a ui file — logic goes to model/ (with a test), generic helpers to lib/.',
+        },
+      ],
+    },
+  },
   // FSD import boundaries + "Spartan only in shared", one block per layer.
   ...fsdLayers.map(layer => ({
     files: [`src/${layer}/**/*.ts`],

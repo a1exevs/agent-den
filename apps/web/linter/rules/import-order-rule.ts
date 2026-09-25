@@ -9,7 +9,7 @@ const importOrderRule: Linter.RulesRecord = {
         order: 'asc',
       },
       // packages → other slices/layers (`@entities/agent`) → own slice (relative)
-      groups: [['builtin', 'external', 'object', 'type'], 'internal', ['parent', 'sibling', 'index']],
+      groups: [['builtin', 'external', 'object'], 'internal', ['parent', 'sibling', 'index']],
       'newlines-between': 'always',
       pathGroups: [
         {

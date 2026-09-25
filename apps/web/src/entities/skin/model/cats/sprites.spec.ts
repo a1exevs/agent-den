@@ -1,4 +1,4 @@
-import { assertPixelArt } from '@shared/ui';
+import { assertPixelArt } from '@shared/lib';
 
 import { catPalette } from './cat-palettes';
 import { catSprites } from './cat-sprites';

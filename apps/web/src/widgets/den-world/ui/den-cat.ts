@@ -12,9 +12,7 @@ import {
 
 import { actionFor, DenAgentAvatar, type Skin } from '@entities/skin';
 
-const WALK_MS = 1200;
-const CAT_SCALE = 3;
-const KITTEN_SCALE = 2;
+import { CAT_SCALE, KITTEN_SCALE, WALK_MS } from '../config/scene';
 
 /**
  * An agent as an actor on the den scene: enters from the door (kittens from the box), walks between stations, shows

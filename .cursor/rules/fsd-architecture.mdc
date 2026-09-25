@@ -59,7 +59,8 @@ Our examples:
 | `DenCat` (walks, bubbles, labels, picking) | `widgets/den-world/ui` | behaviour on the den scene — knows rooms and stations, so not entity UI |
 | `CollectorSocket` | `shared/api` | transport, knows nothing about cats |
 | `DenSheet`, `DenToggle`, `DenPixelSprite` | `shared/ui` | UI kit |
-| `injectNow`, `hashString` | `shared/lib` | generic helpers |
+| `injectNow`, `pickByHash`, `PixelArt` + sprite-sheet rendering | `shared/lib` | generic helpers |
+| room layout (`placeAgents`), walk/scale constants | `widgets/den-world/model`, `widgets/den-world/config` | logic and constants of the scene, out of its components |
 
 `shared` never knows about the domain: no agents, cats or skins there, and it never imports from other layers.
 
@@ -84,6 +85,9 @@ Five standard segments; a custom one is named by **purpose**, never `components`
 | `config/` | constants, configuration, feature flags | `collectorSocketUrl` |
 
 - Create only the segments you need. Sub-folders inside a segment are fine for grouping (`entities/skin/model/cats/`).
+- `ui/` files hold components only. A constant, type or function found next to a component moves to its FSD home in
+  the same slice: `config/`, `model/` or `lib/` — named by purpose (`config/scene.ts`, `model/placements.ts`), never
+  `consts.ts` / `types.ts` / `utils.ts`.
 - Tests (`*.spec.ts`) sit next to the file they test, in the same segment.
 
 **Between segments of one slice** imports are free (relative paths), but keep the direction:
@@ -187,6 +191,7 @@ import { BrnSheet } from '@spartan-ng/brain/sheet';               // ❌ outside
 | kebab-case names | `scripts/check-structure.mjs` |
 | No unused exports / files / dependencies | knip (`knip.json`) |
 | Spartan only in `shared` | ESLint |
+| `ui/` files hold components only (no top-level const/type/function) | ESLint `no-restricted-syntax` on `ui/**` |
 | Pages first | Steiger `insignificant-slice` — **warning only** |
 | `shared` knows nothing about the domain | ❌ not checkable (upward imports are caught, domain concepts are not) — review |
 | Which layer new code belongs to (§2) | ❌ a design decision — review |
@@ -201,8 +206,9 @@ src/
 ├── pages/
 │   └── den/         index.ts, ui/ (den-page)
 ├── widgets/
-│   ├── den-world/   index.ts, ui/ (den-world, den-room, den-cat)
-│   └── agent-panel/ index.ts, ui/ (agent-panel, transcript-feed), model/ (build-feed), lib/ (describe-agent)
+│   ├── den-world/   index.ts, ui/ (den-world, den-room, den-cat), model/ (placements), config/ (scene)
+│   └── agent-panel/ index.ts, ui/ (agent-panel, transcript-feed), model/ (build-feed, filter-feed),
+│                    lib/ (describe-agent), config/ (feed)
 ├── entities/
 │   ├── agent/       index.ts, model/ (agent-store, rooms)
 │   ├── skin/        index.ts, model/ (skin, cats/…), ui/ (agent-avatar)
@@ -210,6 +216,6 @@ src/
 └── shared/
     ├── api/         index.ts, collector-socket
     ├── config/      index.ts
-    ├── lib/         index.ts, cn, hash, now
+    ├── lib/         index.ts, hash, now, pixel-art
     └── ui/          index.ts, pixel-sprite/, sheet/, toggle/, search-field/
 ```

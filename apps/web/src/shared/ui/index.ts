@@ -1,4 +1,4 @@
-export { assertPixelArt, DenPixelSprite, type Palette, patchFrame, type PixelArt } from './pixel-sprite';
-export { DenSheet } from './sheet';
+export { DenPixelSprite } from './pixel-sprite';
 export { DenSearchField } from './search-field';
+export { DenSheet } from './sheet';
 export { DenToggle } from './toggle';

@@ -18,6 +18,9 @@ alwaysApply: false
 - Always three files: `*.ts`, `*.html` (`templateUrl`) and `*.css` (`styleUrl`, omit if the component has no styles).
   No inline `template` / `styles`, even for tiny components (ESLint `component-max-inline-declarations: 0`).
 - Host bindings via the `host` metadata object, not `@HostBinding` / `@HostListener`.
+- A component file contains only imports and the component class — no top-level `const`, `type`, `interface` or
+  functions. Constants go to the slice's `config/`, types and logic to `model/` (with a test), helpers to `lib/`
+  (ESLint `no-restricted-syntax` on `ui/**`).
 
 ## Container / Presentational
 

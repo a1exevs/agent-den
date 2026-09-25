@@ -1,5 +1,4 @@
-import { pickByHash } from '@shared/lib';
-import { type Palette } from '@shared/ui';
+import { type Palette, pickByHash } from '@shared/lib';
 
 const base: Palette = {
   k: '#1e1824',

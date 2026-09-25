@@ -1,4 +1,3 @@
-import type { FeedEntry } from '../model/build-feed';
 import { DatePipe } from '@angular/common';
 import {
   afterRenderEffect,
@@ -14,16 +13,9 @@ import {
 import { type TranscriptStatus } from '@entities/transcript';
 import { DenSearchField, DenToggle } from '@shared/ui';
 
-/** Distance from the bottom (px) that still counts as "following". */
-const FOLLOW_THRESHOLD_PX = 48;
-
-function matches(entry: FeedEntry, query: string): boolean {
-  const haystack =
-    entry.kind === 'tool'
-      ? `${entry.name} ${entry.summary ?? ''} ${entry.input} ${entry.result?.text ?? ''}`
-      : entry.text;
-  return haystack.toLowerCase().includes(query);
-}
+import { FOLLOW_THRESHOLD_PX } from '../config/feed';
+import type { FeedEntry } from '../model/build-feed';
+import { filterFeed } from '../model/filter-feed';
 
 @Component({
   selector: 'den-transcript-feed',
@@ -43,15 +35,9 @@ export class DenTranscriptFeed {
 
   private readonly list = viewChild.required<ElementRef<HTMLElement>>('list');
 
-  protected readonly visible = computed(() => {
-    const query = this.query().trim().toLowerCase();
-    return this.entries().filter(
-      entry =>
-        (this.showTools() || entry.kind !== 'tool') &&
-        (this.showThinking() || entry.kind !== 'thinking') &&
-        (!query || matches(entry, query)),
-    );
-  });
+  protected readonly visible = computed(() =>
+    filterFeed(this.entries(), { query: this.query(), showTools: this.showTools(), showThinking: this.showThinking() }),
+  );
 
   protected readonly emptyText = computed(() => {
     switch (this.status()) {

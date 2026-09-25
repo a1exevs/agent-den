@@ -1,6 +1,6 @@
 import type { AgentState, ToolCategory } from '@agent-den/contracts';
 
-import type { Palette, PixelArt } from '@shared/ui';
+import type { Palette, PixelArt } from '@shared/lib';
 
 /** What the character is doing, independent of the skin. */
 export type Action = 'idle' | 'think' | 'read' | 'edit' | 'shell' | 'web' | 'delegate' | 'wait' | 'error' | 'sleep';
