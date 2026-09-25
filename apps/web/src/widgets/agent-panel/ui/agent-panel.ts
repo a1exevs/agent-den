@@ -1,4 +1,4 @@
-import type { ToolCategory } from '@agent-den/contracts';
+import { isStale, type ToolCategory } from '@agent-den/contracts';
 import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, computed, effect, inject, input, output } from '@angular/core';
 
@@ -39,9 +39,17 @@ export class DenAgentPanel {
     const agent = this.agent();
     return agent ? this.skin.characterName(agent.agentId) : '';
   });
+  protected readonly stale = computed(() => {
+    const agent = this.agent();
+    return agent !== undefined && isStale(agent, this.now());
+  });
   protected readonly status = computed(() => {
     const agent = this.agent();
-    return agent ? activityLabel(agent) : '';
+    if (!agent) {
+      return '';
+    }
+    const label = activityLabel(agent);
+    return this.stale() ? `${label} · no news for ${formatDuration(this.now() - agent.updatedAt)}` : label;
   });
   protected readonly duration = computed(() => {
     const agent = this.agent();

@@ -26,6 +26,8 @@
     --den-bar-fg: light-dark(#fffaf0, #efe6d2);
     --den-bubble-bg: #fffaf0;
     --den-bubble-fg: #1e1824;
+    --den-danger: #d9534f;
+    --den-dust: light-dark(rgb(120 100 80 / 0.45), rgb(200 190 170 / 0.35));
     --den-pixel: 4px;
   }
 }

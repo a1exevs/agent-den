@@ -30,6 +30,8 @@ import { CAT_SCALE, KITTEN_SCALE, WALK_MS } from '../config/scene';
     '[class.cat--walking]': 'walking()',
     '[class.cat--waiting]': 'action() === "wait"',
     '[class.cat--selected]': 'selected()',
+    '[class.cat--stale]': 'stale()',
+    '[class.cat--leaving]': 'leaving()',
     role: 'button',
     tabindex: '0',
     '[attr.aria-label]': 'name() + ", " + caption()',
@@ -51,6 +53,8 @@ export class DenCat {
   /** Nudge in px so characters at the same station don't overlap. */
   readonly offset = input<number>(0);
   readonly selected = input<boolean>(false);
+  /** Busy but silent for too long: dusty, sitting, with a puzzled bubble. */
+  readonly stale = input<boolean>(false);
   readonly picked = output<string>();
 
   private readonly arrived = signal(false);
@@ -60,7 +64,13 @@ export class DenCat {
 
   protected readonly isKitten = computed(() => Boolean(this.agent().parentAgentId));
   protected readonly scale = computed(() => (this.isKitten() ? KITTEN_SCALE : CAT_SCALE));
-  protected readonly action = computed(() => (this.walking() ? 'idle' : actionFor(this.agent())));
+  protected readonly leaving = computed(() => this.agent().activity === 'gone');
+  protected readonly action = computed(() => {
+    if (this.walking()) {
+      return 'idle';
+    }
+    return this.stale() ? 'stale' : actionFor(this.agent());
+  });
   protected readonly name = computed(() => this.skin().characterName(this.agent().agentId));
   protected readonly bubble = computed(() => (this.walking() ? undefined : this.skin().bubble[this.action()]));
   protected readonly x = computed(() => (this.arrived() ? this.targetX() : this.originX()));

@@ -23,6 +23,7 @@ export class DenWorld {
   protected readonly collapsedRooms = inject(CollapsedRooms);
   protected readonly skin = catsSkin;
   protected readonly status = this.store.status;
+  protected readonly staleIds = this.store.staleIds;
   protected readonly rooms = computed(() => groupIntoRooms(this.store.visible()));
 
   constructor() {

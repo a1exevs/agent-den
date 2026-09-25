@@ -44,6 +44,7 @@
           [originX]="placement.originX"
           [offset]="placement.offset"
           [selected]="placement.agent.agentId === selectedAgentId()"
+          [stale]="staleAgentIds().has(placement.agent.agentId)"
           (picked)="agentPicked.emit($event)"
         />
       }

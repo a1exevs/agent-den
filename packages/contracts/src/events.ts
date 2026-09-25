@@ -17,7 +17,9 @@ export type DenEventKind =
   | 'subagent-start'
   | 'subagent-stop'
   | 'waiting'
-  | 'stop';
+  | 'stop'
+  /** The user interrupted the turn (Esc) — Claude Code sends no `Stop` hook then; comes from the transcript. */
+  | 'interrupted';
 
 /** Normalized event — every adapter (hooks, JSONL, mock) emits this shape. */
 export type DenEvent = {
@@ -67,7 +69,7 @@ export type ServerMessage =
 /** Messages sent from web clients to the collector. One watched transcript per connection. */
 export type ClientMessage = { type: 'watch-transcript'; agentId: string } | { type: 'unwatch-transcript' };
 
-export type AgentActivity = 'idle' | 'thinking' | 'tool' | 'waiting' | 'done' | 'error' | 'gone';
+export type AgentActivity = 'idle' | 'thinking' | 'tool' | 'waiting' | 'done' | 'interrupted' | 'error' | 'gone';
 
 export interface AgentState {
   agentId: string;

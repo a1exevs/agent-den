@@ -12,6 +12,8 @@ export function activityLabel(agent: AgentState): string {
       return agent.parentAgentId ? 'finished' : 'done, napping';
     case 'error':
       return 'tool failed';
+    case 'interrupted':
+      return 'interrupted (Esc)';
     case 'gone':
       return 'left the den';
     default:

@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { open, readdir, readFile, stat } from 'node:fs/promises';
+import { open, readdir, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { basename, join } from 'node:path';
 
@@ -7,36 +7,14 @@ import { categorizeTool, type DenEvent, type DenEventKind } from '@agent-den/con
 
 import type { DenStore } from '../den-store';
 import { type InferredState, inferState } from './infer-state';
+import { readJson, readSubagentMeta, readSubagentVerdict, readTail } from './transcript-files';
 import type { TranscriptRegistry } from './transcript-registry';
 
 const PROJECTS_DIR = join(homedir(), '.claude', 'projects');
 /** Only transcripts touched this recently count as live sessions. */
 const ACTIVE_WINDOW_MS = 10 * 60_000;
-const TAIL_BYTES = 256 * 1024;
 
 type Identity = Pick<DenEvent, 'sessionId' | 'agentId' | 'parentAgentId'>;
-
-async function readTail(path: string): Promise<unknown[]> {
-  const handle = await open(path, 'r');
-  try {
-    const { size } = await handle.stat();
-    const start = Math.max(0, size - TAIL_BYTES);
-    const buffer = Buffer.alloc(size - start);
-    await handle.read(buffer, 0, buffer.length, start);
-    const lines = buffer.toString('utf8').split('\n');
-    // The first line of a mid-file tail is usually cut in half.
-    const complete = start > 0 ? lines.slice(1) : lines;
-    return complete.flatMap(line => {
-      try {
-        return line.trim() ? [JSON.parse(line) as unknown] : [];
-      } catch {
-        return [];
-      }
-    });
-  } finally {
-    await handle.close();
-  }
-}
 
 const HEAD_BYTES = 32 * 1024;
 
@@ -69,14 +47,6 @@ async function resolveProjectDir(
   );
   const candidates = [...(await readHeadCwds(path)), ...tailCwds];
   return candidates.find(cwd => encodeProjectDir(cwd) === projectFolder) ?? candidates[0];
-}
-
-async function readJson<T>(path: string): Promise<T | undefined> {
-  try {
-    return JSON.parse(await readFile(path, 'utf8')) as T;
-  } catch {
-    return undefined;
-  }
 }
 
 async function freshFiles(dir: string, now: number, pattern: RegExp): Promise<{ path: string; mtime: number }[]> {
@@ -154,11 +124,11 @@ export async function scanTranscripts(
           continue;
         }
         const state = inferState(await readTail(subagent.path));
-        // A finished subagent is already back in its box.
-        if (!state || state.kind === 'stop') {
+        // A finished subagent is already back in its box — by its own transcript or by its parent's word.
+        if (!state || state.kind === 'stop' || (await readSubagentVerdict(subagent.path))) {
           continue;
         }
-        const meta = await readJson<{ agentType?: string }>(subagent.path.replace(/\.jsonl$/, '.meta.json'));
+        const meta = await readSubagentMeta(subagent.path);
         const identity = { sessionId, agentId, parentAgentId: sessionId };
         store.push(event(identity, 'subagent-start', subagent.mtime, { cwd: state.cwd, title: meta?.agentType }));
         store.push(stateEvent(identity, state, subagent.mtime));

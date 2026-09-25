@@ -14,6 +14,8 @@ const poseByAction: Record<Action, CatPose> = {
   wait: 'yowl',
   error: 'hiss',
   sleep: 'sleep',
+  interrupted: 'sit',
+  stale: 'sit',
 };
 
 export const catsSkin: Skin = {
@@ -38,5 +40,7 @@ export const catsSkin: Skin = {
     wait: 'MEOW!',
     error: '#@!',
     sleep: 'z z',
+    interrupted: 'stopped',
+    stale: '…?',
   },
 };

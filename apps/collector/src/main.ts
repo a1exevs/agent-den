@@ -10,6 +10,7 @@ import { DenStore } from './den-store';
 import { isAllowedOrigin } from './local-origin';
 import { followTranscript } from './transcripts/transcript-follower';
 import { TranscriptRegistry } from './transcripts/transcript-registry';
+import { TranscriptReconciler } from './transcripts/reconcile';
 import { scanTranscripts } from './transcripts/transcript-scanner';
 
 const port = Number(process.env['AGENT_DEN_PORT'] ?? COLLECTOR_PORT);
@@ -80,6 +81,8 @@ const wss = new WebSocketServer({
 
 const SCAN_INTERVAL_MS = 30_000;
 const SWEEP_INTERVAL_MS = 60_000;
+const RECONCILE_INTERVAL_MS = 5_000;
+const reconciler = new TranscriptReconciler(store, transcripts);
 
 const scan = (): void => {
   scanTranscripts(store, transcripts)
@@ -94,6 +97,9 @@ const scan = (): void => {
 scan();
 setInterval(scan, SCAN_INTERVAL_MS);
 setInterval(() => store.sweep(), SWEEP_INTERVAL_MS);
+setInterval(() => {
+  reconciler.reconcile().catch((error: unknown) => process.stderr.write(`reconcile failed: ${String(error)}\n`));
+}, RECONCILE_INTERVAL_MS);
 
 function parseClientMessage(data: unknown): ClientMessage | null {
   try {

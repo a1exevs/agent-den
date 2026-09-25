@@ -9,6 +9,9 @@ const MINUTE = 60_000;
 const SILENT_BUSY_MS = 30 * MINUTE;
 /** A sleeping cat leaves the den after this long. */
 const SLEEPING_MS = 60 * MINUTE;
+/** Not busy: done, interrupted by the user, or idle before the first prompt. */
+const RESTING = new Set<AgentState['activity']>(['done', 'interrupted', 'idle']);
+
 /** A kitten without `SubagentStop` goes back into the box. */
 const SILENT_KITTEN_MS = 10 * MINUTE;
 
@@ -47,13 +50,14 @@ export class DenStore {
       if (agent.activity === 'gone') {
         continue;
       }
+      const resting = RESTING.has(agent.activity);
       if (agent.parentAgentId) {
-        if (agent.activity !== 'done' && silentFor > SILENT_KITTEN_MS) {
+        if (!resting && silentFor > SILENT_KITTEN_MS) {
           expired.push({ agent, kind: 'subagent-stop' });
         }
         continue;
       }
-      const limit = agent.activity === 'done' || agent.activity === 'idle' ? SLEEPING_MS : SILENT_BUSY_MS;
+      const limit = resting ? SLEEPING_MS : SILENT_BUSY_MS;
       if (silentFor > limit) {
         expired.push({ agent, kind: 'session-end' });
       }

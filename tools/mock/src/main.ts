@@ -90,7 +90,8 @@ async function runSession(cwd: string): Promise<void> {
   }
 
   await runTools(main, 2);
-  await emit(main, 'stop');
+  // Now and then the user hits Esc instead of letting the turn finish.
+  await emit(main, Math.random() < 0.2 ? 'interrupted' : 'stop');
   await pause(5000, 10000);
   await emit(main, 'session-end');
 }

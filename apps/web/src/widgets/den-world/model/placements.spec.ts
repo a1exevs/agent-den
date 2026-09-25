@@ -33,3 +33,26 @@ describe('placeAgents', () => {
     expect(offsets).toEqual([0, 30, -30]);
   });
 });
+
+describe('placeAgents — leaving the den', () => {
+  it('sends a cat whose session ended to the door and a kitten to its box', () => {
+    const [cat, kitten] = placeAgents(
+      [agent({ agentId: 's1', activity: 'gone' }), agent({ agentId: 'k1', parentAgentId: 's1', activity: 'gone' })],
+      catsSkin,
+    );
+    expect(cat?.targetX).toBe(xOf('entrance'));
+    expect(kitten?.targetX).toBe(xOf('spawn'));
+  });
+
+  it('sends an interrupted kitten back to the box, an interrupted cat to the rug', () => {
+    const [cat, kitten] = placeAgents(
+      [
+        agent({ agentId: 's1', activity: 'interrupted' }),
+        agent({ agentId: 'k1', parentAgentId: 's1', activity: 'interrupted' }),
+      ],
+      catsSkin,
+    );
+    expect(cat?.targetX).toBe(xOf('center'));
+    expect(kitten?.targetX).toBe(xOf('spawn'));
+  });
+});

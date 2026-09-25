@@ -24,6 +24,29 @@
     drop-shadow(-2px 0 0 var(--den-accent)) drop-shadow(0 -2px 0 var(--den-accent));
 }
 
+/* No news for a while: faded, covered in dust. */
+:host(.cat--stale) .cat__sprite {
+  filter: grayscale(1) sepia(0.35) brightness(0.9);
+  opacity: 0.75;
+}
+
+:host(.cat--stale)::after {
+  content:;
+  position: absolute;
+  inset: 0 -6px 18px;
+  pointer-events: none;
+  background:
+    radial-gradient(circle, var(--den-dust) 1.5px, transparent 2px) 0 0 / 11px 9px,
+    radial-gradient(circle, var(--den-dust) 1px, transparent 1.5px) 5px 4px / 13px 11px;
+  animation: dust-drift 3s steps(6) infinite;
+}
+
+/* Session over: walk to the door (or the box), then fade out. */
+:host(.cat--leaving) {
+  pointer-events: none;
+  animation: cat-leave 0.4s steps(3) var(--walk-ms) forwards;
+}
+
 :host(.cat--selected) .cat__name {
   color: var(--den-bubble-bg);
   background: var(--den-accent);
@@ -87,7 +110,7 @@
   animation: bubble-bob 1.2s steps(2) infinite;
 
   :host(.cat--waiting) & {
-    color: #fff;
+    color: var(--den-bubble-bg);
     background: var(--den-accent);
   }
 }
@@ -106,6 +129,18 @@
 
   :host(:hover) & {
     display: block;
+  }
+}
+
+@keyframes dust-drift {
+  50% {
+    translate: 2px -3px;
+  }
+}
+
+@keyframes cat-leave {
+  to {
+    opacity: 0;
   }
 }
 

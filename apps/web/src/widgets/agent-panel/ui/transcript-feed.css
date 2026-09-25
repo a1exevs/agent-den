@@ -117,7 +117,7 @@
 
 .entry__error-mark,
 .entry__result--error {
-  color: #d9534f;
+  color: var(--den-danger);
 }
 
 .entry__code {

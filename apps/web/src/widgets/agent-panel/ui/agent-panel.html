@@ -12,7 +12,10 @@
         @if (agent.title) {
           <p class="who__title">{{ agent.title }}</p>
         }
-        <p class="who__status" [class.who__status--alert]="agent.activity === 'waiting' || agent.activity === 'error'">
+        <p
+          class="who__status"
+          [class.who__status--alert]="agent.activity === 'waiting' || agent.activity === 'error' || stale()"
+        >
           {{ status() }}
         </p>
       </div>

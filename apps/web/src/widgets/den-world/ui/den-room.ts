@@ -19,6 +19,8 @@ export class DenRoom {
   readonly room = input.required<Room>();
   readonly skin = input.required<Skin>();
   readonly selectedAgentId = input<string | null>(null);
+  /** Busy agents with no news for a while — drawn dusty. */
+  readonly staleAgentIds = input<ReadonlySet<string>>(new Set());
   readonly agentPicked = output<string>();
   /** Folded rooms show only the header: avatars, counts and who is waiting. */
   readonly expanded = model<boolean>(true);

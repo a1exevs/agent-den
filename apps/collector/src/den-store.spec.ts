@@ -45,3 +45,14 @@ describe('DenStore.sweep', () => {
     expect(kitten?.activity).toBe('done');
   });
 });
+
+describe('DenStore.sweep — interrupted', () => {
+  it('treats an interrupted session as resting, not as a stuck busy one', () => {
+    const store = new DenStore();
+    store.push(event({ kind: 'interrupted', agentId: 's1' }));
+    store.sweep(start + 31 * MINUTE);
+    expect(store.snapshot()[0]?.activity).toBe('interrupted');
+    store.sweep(start + 61 * MINUTE);
+    expect(store.snapshot()).toEqual([]);
+  });
+});

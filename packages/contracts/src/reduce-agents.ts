@@ -11,7 +11,13 @@ const activityByKind: Record<DenEventKind, AgentActivity> = {
   'subagent-stop': 'done',
   waiting: 'waiting',
   stop: 'done',
+  interrupted: 'interrupted',
 };
+
+/** The activity an event puts its agent into. */
+export function activityOf(kind: DenEventKind): AgentActivity {
+  return activityByKind[kind];
+}
 
 /**
  * Pure reducer: applies one event to the agents map (keyed by `agentId`).
@@ -35,7 +41,7 @@ export function reduceAgents(agents: ReadonlyMap<string, AgentState>, event: Den
     source: event.source,
     // Sticky: the first known directory is the agent's room, later `cd`s don't move it.
     cwd: previous?.cwd ?? event.cwd,
-    activity: activityByKind[event.kind],
+    activity: activityOf(event.kind),
     toolName: isToolKind ? event.toolName : undefined,
     toolCategory: isToolKind ? event.toolCategory : undefined,
     detail: event.detail ?? (isToolKind ? undefined : previous?.detail),

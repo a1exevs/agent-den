@@ -9,7 +9,9 @@ This file is read by every coding agent (Cursor natively, Claude Code through `C
 - `apps/web` — Angular 22, zoneless, signals, FSD. UI primitives: `@spartan-ng/brain` wrapped in `src/shared/ui`, plain
   CSS. Dev server on port 4210.
 - `apps/collector` — Node + Hono on `127.0.0.1:4317`: `POST /hooks/claude-code`, `POST /hooks/cursor`, `POST /events`,
-  WebSocket `/ws` (agent snapshot/events + transcript streaming). Backfills sessions from `~/.claude/projects`.
+  WebSocket `/ws` (agent snapshot/events + transcript streaming). Backfills sessions from `~/.claude/projects` and
+  reconciles agents silent in hooks with their transcripts (Esc interruptions, killed subagents, sessions without the
+  plugin).
 - `packages/contracts` — `DenEvent`, `AgentState`, `TranscriptItem`, `reduceAgents()` shared by collector and web.
 - `plugins/claude-code` — Claude Code plugin (hooks → `scripts/send.mjs` → collector). Marketplace:
   `.claude-plugin/marketplace.json`.
@@ -51,6 +53,7 @@ Raw payloads the collector received: `GET http://127.0.0.1:4317/debug/hooks`.
 
 ## Gotchas
 
-- `ng serve` doesn't pick up changes to `tsconfig` `paths` or to `packages/contracts` types (outside the app root):
-  restart it with a clean cache (`rm -rf apps/web/.angular/cache`). `ng build` is not affected.
+- `ng serve` doesn't pick up changes to `tsconfig` `paths` or to `packages/contracts` (outside the app root —
+  Angular's watcher, even with `NG_BUILD_WATCH_ROOT`, only watches the app). After such a change stop the dev server
+  and run `npm run dev:web:fresh` (clears `.angular/cache`). `ng build` is not affected.
 - Port 4200 is often taken on this machine by another project — the web app uses 4210.

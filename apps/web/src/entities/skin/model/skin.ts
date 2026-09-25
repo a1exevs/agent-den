@@ -3,7 +3,21 @@ import type { AgentState, ToolCategory } from '@agent-den/contracts';
 import type { Palette, PixelArt } from '@shared/lib';
 
 /** What the character is doing, independent of the skin. */
-export type Action = 'idle' | 'think' | 'read' | 'edit' | 'shell' | 'web' | 'delegate' | 'wait' | 'error' | 'sleep';
+export type Action =
+  | 'idle'
+  | 'think'
+  | 'read'
+  | 'edit'
+  | 'shell'
+  | 'web'
+  | 'delegate'
+  | 'wait'
+  | 'error'
+  | 'sleep'
+  /** The user interrupted the turn (Esc). */
+  | 'interrupted'
+  /** Busy but silent for too long — drawn dusty. Set by the scene (see `isStale`), not derived from activity. */
+  | 'stale';
 
 /** Station slots every skin must draw. `entrance` doubles as the "waiting for you" spot. */
 export type StationSlot = 'entrance' | 'web' | 'read' | 'center' | 'edit' | 'shell' | 'spawn' | 'rest';
@@ -50,6 +64,8 @@ export function actionFor(agent: AgentState): Action {
       return 'error';
     case 'done':
       return agent.parentAgentId ? 'idle' : 'sleep';
+    case 'interrupted':
+      return agent.parentAgentId ? 'idle' : 'interrupted';
     default:
       return 'idle';
   }
@@ -66,11 +82,18 @@ const slotByAction: Record<Action, StationSlot> = {
   wait: 'entrance',
   error: 'center',
   sleep: 'rest',
+  interrupted: 'center',
+  stale: 'center',
 };
 
 export function slotFor(agent: AgentState): StationSlot {
-  // A finished kitten heads back into its box.
-  if (agent.parentAgentId && agent.activity === 'done') {
+  const isKitten = Boolean(agent.parentAgentId);
+  // Leaving the den: cats walk out of the door, kittens hop back into the box.
+  if (agent.activity === 'gone') {
+    return isKitten ? 'spawn' : 'entrance';
+  }
+  // A finished or interrupted kitten heads back into its box.
+  if (isKitten && (agent.activity === 'done' || agent.activity === 'interrupted')) {
     return 'spawn';
   }
   return slotByAction[actionFor(agent)];
