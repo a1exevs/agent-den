@@ -1,0 +1,25 @@
+<div class="strip" [class.strip--left]="canScrollLeft()" [class.strip--right]="canScrollRight()">
+  @if (canScrollLeft()) {
+    <button type="button" class="strip__arrow strip__arrow--left" aria-label="Scroll left" (click)="scrollByPage(-1)">
+      ◀
+    </button>
+  }
+  <div
+    #viewport
+    class="strip__viewport"
+    role="region"
+    tabindex="0"
+    [attr.aria-label]="label()"
+    (scroll)="updateArrows()"
+    (wheel)="onWheel($event)"
+  >
+    <div #track class="strip__track">
+      <ng-content />
+    </div>
+  </div>
+  @if (canScrollRight()) {
+    <button type="button" class="strip__arrow strip__arrow--right" aria-label="Scroll right" (click)="scrollByPage(1)">
+      ▶
+    </button>
+  }
+</div>

@@ -207,7 +207,8 @@ src/
 ├── pages/
 │   └── den/         index.ts, ui/ (den-page)
 ├── widgets/
-│   ├── den-world/   index.ts, ui/ (den-world, den-room, den-cat), model/ (placements), config/ (scene)
+│   ├── den-world/   index.ts, ui/ (den-world, den-room, den-cat, den-roster),
+│   │                model/ (placements, roster, collapsed-rooms), config/ (scene)
 │   └── agent-panel/ index.ts, ui/ (agent-panel, transcript-feed), model/ (build-feed, filter-feed),
 │                    lib/ (describe-agent), config/ (feed)
 ├── entities/
@@ -218,5 +219,5 @@ src/
     ├── api/         index.ts, collector-socket
     ├── config/      index.ts
     ├── lib/         index.ts, hash, now, pixel-art
-    └── ui/          index.ts, pixel-sprite/, sheet/, toggle/, search-field/
+    └── ui/          index.ts, collapsible/, pixel-sprite/, scroll-strip/, search-field/, sheet/, toggle/
 ```

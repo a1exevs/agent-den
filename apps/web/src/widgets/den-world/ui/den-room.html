@@ -49,5 +49,14 @@
         />
       }
     </div>
+
+    <den-roster
+      [roomName]="room().name"
+      [agents]="room().agents"
+      [skin]="skin()"
+      [selectedAgentId]="selectedAgentId()"
+      [staleAgentIds]="staleAgentIds()"
+      (picked)="agentPicked.emit($event)"
+    />
   </den-collapsible>
 </section>

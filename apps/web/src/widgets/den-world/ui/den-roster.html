@@ -1,0 +1,20 @@
+<den-scroll-strip [label]="label()">
+  @for (entry of entries(); track entry.agent.agentId) {
+    <button
+      #chip
+      type="button"
+      class="chip"
+      [class.chip--kitten]="entry.isKitten"
+      [class.chip--alert]="entry.alert"
+      [class.chip--selected]="entry.agent.agentId === selectedAgentId()"
+      [attr.data-agent-id]="entry.agent.agentId"
+      [attr.aria-pressed]="entry.agent.agentId === selectedAgentId()"
+      [attr.title]="entry.agent.title ?? nameOf(entry.agent)"
+      (click)="picked.emit(entry.agent.agentId)"
+    >
+      <den-agent-avatar class="chip__avatar" [agent]="entry.agent" [skin]="skin()" [scale]="1" />
+      <span class="chip__name">{{ nameOf(entry.agent) }}</span>
+      <span class="chip__status">{{ entry.status }}</span>
+    </button>
+  }
+</den-scroll-strip>

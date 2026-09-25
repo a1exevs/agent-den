@@ -1,0 +1,59 @@
+:host {
+  display: block;
+  border-top: 4px solid var(--den-ink);
+  background: color-mix(in srgb, var(--den-ink) 12%, var(--den-paper));
+}
+
+.chip {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  padding: 3px 8px 3px 4px;
+  font: inherit;
+  font-size: 11px;
+  color: var(--den-fg);
+  background: var(--den-paper);
+  border: 2px solid var(--den-ink);
+  box-shadow: 2px 2px 0 var(--den-ink);
+  cursor: pointer;
+
+  &:hover {
+    translate: 0 -1px;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--den-accent);
+    outline-offset: 1px;
+  }
+
+  /* A kitten sits right after its cat: smaller, dashed, a little lower. */
+  &.chip--kitten {
+    font-size: 10px;
+    border-style: dashed;
+    translate: 0 2px;
+  }
+
+  &.chip--alert {
+    border-color: var(--den-accent);
+    box-shadow: 2px 2px 0 var(--den-accent);
+  }
+
+  &.chip--selected {
+    color: var(--den-bubble-bg);
+    background: var(--den-accent);
+    border-color: var(--den-accent);
+  }
+}
+
+.chip__name {
+  font-weight: 700;
+}
+
+.chip__status {
+  opacity: 0.75;
+
+  .chip--alert & {
+    font-weight: 700;
+    opacity: 1;
+  }
+}

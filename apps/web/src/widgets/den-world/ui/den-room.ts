@@ -5,12 +5,13 @@ import { DenAgentAvatar, type Skin } from '@entities/skin';
 import { DenCollapsible, DenPixelSprite } from '@shared/ui';
 
 import { DenCat } from './den-cat';
+import { DenRoster } from './den-roster';
 import { STATION_SCALE } from '../config/scene';
 import { placeAgents } from '../model/placements';
 
 @Component({
   selector: 'den-room',
-  imports: [DenAgentAvatar, DenCat, DenCollapsible, DenPixelSprite],
+  imports: [DenAgentAvatar, DenCat, DenCollapsible, DenPixelSprite, DenRoster],
   templateUrl: './den-room.html',
   styleUrl: './den-room.css',
   changeDetection: ChangeDetectionStrategy.OnPush,
