@@ -1,0 +1,16 @@
+{
+  "name": "agent-den",
+  "owner": {
+    "name": "Alexander Evstafiadi"
+  },
+  "metadata": {
+    "description": "agent-den: watch your Cursor agents live in a pixel-art den"
+  },
+  "plugins": [
+    {
+      "name": "agent-den",
+      "source": "plugins/cursor",
+      "description": "Streams Cursor sessions, tools and subagents to the local agent-den collector"
+    }
+  ]
+}

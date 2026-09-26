@@ -6,8 +6,8 @@
 
 ## Description
 
-Watch your AI coding agents live in a pixel-art den. Every Claude Code session is a character, its subagents are
-its young, and every project folder is a room. Characters walk to the station of the tool they're using and show what
+Watch your AI coding agents live in a pixel-art den. Every Claude Code or Cursor session is a character, its
+subagents are its young, and every project folder is a room. Characters walk to the station of the tool they're using and show what
 they are doing at a glance: thinking, working, waiting for you, done.
 
 The den is skinnable. It ships with the **cats** skin: sessions are cats, subagents are kittens. Cats sniff books while
@@ -24,18 +24,28 @@ Workspaces:
 | **@agent-den/contracts** | [`packages/contracts/`](packages/contracts/)   | Events, agent state and the reducer shared by collector and web                   |
 | **@agent-den/mock**      | [`tools/mock/`](tools/mock/)                   | Dev-only generator of fake sessions                                               |
 | Claude Code plugin       | [`plugins/claude-code/`](plugins/claude-code/) | Hooks that forward session, tool and subagent events to the collector             |
+| Cursor plugin            | [`plugins/cursor/`](plugins/cursor/)           | The same for Cursor                                                               |
+| Launcher                 | [`plugins/launcher/`](plugins/launcher/)       | Starts, upgrades and stops the collector; packed into both plugins                |
 
 How it fits together:
 
 ```
-Claude Code ──hooks──▶ plugin (send.mjs) ──HTTP──▶ collector ──WebSocket──▶ den in the browser
-                                                     ▲
-                                  ~/.claude/projects/*.jsonl (transcripts: backfill + reconciliation)
+Claude Code ──hooks──▶ plugins/claude-code ──HTTP──┐
+Cursor ───────hooks──▶ plugins/cursor ─────HTTP────┴─▶ collector ──WebSocket──▶ den in the browser
+                                                          ▲
+      ~/.claude/projects/*.jsonl, ~/.cursor/projects/*/agent-transcripts (transcripts: backfill + reconciliation)
 ```
+
+Both plugins report to one collector: whichever agent starts first runs it, the other one just sends its events.
 
 ## Use it (no repository needed)
 
-Needs [Claude Code](https://claude.com/claude-code) and `node` 22+ on `PATH`. In Claude Code:
+Needs `node` 22+ on `PATH`, and [Claude Code](https://claude.com/claude-code) or [Cursor](https://cursor.com) (or
+both).
+
+### Claude Code
+
+In Claude Code:
 
 ```
 /plugin marketplace add a1exevs/agent-den
@@ -59,8 +69,36 @@ running in the background until the next reboot.
 To get new versions automatically, turn on auto-update for the `agent-den` marketplace in `/plugin` → Marketplaces
 (it is off by default for third-party marketplaces). Or update by hand: `/plugin marketplace update agent-den`.
 
-The collector listens on `127.0.0.1` only. It keeps the den in `den-state.json` (so updates and reboots don't empty
-it) and writes `collector.log`, both in the data folder Claude Code gives the plugin (`CLAUDE_PLUGIN_DATA`).
+### Cursor
+
+Open **Customize** in the sidebar → add a plugin **From GitHub Repository** →
+`https://github.com/a1exevs/agent-den` → install `agent-den`. The repository's `.cursor-plugin/marketplace.json`
+points Cursor at `plugins/cursor`.
+
+Start a new chat: the plugin starts the den in the background by itself (`sessionStart`). Chats that were already
+running show up from their transcripts.
+
+| Command            | What it does                                                                                       |
+| ------------------ | -------------------------------------------------------------------------------------------------- |
+| `/agent-den-start` | Start the den if it isn't running and open it in the browser (http://localhost:4317)               |
+| `/agent-den-stop`  | Stop the den and keep it off: new sessions won't start it until `/agent-den-start`. Cats are saved |
+
+The agent runs these commands for you in a shell outside the sandbox (the den binds a local port and writes to
+`~/.agent-den`), so Cursor may ask you to approve that command.
+
+The hooks never block the agent. Cursor's `preToolUse` and `subagentStart` hooks must answer before a tool or a
+subagent runs; the plugin answers `{}` (no opinion), so your own approval settings apply as before. If the den or
+`node` is missing, the hook fails and Cursor lets the action through.
+
+To try a local checkout instead, copy `plugins/cursor` to `~/.cursor/plugins/local/agent-den` (a copy: Cursor skips
+symlinks that point outside that folder) and reload the window.
+
+### Where the den keeps its data
+
+The collector listens on `127.0.0.1` only. It keeps the den in `~/.agent-den/den-state.json` (so updates and reboots
+don't empty it) and writes `~/.agent-den/collector.log`; `AGENT_DEN_HOME` moves the folder. Both plugins share it,
+and so the pause: `/agent-den:stop` in Claude Code keeps the den off for Cursor too. Versions up to 0.2.x kept it in
+the Claude Code plugin data folder; the first start of 0.3 moves it over.
 
 ## Develop
 
@@ -107,7 +145,7 @@ Run from the **repository root**.
 | `npm run format` / `npm run format:check` | Prettier                                                                                       |
 | `npm test`                                | Vitest in every workspace                                                                      |
 | `npm run build`                           | Build every workspace                                                                          |
-| `npm run build:plugin`                    | Pack the collector and the built den into `plugins/claude-code/den` (committed)                |
+| `npm run build:plugin`                    | Pack the collector, the den and the launcher into both plugins' `den/` (committed)             |
 
 ### Tooling
 
@@ -118,18 +156,22 @@ Run from the **repository root**.
 
 ## Releasing the plugin
 
+Both plugins share one version (and one collector), so they are released together.
+
 1. Bump `version` in `plugins/claude-code/.claude-plugin/plugin.json` — users only get an update when it changes.
-2. `npm run build:plugin` — packs the collector and the den into `plugins/claude-code/den`. Commit the result:
+2. `npm run build:plugin` — copies the version into `plugins/cursor/.cursor-plugin/plugin.json` and packs the
+   collector, the den and the launcher into `plugins/claude-code/den` and `plugins/cursor/den`. Commit the result:
    marketplaces install the plugin folder exactly as it is in git. The build refuses changed sources under an
-   already built version, and `npm run lint` fails when `plugin.json` and the build disagree.
+   already built version, and `npm run lint` fails when the manifests and the builds disagree.
 3. Push to `main`.
-4. Users with auto-update get it on the next start; others run `/plugin marketplace update agent-den`. The first new
-   session replaces a collector left over from the previous version; sessions still on an older version never
-   downgrade it.
+4. Claude Code users with auto-update get it on the next start; others run `/plugin marketplace update agent-den`.
+   Cursor picks up the new version when it refreshes the plugin from GitHub (Customize → the plugin → update). The
+   first new session in either agent replaces a collector left over from the previous version; sessions still on an
+   older version never downgrade it.
 
 ## Features
 
-- Live sessions from Claude Code hooks, plus transcript backfill for sessions started before the plugin
+- Live sessions from Claude Code and Cursor hooks, plus transcript backfill for sessions started before the plugin
 - Subagents live next to their parent, always in its room
 - A station per tool category: read, edit, shell, web, subagents, rest, the door in and out
 - Precise statuses: thinking, using a tool, waiting for you, done, interrupted (Esc), error; dusty characters for stale

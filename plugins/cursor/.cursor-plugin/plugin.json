@@ -1,0 +1,12 @@
+{
+  "name": "agent-den",
+  "version": "0.3.0",
+  "description": "Watch your Cursor agents and their subagents live in a pixel-art den (sessions are cats, subagents are kittens)",
+  "author": {
+    "name": "Alexander Evstafiadi"
+  },
+  "homepage": "https://github.com/a1exevs/agent-den",
+  "repository": "https://github.com/a1exevs/agent-den",
+  "license": "MIT",
+  "keywords": ["agents", "subagents", "visualization", "pixel-art", "hooks"]
+}

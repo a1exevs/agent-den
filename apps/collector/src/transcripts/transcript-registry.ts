@@ -1,4 +1,13 @@
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
+
+/**
+ * Cursor keeps a subagent's transcript in `subagents/` next to its session's: `<id>/<id>.jsonl` →
+ * `<id>/subagents/<subagent>.jsonl`. A subagent of a subagent lands in the same folder.
+ */
+export function cursorSubagentTranscript(parentPath: string, subagentId: string): string {
+  const dir = dirname(parentPath);
+  return join(basename(dir) === 'subagents' ? dir : join(dir, 'subagents'), `${subagentId}.jsonl`);
+}
 
 /** Where each agent's transcript lives. Filled from hook payloads and the transcript scanner. */
 export class TranscriptRegistry {
@@ -38,5 +47,34 @@ export class TranscriptRegistry {
       agentId,
       payload.agent_transcript_path ?? join(dirname(sessionPath), sessionId, 'subagents', `agent-${agentId}.jsonl`),
     );
+  }
+
+  /**
+   * Cursor: session hooks carry `transcript_path`, hooks inside a subagent carry `null` — its transcript is found
+   * from the parent's when `subagentStart` / `subagentStop` name it.
+   */
+  rememberCursorHook(payload: {
+    conversation_id?: string;
+    transcript_path?: string | null;
+    subagent_id?: string;
+    parent_conversation_id?: string;
+    agent_transcript_path?: string | null;
+  }): void {
+    const conversationId = payload.conversation_id;
+    const subagentId = payload.subagent_id
+      ?.split(/[\r\n]/)
+      .find(line => line.trim())
+      ?.trim();
+    if (subagentId) {
+      const parentPath = this.get(payload.parent_conversation_id ?? conversationId ?? '') ?? payload.transcript_path;
+      const path = payload.agent_transcript_path ?? (parentPath && cursorSubagentTranscript(parentPath, subagentId));
+      if (path) {
+        this.set(subagentId, path);
+      }
+      return;
+    }
+    if (conversationId && payload.transcript_path) {
+      this.set(conversationId, payload.transcript_path);
+    }
   }
 }

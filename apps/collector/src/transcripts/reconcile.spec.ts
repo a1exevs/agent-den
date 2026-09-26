@@ -53,6 +53,25 @@ describe('TranscriptReconciler', () => {
     expect(store.snapshot()[0]).toMatchObject({ activity: 'interrupted', updatedAt: 2_000 });
   });
 
+  it('does not let an older transcript override a newer Claude hook', async () => {
+    const { store, reconciler, path, write } = setup();
+    store.push({
+      id: 'e1',
+      source: 'claude-code',
+      kind: 'tool-start',
+      sessionId: 's1',
+      agentId: 's1',
+      toolName: 'Bash',
+      toolCategory: 'shell',
+      timestamp: 10_000,
+    });
+    write(interrupted);
+    utimesSync(path, 2, 2); // mtime 2000 ms, older than the hook
+
+    expect(await reconciler.reconcile(60_000)).toBe(0);
+    expect(store.snapshot()[0]?.activity).toBe('tool');
+  });
+
   it('stays quiet while hooks are fresh, and does not repeat an unchanged state', async () => {
     const { store, reconciler, path, write } = setup();
     store.push({

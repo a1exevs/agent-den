@@ -10,4 +10,9 @@ describe('parentTranscriptPath', () => {
     const subagent = join(project, 'session-1', 'subagents', 'agent-abc.jsonl');
     expect(parentTranscriptPath(subagent)).toBe(join(project, 'session-1.jsonl'));
   });
+
+  it('maps a Cursor subagent file to the session file nested in the same folder', () => {
+    const session = join('home', '.cursor', 'projects', 'agent-den', 'agent-transcripts', 'c1');
+    expect(parentTranscriptPath(join(session, 'subagents', 'k1.jsonl'))).toBe(join(session, 'c1.jsonl'));
+  });
 });

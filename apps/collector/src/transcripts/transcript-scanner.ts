@@ -3,14 +3,16 @@ import { open, readdir, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { basename, join } from 'node:path';
 
-import { categorizeTool, type DenEvent, type DenEventKind } from '@agent-den/contracts';
+import { type AgentSource, categorizeTool, type DenEvent, type DenEventKind } from '@agent-den/contracts';
 
 import type { DenStore } from '../den-store';
+import { resolveCursorWorkspace } from './cursor-transcript';
 import { type InferredState, inferState } from './infer-state';
-import { readJson, readSubagentMeta, readSubagentVerdict, readTail } from './transcript-files';
+import { readJson, readState, readSubagentMeta, readSubagentVerdict, readTail } from './transcript-files';
 import type { TranscriptRegistry } from './transcript-registry';
 
 const PROJECTS_DIR = join(homedir(), '.claude', 'projects');
+const CURSOR_PROJECTS_DIR = join(homedir(), '.cursor', 'projects');
 /** Only transcripts touched this recently count as live sessions. */
 const ACTIVE_WINDOW_MS = 10 * 60_000;
 
@@ -68,16 +70,33 @@ async function freshFiles(dir: string, now: number, pattern: RegExp): Promise<{ 
   return files.filter(file => now - file.mtime < ACTIVE_WINDOW_MS);
 }
 
-function event(identity: Identity, kind: DenEventKind, timestamp: number, extra: Partial<DenEvent> = {}): DenEvent {
-  return { id: randomUUID(), source: 'claude-code', kind, timestamp, ...identity, ...extra };
+function event(
+  identity: Identity,
+  kind: DenEventKind,
+  timestamp: number,
+  extra: Partial<DenEvent> = {},
+  source: AgentSource = 'claude-code',
+): DenEvent {
+  return { id: randomUUID(), source, kind, timestamp, ...identity, ...extra };
 }
 
-function stateEvent(identity: Identity, state: InferredState, timestamp: number): DenEvent {
-  return event(identity, state.kind, timestamp, {
-    toolName: state.toolName,
-    toolCategory: state.toolName ? categorizeTool(state.toolName) : undefined,
-    detail: state.detail,
-  });
+function stateEvent(
+  identity: Identity,
+  state: InferredState,
+  timestamp: number,
+  source: AgentSource = 'claude-code',
+): DenEvent {
+  return event(
+    identity,
+    state.kind,
+    timestamp,
+    {
+      toolName: state.toolName,
+      toolCategory: state.toolName ? categorizeTool(state.toolName) : undefined,
+      detail: state.detail,
+    },
+    source,
+  );
 }
 
 /**
@@ -137,5 +156,75 @@ export async function scanTranscripts(
     }
   }
 
+  return added + (await scanCursorTranscripts(store, registry, now));
+}
+
+/**
+ * The same for Cursor: `~/.cursor/projects/<workspace>/agent-transcripts/<id>/<id>.jsonl`, subagents in
+ * `<id>/subagents/<subagent>.jsonl`. The room comes from the workspace folder name — Cursor lines carry no cwd.
+ */
+export async function scanCursorTranscripts(
+  store: DenStore,
+  registry: TranscriptRegistry,
+  now = Date.now(),
+  projectsDir = CURSOR_PROJECTS_DIR,
+  workspaceRoot?: string,
+): Promise<number> {
+  let added = 0;
+  let workspaces: string[];
+  try {
+    workspaces = await readdir(projectsDir);
+  } catch {
+    return 0;
+  }
+
+  for (const workspace of workspaces) {
+    const transcriptsDir = join(projectsDir, workspace, 'agent-transcripts');
+    let sessions: string[];
+    try {
+      sessions = await readdir(transcriptsDir);
+    } catch {
+      continue;
+    }
+    for (const sessionId of sessions) {
+      const sessionDir = join(transcriptsDir, sessionId);
+      const [file] = await freshFiles(sessionDir, now, new RegExp(`^${sessionId}\\.jsonl$`));
+      if (!file) {
+        continue;
+      }
+      const cwd = await resolveCursorWorkspace(workspace, workspaceRoot);
+      // A chat with no folder (a numeric Cursor project name, or a path we can't resolve) has no room.
+      if (!cwd) {
+        continue;
+      }
+      registry.set(sessionId, file.path);
+
+      if (!store.has(sessionId)) {
+        const state = await readState(file.path);
+        if (state) {
+          const identity = { sessionId, agentId: sessionId };
+          store.push(event(identity, 'session-start', file.mtime, { cwd }, 'cursor'));
+          store.push(stateEvent(identity, state, file.mtime, 'cursor'));
+          added++;
+        }
+      }
+
+      for (const subagent of await freshFiles(join(sessionDir, 'subagents'), now, /\.jsonl$/)) {
+        const agentId = basename(subagent.path, '.jsonl');
+        registry.set(agentId, subagent.path);
+        if (store.has(agentId)) {
+          continue;
+        }
+        const state = await readState(subagent.path);
+        if (!state || state.kind === 'stop') {
+          continue;
+        }
+        const identity = { sessionId, agentId, parentAgentId: sessionId };
+        store.push(event(identity, 'subagent-start', subagent.mtime, { cwd }, 'cursor'));
+        store.push(stateEvent(identity, state, subagent.mtime, 'cursor'));
+        added++;
+      }
+    }
+  }
   return added;
 }

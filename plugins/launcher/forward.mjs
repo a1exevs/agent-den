@@ -1,5 +1,5 @@
 // Forwarding a hook payload to the collector. Must never block or fail the agent: short timeout, errors swallowed,
-// no stdout (SessionStart stdout would land in the model's context).
+// no stdout (a hook's stdout is read by the agent: SessionStart output would land in the model's context).
 
 export const port = process.env.AGENT_DEN_PORT ?? '4317';
 export const collectorUrl = `http://127.0.0.1:${port}`;
@@ -15,17 +15,31 @@ export function readStdin() {
   });
 }
 
-export async function forward(raw) {
+/**
+ * Posts the payload to `/hooks/<source>`, merged with `extra` (what the plugin knows beyond the payload).
+ * @param {object} payload the parsed hook payload
+ * @param {'claude-code' | 'cursor'} source
+ * @param {object} [extra]
+ */
+export async function forward(payload, source, extra = {}) {
   try {
-    // `cwd` follows the agent's `cd`s; the project root is what maps to a room.
-    const payload = { ...JSON.parse(raw), project_dir: process.env.CLAUDE_PROJECT_DIR };
-    await fetch(`${collectorUrl}/hooks/claude-code`, {
+    await fetch(`${collectorUrl}/hooks/${source}`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({ ...payload, ...extra }),
       signal: AbortSignal.timeout(1000),
     });
   } catch {
     // Collector is not running — the den is simply empty.
+  }
+}
+
+/** The payload as an object; `null` for anything that isn't a JSON object. */
+export function parsePayload(raw) {
+  try {
+    const payload = JSON.parse(raw);
+    return typeof payload === 'object' && payload !== null ? payload : null;
+  } catch {
+    return null;
   }
 }

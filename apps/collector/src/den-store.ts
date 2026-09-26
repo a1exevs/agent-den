@@ -50,6 +50,10 @@ export class DenStore {
     return this.agents.has(agentId);
   }
 
+  get(agentId: string): AgentState | undefined {
+    return this.agents.get(agentId);
+  }
+
   snapshot(): AgentState[] {
     return [...this.agents.values()].filter(agent => agent.activity !== 'gone');
   }

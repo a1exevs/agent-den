@@ -18,7 +18,8 @@ control — later).
 - `apps/web` — Angular (latest), standalone, signals, zoneless, FSD. Spartan `brain` + plain CSS (no Tailwind, no LESS).
 - `apps/collector` — Node + Hono: accepts hook POSTs, tails JSONL, broadcasts over WebSocket on `localhost`.
 - `packages/contracts` — shared event / agent state types.
-- `plugins/claude-code`, `plugins/cursor` — hook configs + sender script.
+- `plugins/claude-code`, `plugins/cursor` — hook configs + sender script; `plugins/launcher` — the shared collector
+  launcher packed into both.
 - `tools/mock` — dev-only scenario generator.
 
 ## Stations (cats skin)

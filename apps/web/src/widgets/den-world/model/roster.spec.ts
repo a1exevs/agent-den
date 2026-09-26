@@ -31,6 +31,7 @@ describe('buildRoster', () => {
         agent({ agentId: 'c', activity: 'done' }),
         agent({ agentId: 'd', activity: 'tool', toolName: 'Edit' }),
         agent({ agentId: 'e', activity: 'tool', toolName: 'mcp__Claude_Browser__browser_batch' }),
+        agent({ agentId: 'f', activity: 'tool', toolName: 'MCP:browser_navigate' }),
       ],
       new Set(['d']),
     );
@@ -41,6 +42,7 @@ describe('buildRoster', () => {
       ['napping', false],
       ['no news', false],
       ['browser_batch', false],
+      ['browser_navigate', false],
     ]);
   });
 });

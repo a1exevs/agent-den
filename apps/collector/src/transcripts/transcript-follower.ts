@@ -22,13 +22,17 @@ async function readRange(path: string, start: number, end: number): Promise<stri
   }
 }
 
-function parse(lines: string[]): TranscriptItem[] {
+/** `firstOffset` — byte offset of the first line in the file: lines without a uuid are named after their offset. */
+function parse(lines: string[], firstOffset: number): TranscriptItem[] {
+  let lineOffset = firstOffset;
   return lines.flatMap(line => {
+    const offset = lineOffset;
+    lineOffset += Buffer.byteLength(line) + 1;
     if (!line.trim()) {
       return [];
     }
     try {
-      const item = normalizeEntry(JSON.parse(line));
+      const item = normalizeEntry(JSON.parse(line), `line-${offset}`);
       return item ? [item] : [];
     } catch {
       return [];
@@ -50,12 +54,13 @@ export function followTranscript(path: string, onItems: Listener, onMissing: () 
     const { size } = await stat(path);
     const start = Math.max(0, size - INITIAL_TAIL_BYTES);
     const lines = (await readRange(path, start, size)).split('\n');
+    let firstOffset = start;
     if (start > 0) {
-      lines.shift();
+      firstOffset += Buffer.byteLength(lines.shift() ?? '') + 1;
     }
     partial = lines.pop() ?? '';
     offset = size;
-    onItems(parse(lines).slice(-INITIAL_ITEMS), true);
+    onItems(parse(lines, firstOffset).slice(-INITIAL_ITEMS), true);
   };
 
   const poll = async (): Promise<void> => {
@@ -67,10 +72,11 @@ export function followTranscript(path: string, onItems: Listener, onMissing: () 
     if (size === offset) {
       return;
     }
+    const firstOffset = offset - Buffer.byteLength(partial);
     const lines = (partial + (await readRange(path, offset, size))).split('\n');
     offset = size;
     partial = lines.pop() ?? '';
-    const items = parse(lines);
+    const items = parse(lines, firstOffset);
     if (items.length > 0) {
       onItems(items, false);
     }

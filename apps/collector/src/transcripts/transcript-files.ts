@@ -1,7 +1,8 @@
 import { open, readFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 
-import { inferSubagentVerdict, type SubagentVerdict } from './infer-state';
+import { inferCursorState, isCursorTranscript } from './cursor-transcript';
+import { type InferredState, inferState, inferSubagentVerdict, type SubagentVerdict } from './infer-state';
 
 const TAIL_BYTES = 256 * 1024;
 
@@ -28,6 +29,12 @@ export async function readTail(path: string): Promise<unknown[]> {
   }
 }
 
+/** What an agent's transcript says it is doing now, in whichever format (Claude Code or Cursor) it is written. */
+export async function readState(path: string): Promise<InferredState | null> {
+  const tail = await readTail(path);
+  return isCursorTranscript(path) ? inferCursorState(tail) : inferState(tail);
+}
+
 export async function readJson<T>(path: string): Promise<T | undefined> {
   try {
     return JSON.parse(await readFile(path, 'utf8')) as T;
@@ -43,10 +50,17 @@ export function readSubagentMeta(subagentPath: string): Promise<SubagentMeta | u
   return readJson<SubagentMeta>(subagentPath.replace(/\.jsonl$/, '.meta.json'));
 }
 
-/** `<project>/<session>/subagents/agent-<id>.jsonl` → `<project>/<session>.jsonl`. */
+/**
+ * `<project>/<session>/subagents/agent-<id>.jsonl` → `<project>/<session>.jsonl` (Claude Code).
+ * Cursor nests the session file inside its own folder: `…/<id>/subagents/<sub>.jsonl` → `…/<id>/<id>.jsonl`.
+ */
 export function parentTranscriptPath(subagentPath: string): string {
   const sessionDir = dirname(dirname(subagentPath));
-  return join(dirname(sessionDir), `${sessionDir.split(/[\\/]/).at(-1)}.jsonl`);
+  const sessionId = sessionDir.split(/[\\/]/).at(-1) ?? '';
+  if (basename(dirname(sessionDir)) === 'agent-transcripts') {
+    return join(sessionDir, `${sessionId}.jsonl`);
+  }
+  return join(dirname(sessionDir), `${sessionId}.jsonl`);
 }
 
 /** How the parent session says this subagent ended — or null while it is still running. */

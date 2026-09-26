@@ -1,5 +1,7 @@
 import type { TranscriptBlock, TranscriptItem } from '@agent-den/contracts';
 
+import { cursorPromptText } from './cursor-transcript';
+
 const MAX_TEXT = 8 * 1024;
 const MAX_INPUT = 2 * 1024;
 
@@ -17,6 +19,8 @@ type RawBlock = {
 
 type RawEntry = {
   type?: string;
+  /** Cursor transcripts have `role` instead of `type`, and no uuid or timestamp. */
+  role?: string;
   uuid?: string;
   timestamp?: string;
   isMeta?: boolean;
@@ -47,11 +51,12 @@ function summarize(input: unknown): string | undefined {
   const value =
     record['description'] ??
     record['file_path'] ??
+    record['path'] ??
     record['command'] ??
     record['pattern'] ??
     record['url'] ??
     record['query'];
-  return typeof value === 'string' ? value.replace(/s+/g, ' ').slice(0, 120) : undefined;
+  return typeof value === 'string' ? value.replace(/\s+/g, ' ').slice(0, 120) : undefined;
 }
 
 function toBlock(block: RawBlock): TranscriptBlock | null {
@@ -83,26 +88,39 @@ function toBlock(block: RawBlock): TranscriptBlock | null {
   }
 }
 
-/** Turns a raw transcript line into a display item; bookkeeping and meta entries are dropped. */
-export function normalizeEntry(value: unknown): TranscriptItem | null {
+/**
+ * Turns a raw transcript line into a display item; bookkeeping and meta entries are dropped.
+ * `fallbackId` names lines that carry no uuid (Cursor) — the line's position in the file.
+ */
+export function normalizeEntry(value: unknown, fallbackId?: string): TranscriptItem | null {
   if (typeof value !== 'object' || value === null) {
     return null;
   }
   const entry = value as RawEntry;
-  if ((entry.type !== 'user' && entry.type !== 'assistant') || entry.isMeta || !entry.message) {
+  const isCursor = entry.type === undefined && entry.role !== undefined;
+  const role = isCursor ? entry.role : entry.type;
+  if ((role !== 'user' && role !== 'assistant') || entry.isMeta || !entry.message) {
     return null;
   }
 
   const content = entry.message.content;
-  const blocks =
+  let blocks =
     typeof content === 'string'
       ? [{ kind: 'text' as const, text: clip(content, MAX_TEXT).text }]
       : Array.isArray(content)
         ? (content as RawBlock[]).map(toBlock).filter((block): block is TranscriptBlock => block !== null)
         : [];
+  if (isCursor && role === 'user') {
+    blocks = blocks.map(block => (block.kind === 'text' ? { ...block, text: cursorPromptText(block.text) } : block));
+  }
 
   if (blocks.length === 0) {
     return null;
   }
-  return { id: entry.uuid ?? `${entry.timestamp}-${entry.type}`, role: entry.type, timestamp: entry.timestamp, blocks };
+  return {
+    id: entry.uuid ?? fallbackId ?? `${entry.timestamp}-${role}`,
+    role,
+    timestamp: entry.timestamp,
+    blocks,
+  };
 }

@@ -35,4 +35,12 @@ describe('groupIntoRooms', () => {
     expect(rooms).toHaveLength(1);
     expect(rooms[0]?.agents.map(a => a.agentId)).toEqual(['cat', 'kitten']);
   });
+
+  it('drops agents that have no project folder', () => {
+    const rooms = groupIntoRooms([
+      agent({ agentId: 'placed', cwd: 'D:/projects/agent-den' }),
+      agent({ agentId: 'loose' }),
+    ]);
+    expect(rooms.map(room => room.name)).toEqual(['agent-den']);
+  });
 });

@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [{ "command": "node ./scripts/session-start.mjs", "timeout": 10 }],
+    "sessionEnd": [{ "command": "node ./scripts/send.mjs", "timeout": 3 }],
+    "beforeSubmitPrompt": [{ "command": "node ./scripts/send.mjs", "timeout": 3 }],
+    "preToolUse": [{ "command": "node ./scripts/send.mjs", "timeout": 3 }],
+    "postToolUse": [{ "command": "node ./scripts/send.mjs", "timeout": 3 }],
+    "postToolUseFailure": [{ "command": "node ./scripts/send.mjs", "timeout": 3 }],
+    "subagentStart": [{ "command": "node ./scripts/send.mjs", "timeout": 3 }],
+    "subagentStop": [{ "command": "node ./scripts/send.mjs", "timeout": 3 }],
+    "stop": [{ "command": "node ./scripts/send.mjs", "timeout": 3 }]
+  }
+}

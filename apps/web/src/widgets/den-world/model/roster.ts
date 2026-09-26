@@ -10,8 +10,14 @@ export type RosterEntry = {
   alert: boolean;
 };
 
-/** `mcp__Claude_Browser__browser_batch` → `browser_batch`: the server prefix is noise in a chip. */
+/**
+ * `mcp__Claude_Browser__browser_batch` → `browser_batch`, Cursor's `MCP:browser_navigate` → `browser_navigate`:
+ * the server prefix is noise in a chip.
+ */
 function shortToolName(toolName: string): string {
+  if (toolName.startsWith('MCP:')) {
+    return toolName.slice('MCP:'.length);
+  }
   return toolName.startsWith('mcp__') ? (toolName.split('__').at(-1) ?? toolName) : toolName;
 }
 

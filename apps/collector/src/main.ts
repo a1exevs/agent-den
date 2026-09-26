@@ -5,7 +5,7 @@ import { cors } from 'hono/cors';
 import { WebSocketServer } from 'ws';
 
 import { type ClaudeCodeHookPayload, fromClaudeCodeHook } from './adapters/claude-code';
-import { type CursorHookPayload, fromCursorHook } from './adapters/cursor';
+import { CursorAdapter, type CursorHookPayload } from './adapters/cursor';
 import { loadDen, saveDen } from './den-state';
 import { DenStore } from './den-store';
 import { isAllowedHost, isAllowedOrigin } from './local-origin';
@@ -22,6 +22,7 @@ const version = process.env['AGENT_DEN_VERSION'] ?? 'dev';
 const webDir = process.env['AGENT_DEN_WEB_DIR'];
 const store = new DenStore();
 const transcripts = new TranscriptRegistry();
+const cursor = new CursorAdapter(store);
 
 /** Set by the plugin's launcher: the den survives restarts (updates, reboots). Unset in development. */
 const stateFile = process.env['AGENT_DEN_STATE_FILE'];
@@ -98,9 +99,12 @@ app.post('/hooks/claude-code', async c => {
 app.post('/hooks/cursor', async c => {
   const payload = await c.req.json<CursorHookPayload>();
   remember(payload);
-  const event = fromCursorHook(payload);
-  if (event) {
+  transcripts.rememberCursorHook(payload);
+  for (const event of cursor.toEvents(payload)) {
     store.push(event);
+  }
+  for (const [agentId, path] of cursor.transcriptPaths()) {
+    transcripts.set(agentId, path);
   }
   return c.body(null, 204);
 });
@@ -146,7 +150,7 @@ const wss = new WebSocketServer({
 const SCAN_INTERVAL_MS = 30_000;
 const SWEEP_INTERVAL_MS = 60_000;
 const RECONCILE_INTERVAL_MS = 5_000;
-const reconciler = new TranscriptReconciler(store, transcripts);
+const reconciler = new TranscriptReconciler(store, transcripts, agentId => cursor.heardFrom(agentId));
 
 const scan = (): void => {
   scanTranscripts(store, transcripts)

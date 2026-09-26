@@ -7,8 +7,6 @@ export interface Room {
   agents: AgentState[];
 }
 
-const UNKNOWN_ROOM = 'somewhere';
-
 function roomName(cwd: string): string {
   return cwd.split(/[\\/]/).filter(Boolean).at(-1) ?? cwd;
 }
@@ -21,7 +19,11 @@ export function groupIntoRooms(agents: readonly AgentState[]): Room[] {
   for (const agent of agents) {
     // A kitten always lives in its cat's room, whatever directory its own events reported.
     const parentCwd = agent.parentAgentId ? byId.get(agent.parentAgentId)?.cwd : undefined;
-    const cwd = parentCwd ?? agent.cwd ?? UNKNOWN_ROOM;
+    const cwd = parentCwd ?? agent.cwd;
+    // No project folder: Cursor chats without a workspace used to land in a fake "somewhere" room.
+    if (!cwd) {
+      continue;
+    }
     const key = cwd.replaceAll('\\', '/').toLowerCase();
     const room = rooms.get(key) ?? { id: key, name: roomName(cwd), agents: [] };
     room.agents.push(agent);
