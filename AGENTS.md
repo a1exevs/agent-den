@@ -50,13 +50,17 @@ Key constraints:
 
 The plugin is self-contained: `plugins/claude-code/den/` holds the bundled collector and the built web app, generated
 by `npm run build:plugin` and committed (marketplaces install the folder as it is in git). Never edit `den/` by hand.
-The `SessionStart` hook (`scripts/start-den.mjs`) starts that collector detached when nothing answers on 4317, and
+The `SessionStart` hook (`scripts/session-start.mjs`) starts that collector detached when nothing answers on 4317, and
 upgrades one from an older plugin version (`/health` reports the version, `POST /shutdown` stops it). It never
 downgrades: SessionStart also fires on `/clear`, `/compact` and resume in sessions still on the previous version. A
 collector reporting `dev` (`npm run dev:collector`) and a foreign program on the port are left alone — every case is
 `decide()` in `scripts/version.mjs`, tested with `node --test`. The launcher also passes `AGENT_DEN_STATE_FILE`
 (in `CLAUDE_PLUGIN_DATA`): the collector restores the den from it on start and saves it every minute and on
-shutdown, so an update or a reboot keeps the cats (the dev collector doesn't persist). `/agent-den:den` (`skills/den`) opens the den.
+shutdown, so an update or a reboot keeps the cats (the dev collector doesn't persist). Commands (skills):
+`/agent-den:start` (`skills/start` → `scripts/start.mjs`) lifts a pause, starts the collector if needed and opens the
+den; `/agent-den:stop` (`skills/stop` → `scripts/stop.mjs`) saves and stops it and writes a `paused` flag, so
+SessionStart leaves it off. The flag and the saved den live in the plugin data folder, derived from the plugin path
+when a skill's shell lacks `CLAUDE_PLUGIN_DATA` (`scripts/plugin-paths.mjs`).
 `npm run build:plugin` refuses to pack changed sources under an already built version, and `npm run lint` fails when
 `plugin.json` and `den/build-info.json` disagree — users only get an update when the version changes.
 

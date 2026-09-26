@@ -1,12 +1,15 @@
-// `/agent-den:den`: starts the collector if needed and opens the den in the default browser.
+// `/agent-den:start`: lifts a pause, starts the collector if needed and opens the den in the default browser.
 // Prints one line for the skill to relay.
 
 import { spawn } from 'node:child_process';
 
+import { denUrl, ensureCollector, logFile, setPaused } from './den-server.mjs';
 import { port } from './forward.mjs';
-import { denUrl, ensureCollector, logFile } from './den-server.mjs';
 
 function openBrowser(url) {
+  if (process.env.AGENT_DEN_NO_BROWSER) {
+    return;
+  }
   const [command, args] =
     process.platform === 'win32'
       ? ['cmd', ['/c', 'start', '', url]]
@@ -16,6 +19,7 @@ function openBrowser(url) {
   spawn(command, args, { detached: true, stdio: 'ignore', windowsHide: true }).unref();
 }
 
+setPaused(false);
 const state = await ensureCollector().catch(() => 'failed');
 if (state === 'failed') {
   process.stdout.write(`agent-den: the collector did not start. Log: ${logFile()}\n`);

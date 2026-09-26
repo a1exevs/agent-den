@@ -45,8 +45,16 @@ Needs [Claude Code](https://claude.com/claude-code) and `node` 22+ on `PATH`. In
 `a1exevs/agent-den` is cloned over SSH; without a GitHub SSH key add `https://github.com/a1exevs/agent-den.git`
 instead.
 
-Start a new session: the plugin starts the den in the background by itself. Then run `/agent-den:den` to open it
-(http://localhost:4317). Sessions that were already running show up from their transcripts.
+Start a new session: the plugin starts the den in the background by itself. Sessions that were already running show
+up from their transcripts.
+
+| Command            | What it does                                                                                       |
+| ------------------ | -------------------------------------------------------------------------------------------------- |
+| `/agent-den:start` | Start the den if it isn't running and open it in the browser (http://localhost:4317)               |
+| `/agent-den:stop`  | Stop the den and keep it off: new sessions won't start it until `/agent-den:start`. Cats are saved |
+
+To remove the plugin for good, run `/agent-den:stop` first, then uninstall it in `/plugin` — otherwise the den keeps
+running in the background until the next reboot.
 
 To get new versions automatically, turn on auto-update for the `agent-den` marketplace in `/plugin` → Marketplaces
 (it is off by default for third-party marketplaces). Or update by hand: `/plugin marketplace update agent-den`.

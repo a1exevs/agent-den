@@ -26,7 +26,7 @@
     "lint:structure": "node scripts/check-structure.mjs",
     "lint:unused": "knip",
     "rules:sync": "node scripts/sync-agent-rules.mjs",
-    "test": "node --test plugins/claude-code/scripts/version.test.mjs && npm run test --workspaces --if-present"
+    "test": "node --test plugins/claude-code/scripts/version.test.mjs plugins/claude-code/scripts/plugin-paths.test.mjs && npm run test --workspaces --if-present"
   },
   "devDependencies": {
     "@alexevs/prettier-config": "1.0.1",

@@ -2,12 +2,12 @@
 // over from an older plugin version. See `decide` in version.mjs for every case.
 
 import { spawn } from 'node:child_process';
-import { existsSync, mkdirSync, openSync, readFileSync, statSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, openSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { collectorUrl, port } from './forward.mjs';
+import { pluginDataDir } from './plugin-paths.mjs';
 import { decide } from './version.mjs';
 
 const pluginRoot = process.env.CLAUDE_PLUGIN_ROOT ?? join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -52,9 +52,43 @@ async function waitFor(check, timeoutMs) {
 }
 
 function dataDir() {
-  const dir = process.env.CLAUDE_PLUGIN_DATA ?? join(tmpdir(), 'agent-den');
+  const dir = pluginDataDir(pluginRoot);
   mkdirSync(dir, { recursive: true });
   return dir;
+}
+
+const pauseFile = () => join(dataDir(), 'paused');
+
+/** `/agent-den:stop` pauses the den: new sessions don't start it until `/agent-den:start`. */
+export function isPaused() {
+  return existsSync(pauseFile());
+}
+
+export function setPaused(paused) {
+  if (paused) {
+    writeFileSync(pauseFile(), `${new Date().toISOString()}\n`);
+  } else {
+    rmSync(pauseFile(), { force: true });
+  }
+}
+
+/**
+ * Saves the den and stops our collector.
+ * @returns {Promise<'stopped' | 'not-running' | 'dev' | 'foreign' | 'failed'>}
+ */
+export async function stopCollector() {
+  const current = await probe();
+  if (current.state === 'down') {
+    return 'not-running';
+  }
+  if (current.state === 'foreign') {
+    return 'foreign';
+  }
+  if (current.version === 'dev') {
+    return 'dev';
+  }
+  await fetch(`${collectorUrl}/shutdown`, { method: 'POST', signal: AbortSignal.timeout(500) }).catch(() => {});
+  return (await waitFor(async () => (await probe()).state === 'down', 3000)) ? 'stopped' : 'failed';
 }
 
 export function logFile() {
