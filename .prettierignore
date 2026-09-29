@@ -3,6 +3,5 @@ dist
 coverage
 .angular
 package-lock.json
-.cursor
 .claude/rules
 plugins/claude-code/den

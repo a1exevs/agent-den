@@ -3,8 +3,6 @@ paths:
   - "apps/web/**"
 ---
 
-<!-- Generated from .cursor/rules/state-management.mdc by scripts/sync-agent-rules.mjs — edit the .mdc, not this file. -->
-
 # State Management
 
 ## Live state — signal stores in entities

@@ -43,7 +43,7 @@ control — later).
 
 ## Code rules
 
-- FSD rules adapted from set-forge (`.cursor/rules`), rewritten for Angular.
+- FSD rules adapted from set-forge (`.claude/rules`), rewritten for Angular.
 - Prettier: `@alexevs/prettier-config`.
 - ESLint: `angular-eslint` + set-forge rules (import order, absolute paths, curly, unused vars, no-console).
 - **All UI primitives live in `src/shared/ui`.** `@spartan-ng/*` imports are forbidden outside `src/shared/**`

@@ -3,7 +3,7 @@
 Pixel-art den for AI agent sessions and their subagents, with switchable skins (ships with cats: sessions are cats,
 subagents are kittens). Requirements: `docs/requirements.md`.
 
-This file is read by every coding agent (Cursor natively, Claude Code through `CLAUDE.md`). Keep it tool-agnostic.
+This file is the project guide for coding agents; Claude Code reads it through `CLAUDE.md`.
 
 ## Layout (npm workspaces)
 
@@ -26,14 +26,11 @@ This file is read by every coding agent (Cursor natively, Claude Code through `C
   ESLint for Node packages (root `eslint.config.mjs`),
   ESLint (incl. FSD imports, cycles, segment direction), Steiger (FSD), tsc
 - `npm test`, `npm run build`, `npm run format`
-- `npm run rules:sync` — regenerate `.claude/rules` after editing `.cursor/rules`
 
 ## Coding rules
 
-One source: `.cursor/rules/*.mdc`, each scoped to files by `globs`:
-`fsd-architecture`, `component-architecture`, `state-management`, `styling-guidelines`, `typescript-guidelines`,
-`file-naming`. `.claude/rules/*.md` are generated from them (`npm run rules:sync`) — never edit those by hand;
-`npm run lint` fails when they drift.
+`.claude/rules/*.md`, each scoped to files by its frontmatter `paths`: `fsd-architecture`, `component-architecture`,
+`state-management`, `styling-guidelines`, `typescript-guidelines`, `file-naming`.
 
 Key constraints:
 

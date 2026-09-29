@@ -5,8 +5,6 @@ paths:
   - "tools/**"
 ---
 
-<!-- Generated from .cursor/rules/typescript-guidelines.mdc by scripts/sync-agent-rules.mjs — edit the .mdc, not this file. -->
-
 # TypeScript Guidelines
 
 ## Strict Mode

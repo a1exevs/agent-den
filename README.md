@@ -114,7 +114,6 @@ Run from the **repository root**.
 | Command                  | Description                                                                                        |
 | ------------------------ | -------------------------------------------------------------------------------------------------- |
 | `npm run generate:icons` | Regenerate favicons, app icons and the OG image in `apps/web/public` from the code-defined sprites |
-| `npm run rules:sync`     | Regenerate `.claude/rules` from `.cursor/rules` (the single source of coding rules)                |
 
 ## Releasing the plugin
 
@@ -144,7 +143,7 @@ Run from the **repository root**.
 
 ## Coding rules
 
-Coding rules for agents live in [`.cursor/rules`](.cursor/rules) and are generated into `.claude/rules`;
+Coding rules for agents live in [`.claude/rules`](.claude/rules);
 [`AGENTS.md`](AGENTS.md) is the project guide for every coding agent.
 
 ## Credits

@@ -3,8 +3,6 @@ paths:
   - "apps/web/**"
 ---
 
-<!-- Generated from .cursor/rules/fsd-architecture.mdc by scripts/sync-agent-rules.mjs — edit the .mdc, not this file. -->
-
 # Feature-Sliced Design
 
 `apps/web` follows standard [Feature-Sliced Design](https://feature-sliced.design/ru/docs/get-started/overview).

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Structural checks that neither ESLint nor Steiger cover (see .cursor/rules/fsd-architecture.mdc):
+// Structural checks that neither ESLint nor Steiger cover (see .claude/rules/fsd-architecture.md):
 //   1. slice root holds only `index.ts` + segment folders;
 //   2. `index.ts`: required for every slice and every `shared` segment (their public API); forbidden in the segments
 //      of a slice — the slice index re-exports straight from files, a segment barrel would be dead code;
@@ -23,7 +23,7 @@ const SRC_ROOT_FILES = new Set(['main.ts', 'styles.css', 'index.html']);
 
 /** kebab-case segments separated by dots: `den-cat.ts`, `den-cat.spec.ts`, `index.ts`. */
 const KEBAB = /^[a-z0-9]+(-[a-z0-9]+)*(\.[a-z0-9]+(-[a-z0-9]+)*)*$/;
-const KEBAB_ROOTS = ['apps/web/src', 'apps/collector/src', 'packages', 'tools', 'plugins', 'scripts', '.cursor/rules'];
+const KEBAB_ROOTS = ['apps/web/src', 'apps/collector/src', 'packages', 'tools', 'plugins', 'scripts', '.claude/rules'];
 const SKIP_DIRS = new Set(['node_modules', 'dist', '.angular', 'coverage', '.claude-plugin']);
 /** Build output committed into the plugin (`npm run build:plugin`): hashed chunk names, not ours to name. */
 const SKIP_PATHS = new Set(['plugins/claude-code/den']);

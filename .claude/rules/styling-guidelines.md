@@ -3,8 +3,6 @@ paths:
   - "apps/web/**"
 ---
 
-<!-- Generated from .cursor/rules/styling-guidelines.mdc by scripts/sync-agent-rules.mjs — edit the .mdc, not this file. -->
-
 # Styling Guidelines
 
 ## Plain CSS

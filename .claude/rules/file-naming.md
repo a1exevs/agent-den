@@ -6,8 +6,6 @@ paths:
   - "plugins/**"
 ---
 
-<!-- Generated from .cursor/rules/file-naming.mdc by scripts/sync-agent-rules.mjs — edit the .mdc, not this file. -->
-
 # File Naming Conventions
 
 All files and folders use **kebab-case** (lowercase with hyphens).
