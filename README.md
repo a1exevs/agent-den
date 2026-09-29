@@ -143,8 +143,8 @@ Run from the **repository root**.
 
 ## Coding rules
 
-Coding rules for agents live in [`.claude/rules`](.claude/rules);
-[`AGENTS.md`](AGENTS.md) is the project guide for every coding agent.
+Coding rules for agents live in [`.claude/rules`](.claude/rules); [`CLAUDE.md`](CLAUDE.md) is the project guide
+for Claude Code.
 
 ## Credits
 
