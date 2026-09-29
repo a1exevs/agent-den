@@ -176,4 +176,22 @@ describe('TranscriptReconciler with Cursor transcripts', () => {
     expect(await reconciler.reconcile(60_000)).toBe(1);
     expect(store.get('c1')).toMatchObject({ activity: 'tool', toolName: 'Shell' });
   });
+
+  it('ends a Cursor session when its transcript was deleted from disk', async () => {
+    const { store, reconciler, path } = setup(true);
+    writeTranscript(path, [prompt], 1);
+    rmSync(path);
+
+    expect(await reconciler.reconcile(60_000)).toBe(1);
+    expect(store.get('c1')?.activity).toBe('gone');
+  });
+
+  it('waits until hooks went quiet before ending a deleted Cursor chat', async () => {
+    const { store, reconciler, path } = setup(true);
+    writeTranscript(path, [prompt], 1);
+    rmSync(path);
+
+    expect(await reconciler.reconcile(10_000)).toBe(0);
+    expect(store.get('c1')?.activity).toBe('done');
+  });
 });

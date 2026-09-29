@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, utimesSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, rmSync, unlinkSync, utimesSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -90,5 +90,22 @@ describe('TranscriptReconciler', () => {
     expect(await reconciler.reconcile(5_000)).toBe(0); // hooks spoke 4 s ago
     expect(await reconciler.reconcile(60_000)).toBe(0); // transcript says the same: Bash is running
     expect(store.snapshot()[0]?.toolCounts).toEqual({ shell: 1 }); // not double-counted
+  });
+
+  it('does not end a Claude session when its transcript file is gone', async () => {
+    const { store, reconciler, path, write } = setup();
+    store.push({
+      id: 'e1',
+      source: 'claude-code',
+      kind: 'stop',
+      sessionId: 's1',
+      agentId: 's1',
+      timestamp: 1_000,
+    });
+    write(bashCall);
+    unlinkSync(path);
+
+    expect(await reconciler.reconcile(60_000)).toBe(0);
+    expect(store.get('s1')?.activity).toBe('done');
   });
 });
