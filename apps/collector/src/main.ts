@@ -5,7 +5,6 @@ import { cors } from 'hono/cors';
 import { WebSocketServer } from 'ws';
 
 import { type ClaudeCodeHookPayload, fromClaudeCodeHook } from './adapters/claude-code';
-import { type CursorHookPayload, fromCursorHook } from './adapters/cursor';
 import { loadDen, saveDen } from './den-state';
 import { DenStore } from './den-store';
 import { isAllowedHost, isAllowedOrigin } from './local-origin';
@@ -89,16 +88,6 @@ app.post('/hooks/claude-code', async c => {
   remember(payload);
   transcripts.rememberHook(payload);
   const event = fromClaudeCodeHook(payload);
-  if (event) {
-    store.push(event);
-  }
-  return c.body(null, 204);
-});
-
-app.post('/hooks/cursor', async c => {
-  const payload = await c.req.json<CursorHookPayload>();
-  remember(payload);
-  const event = fromCursorHook(payload);
   if (event) {
     store.push(event);
   }

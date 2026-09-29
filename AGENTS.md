@@ -9,7 +9,7 @@ This file is read by every coding agent (Cursor natively, Claude Code through `C
 
 - `apps/web` — Angular 22, zoneless, signals, FSD. UI primitives: `@spartan-ng/brain` wrapped in `src/shared/ui`, plain
   CSS. Dev server on port 4210.
-- `apps/collector` — Node + Hono on `127.0.0.1:4317`: `POST /hooks/claude-code`, `POST /hooks/cursor`, `POST /events`,
+- `apps/collector` — Node + Hono on `127.0.0.1:4317`: `POST /hooks/claude-code`, `POST /events`,
   WebSocket `/ws` (agent snapshot/events + transcript streaming). Backfills sessions from `~/.claude/projects` and
   reconciles agents silent in hooks with their transcripts (Esc interruptions, killed subagents, sessions without the
   plugin).

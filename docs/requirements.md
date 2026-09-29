@@ -10,7 +10,6 @@ control — later).
 | Source                                    | How                                                                                                                        | Why                                       |
 | ----------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
 | Claude Code (CLI + desktop Code tab)      | plugin with hooks: `SessionStart/End`, `UserPromptSubmit`, `Pre/PostToolUse`, `SubagentStart/Stop`, `Notification`, `Stop` | live status                               |
-| Cursor                                    | Cursor hooks → adapter to the common event contract                                                                        | live status                               |
 | JSONL transcripts `~/.claude/projects/**` | collector tails files                                                                                                      | pick up already running sessions, history |
 
 ## Repository layout (npm workspaces)
@@ -18,7 +17,7 @@ control — later).
 - `apps/web` — Angular (latest), standalone, signals, zoneless, FSD. Spartan `brain` + plain CSS (no Tailwind, no LESS).
 - `apps/collector` — Node + Hono: accepts hook POSTs, tails JSONL, broadcasts over WebSocket on `localhost`.
 - `packages/contracts` — shared event / agent state types.
-- `plugins/claude-code`, `plugins/cursor` — hook configs + sender script.
+- `plugins/claude-code` — hook config, sender script, the bundled collector and den.
 - `tools/mock` — dev-only scenario generator.
 
 ## Stations (cats skin)

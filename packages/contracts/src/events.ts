@@ -1,5 +1,5 @@
 /** Agent runtime that produced an event. */
-export type AgentSource = 'claude-code' | 'cursor' | 'mock';
+export type AgentSource = 'claude-code' | 'mock';
 
 /**
  * Coarse tool category. Skins map categories to stations
