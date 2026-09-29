@@ -71,36 +71,17 @@ function renderPng(source: string, width: number, fonts = false): Buffer {
   return resvg.render().asPng();
 }
 
-/** ICO that simply wraps PNGs (supported by every browser since IE Vista era). */
-function ico(pngs: readonly { size: number; data: Buffer }[]): Buffer {
-  const header = Buffer.alloc(6 + pngs.length * 16);
-  header.writeUInt16LE(0, 0);
-  header.writeUInt16LE(1, 2);
-  header.writeUInt16LE(pngs.length, 4);
-  let offset = header.length;
-  pngs.forEach(({ size, data }, index) => {
-    const entry = 6 + index * 16;
-    header.writeUInt8(size >= 256 ? 0 : size, entry);
-    header.writeUInt8(size >= 256 ? 0 : size, entry + 1);
-    header.writeUInt16LE(1, entry + 4);
-    header.writeUInt16LE(32, entry + 6);
-    header.writeUInt32LE(data.length, entry + 8);
-    header.writeUInt32LE(offset, entry + 12);
-    offset += data.length;
-  });
-  return Buffer.concat([header, ...pngs.map(png => png.data)]);
-}
-
 function write(name: string, data: string | Buffer): void {
   writeFileSync(resolve(publicDir, name), data);
 }
 
 // Favicon: the ginger cat on its own, transparent, one sprite pixel = one icon pixel at 16×16.
+// SVG for modern browsers, PNGs as the fallback — no `.ico`: a binary the plugin directory would hold for review.
 const favicon = svg(16, 16, sprite(catSprites.sit, ginger, 0, 0, 1));
 write('favicon.svg', favicon);
-const small = [16, 32, 48].map(size => ({ size, data: renderPng(favicon, size) }));
-small.forEach(({ size, data }) => write(`favicon-${size}x${size}.png`, data));
-write('favicon.ico', ico(small));
+for (const size of [16, 32, 48]) {
+  write(`favicon-${size}x${size}.png`, renderPng(favicon, size));
+}
 
 // App icon (home screen, notifications): the cat sitting on the den floor, on a solid square.
 const appIcon = svg(

@@ -1,8 +1,13 @@
 {
   "name": "agent-den",
-  "version": "0.2.3",
-  "description": "Streams Claude Code session, tool and subagent events to the local agent-den collector",
+  "displayName": "agent-den",
+  "version": "0.2.4",
+  "description": "Your Claude Code sessions as pixel-art cats in a local den: live statuses, kittens for subagents, a meow when an agent needs you",
   "author": {
     "name": "Alexander Evstafiadi"
-  }
+  },
+  "homepage": "https://github.com/a1exevs/agent-den",
+  "repository": "https://github.com/a1exevs/agent-den",
+  "license": "MIT",
+  "keywords": ["claude-code", "agents", "visualization", "pixel-art", "cats"]
 }

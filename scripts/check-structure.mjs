@@ -28,7 +28,7 @@ const SKIP_DIRS = new Set(['node_modules', 'dist', '.angular', 'coverage', '.cla
 /** Build output committed into the plugin (`npm run build:plugin`): hashed chunk names, not ours to name. */
 const SKIP_PATHS = new Set(['plugins/claude-code/den']);
 /** Names fixed by a tool's convention (Claude Code skills). */
-const CONVENTIONAL_NAMES = new Set(['SKILL.md']);
+const CONVENTIONAL_NAMES = new Set(['SKILL.md', 'README.md', 'LICENSE']);
 
 const problems = [];
 const rel = path => relative(root, path).split('\\').join('/');
