@@ -37,6 +37,11 @@ export default tsEslint.config(
       ...sortImportsRule,
       ...curlyRule,
       'no-console': 'error',
+      // Named functions, methods and exported functions declare their return type; inline callbacks may infer it.
+      '@typescript-eslint/explicit-function-return-type': [
+        'error',
+        { allowExpressions: true, allowTypedFunctionExpressions: true, allowHigherOrderFunctions: true },
+      ],
       '@typescript-eslint/no-extraneous-class': ['error', { allowWithDecorator: true }],
       '@angular-eslint/directive-selector': ['error', { type: 'attribute', prefix: 'den', style: 'camelCase' }],
       '@angular-eslint/component-selector': ['error', { type: 'element', prefix: 'den', style: 'kebab-case' }],

@@ -17,6 +17,11 @@ export default tsEslint.config(
     rules: {
       curly: ['error', 'all'],
       'no-console': 'error',
+      // Named functions, methods and exported functions declare their return type; inline callbacks may infer it.
+      '@typescript-eslint/explicit-function-return-type': [
+        'error',
+        { allowExpressions: true, allowTypedFunctionExpressions: true, allowHigherOrderFunctions: true },
+      ],
       // `interface` = domain entity, `type` = everything else (payloads, params, unions, view models).
       '@typescript-eslint/consistent-type-definitions': ['error', 'type'],
     },

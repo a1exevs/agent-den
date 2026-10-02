@@ -1,6 +1,6 @@
 /** A recorded sound, optionally cut to its first part with a fade-out. */
 export type Sound = {
-  /** URL of the recording, relative to the app base (`sounds/cat-meow.mp3`). */
+  /** URL of the recording, relative to the app base (`sounds/alert.mp3`). */
   url: string;
   /** Play only the first part of the recording… */
   maxDurationMs?: number;
@@ -58,7 +58,7 @@ function playRecording(audio: AudioContext, buffer: AudioBuffer, sound: Sound, p
   const start = audio.currentTime + 0.01;
   const source = audio.createBufferSource();
   source.buffer = buffer;
-  // Faster playback = a higher voice: a smaller cat, or just a different one.
+  // Faster playback = a higher pitch: one recording, many voices.
   source.playbackRate.value = pitchScale;
   const gain = audio.createGain();
   source.connect(gain).connect(audio.destination);

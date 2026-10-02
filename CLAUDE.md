@@ -40,7 +40,8 @@ Key constraints:
 - Components: separate `.ts` / `.html` / `.css` files, never inline templates or styles.
 - Dependency versions are pinned exactly (`.npmrc` `save-exact=true`).
 - The hook sender must never block or fail the agent: short timeout, swallow errors, exit 0, no stdout.
-- The collector binds to loopback and rejects non-local `Origin`s (HTTP and WebSocket) — hook payloads and transcripts
+- The collector binds to loopback and rejects non-local `Origin` and `Host` headers (HTTP and WebSocket; `Host`
+  guards against DNS rebinding) — hook payloads and transcripts
   contain prompts and file paths.
 
 ## Plugin development

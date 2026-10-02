@@ -14,7 +14,7 @@ container queries, `@property` for animatable variables.
 
 - `component-name.css` next to the component, referenced via `styleUrl`. Angular emulated encapsulation scopes it.
 - Class names: **kebab-case**, BEM-ish (`.cat`, `.cat--sleeping`, `.cat__tail`).
-- Conditional classes via `[class.cat--sleeping]="isSleeping()"` or `cn()` from `@shared/lib`. No `[ngClass]`.
+- Conditional classes via `[class.cat--sleeping]="isSleeping()"`. No `[ngClass]`.
 - Dynamic values (sprite frame, position) → CSS custom properties bound from the template
   (`[style.--frame]="frame()"`), not inline style strings.
 

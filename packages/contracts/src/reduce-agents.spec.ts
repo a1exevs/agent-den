@@ -5,7 +5,10 @@ import { reduceAgents } from './reduce-agents';
 
 let clock = 1_000;
 
-function apply(agents: ReadonlyMap<string, AgentState>, partial: Partial<DenEvent> & Pick<DenEvent, 'kind'>) {
+function apply(
+  agents: ReadonlyMap<string, AgentState>,
+  partial: Partial<DenEvent> & Pick<DenEvent, 'kind'>,
+): ReadonlyMap<string, AgentState> {
   clock += 1_000;
   const event: DenEvent = {
     id: `e${clock}`,

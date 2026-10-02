@@ -30,7 +30,7 @@ control — later).
 | WebFetch / WebSearch   | stares out of the window      |
 | Task (subagent)        | a kitten jumps out of a box   |
 | Waiting for permission | yowls at the door             |
-| Stop                   | sleeps on the keyboard        |
+| Stop                   | naps on the cushion           |
 | Tool error             | hisses, fur up                |
 
 ## MVP features
@@ -48,4 +48,5 @@ control — later).
 - ESLint: `angular-eslint` + set-forge rules (import order, absolute paths, curly, unused vars, no-console).
 - **All UI primitives live in `src/shared/ui`.** `@spartan-ng/*` imports are forbidden outside `src/shared/**`
   (enforced by ESLint).
-- Sprites are drawn in code (pixel matrices), no third-party assets.
+- Sprites are drawn in code (pixel matrices); the only third-party assets are CC0 sound recordings
+  (`apps/web/public/sounds/README.md`).

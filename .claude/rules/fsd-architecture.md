@@ -52,7 +52,7 @@ Our examples:
 | rooms with cats and stations | `widgets/den-world` | big block over the agent + skin entities |
 | details sheet with the transcript | `widgets/agent-panel` | big block over agent + transcript + skin |
 | sound + notifications (toggles and the alerting itself) | `features/agent-alerts` | a user-facing capability with its own settings |
-| skin switcher | `features/switch-skin` | a user action |
+| skin switcher (planned) | `features/switch-skin` | a user action |
 | `AgentStore`, `groupIntoRooms` | `entities/agent/model` | domain state and logic |
 | cat sprites, stations, poses | `entities/skin/model` | domain (how an agent looks) |
 | `DenAgentAvatar` (pose sprite in session colors) | `entities/skin/ui` | entity UI: how an agent looks, reused by `den-world` and `agent-panel` |
