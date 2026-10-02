@@ -24,5 +24,5 @@
   color: var(--den-fg);
   background: var(--den-paper);
   border: 3px solid var(--den-ink);
-  box-shadow: 4px 4px 0 var(--den-ink);
+  box-shadow: 4px 4px 0 var(--den-shadow);
 }

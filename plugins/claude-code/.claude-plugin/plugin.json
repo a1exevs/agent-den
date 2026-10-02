@@ -1,7 +1,7 @@
 {
   "name": "agent-den",
   "displayName": "agent-den",
-  "version": "0.2.5",
+  "version": "0.2.6",
   "description": "Your Claude Code sessions as pixel-art cats in a local den: live statuses, kittens for subagents, a meow when an agent needs you",
   "author": {
     "name": "Alexander Evstafiadi"

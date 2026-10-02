@@ -14,7 +14,7 @@
   color: var(--den-fg);
   background: var(--den-paper);
   border: 2px solid var(--den-ink);
-  box-shadow: 2px 2px 0 var(--den-ink);
+  box-shadow: 2px 2px 0 var(--den-shadow);
   cursor: pointer;
 
   &:hover {

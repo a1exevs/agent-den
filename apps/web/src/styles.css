@@ -18,6 +18,8 @@
     --den-fg: light-dark(#2b2233, #efe6d2);
     --den-accent: #ff6b3d;
     --den-ink: light-dark(#2b2233, #0f0c14);
+    /* Hard pixel shadows: dark on the light theme, a step lighter than the background on the dark one. */
+    --den-shadow: light-dark(#2b2233, #3a3448);
     --den-paper: light-dark(#fffaf0, #2d2838);
     --den-wall: light-dark(#f6d9b8, #3b3350);
     --den-wall-line: light-dark(#ecc9a3, #342d47);
