@@ -1,5 +1,11 @@
 <div class="alerts" role="group" aria-label="Alerts">
-  <den-toggle [pressed]="settings.sound()" (pressedChange)="onSoundChange($event)">🔊 sound</den-toggle>
+  <den-toggle [pressed]="settings.sound()" [hint]="soundHint()" (pressedChange)="onSoundChange($event)">
+    @if (settings.soundBlocked()) {
+      🔇 click to unmute
+    } @else {
+      🔊 sound
+    }
+  </den-toggle>
   <den-toggle
     [pressed]="settings.notifications()"
     [disabled]="notificationsBlocked()"

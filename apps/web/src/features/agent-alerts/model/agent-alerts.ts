@@ -79,12 +79,13 @@ export class AgentAlerts {
 
   private notify(alert: Alert): void {
     // One notification per agent: a newer one replaces the older.
-    // Our meow already plays: keep the system notification chime quiet so there is one sound, not two.
+    // When our meow plays, keep the system chime quiet so there is one sound, not two. While the browser still
+    // holds audio back (the tab was never clicked) the chime is the only sound — let it ring.
     const notification = new Notification(alert.title, {
       body: alert.body,
       tag: alert.agentId,
       icon: 'favicon-192x192.png',
-      silent: this.settings.sound(),
+      silent: this.settings.sound() && !this.settings.soundBlocked(),
     });
     notification.onclick = (): void => {
       window.focus();

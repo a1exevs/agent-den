@@ -16,12 +16,30 @@ type PlayOptions = {
 let context: AudioContext | undefined;
 /** Decoded recordings by URL; `null` = failed to load (then the sound is skipped). */
 const recordings = new Map<string, Promise<AudioBuffer | null>>();
+const unlockListeners = new Set<(unlocked: boolean) => void>();
 
 function audioContext(): AudioContext | undefined {
   if (!context && typeof AudioContext !== 'undefined') {
     context = new AudioContext();
+    context.addEventListener('statechange', () => {
+      for (const listener of unlockListeners) {
+        listener(isAudioUnlocked());
+      }
+    });
   }
   return context;
+}
+
+/** False until the page got a user gesture: browsers keep audio suspended and every sound is skipped until then. */
+function isAudioUnlocked(): boolean {
+  return context?.state === 'running';
+}
+
+/** Calls `listener` now and whenever the browser locks or unlocks audio. Returns the unsubscribe function. */
+export function watchAudioUnlocked(listener: (unlocked: boolean) => void): () => void {
+  listener(isAudioUnlocked());
+  unlockListeners.add(listener);
+  return () => unlockListeners.delete(listener);
 }
 
 function loadRecording(audio: AudioContext, url: string): Promise<AudioBuffer | null> {

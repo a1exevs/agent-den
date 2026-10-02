@@ -17,6 +17,12 @@ export class DenAlertToggles {
   protected readonly settings = inject(AlertSettings);
   private readonly alerts = inject(AgentAlerts);
 
+  protected readonly soundHint = computed(() =>
+    this.settings.soundBlocked()
+      ? 'The browser keeps sound off until you click this page once — click anywhere'
+      : 'Meow when an agent needs you, purr when a session is done',
+  );
+
   protected readonly notificationsBlocked = computed(() => {
     const permission = this.settings.permission();
     return permission === 'denied' || permission === 'unsupported';

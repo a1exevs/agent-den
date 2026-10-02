@@ -1,6 +1,6 @@
-import { Injectable, signal } from '@angular/core';
+import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 
-import { unlockAudio } from '@shared/lib';
+import { unlockAudio, watchAudioUnlocked } from '@shared/lib';
 
 import { ALERT_SETTINGS_STORAGE_KEY } from '../config/alerts';
 
@@ -32,9 +32,21 @@ export class AlertSettings {
     (this.stored.notifications ?? false) && this.permissionState() === 'granted',
   );
 
+  private readonly audioUnlocked = signal(false);
+
   readonly sound = this.soundState.asReadonly();
   readonly notifications = this.notificationsState.asReadonly();
   readonly permission = this.permissionState.asReadonly();
+  /**
+   * Sound is on, but the browser still holds audio back: a tab opened by `/agent-den:start` hasn't been clicked yet,
+   * and until then every meow is skipped.
+   */
+  readonly soundBlocked = computed(() => this.soundState() && !this.audioUnlocked());
+
+  constructor() {
+    const stop = watchAudioUnlocked(unlocked => this.audioUnlocked.set(unlocked));
+    inject(DestroyRef).onDestroy(stop);
+  }
 
   /** Call from the toggle's click — the gesture also unlocks browser audio. */
   setSound(on: boolean): void {
