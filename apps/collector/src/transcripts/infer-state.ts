@@ -25,6 +25,9 @@ type TranscriptEntry = {
   type?: string;
   subtype?: string;
   cwd?: string;
+  timestamp?: string;
+  /** Set on the result of a tool that ends the agent's run — a background subagent's `SubagentHandback`. */
+  toolEndsTurn?: boolean;
   toolUseResult?: { status?: string };
   message?: { content?: unknown; stop_reason?: string | null };
 };
@@ -88,7 +91,7 @@ function stateOf(entry: TranscriptEntry): Omit<InferredState, 'cwd'> | null {
       return { kind: 'prompt' };
     }
     if (blocks(entry).some(block => block.type === 'tool_result')) {
-      return { kind: 'tool-end' };
+      return { kind: entry.toolEndsTurn ? 'stop' : 'tool-end' };
     }
   }
   return null;
@@ -110,6 +113,21 @@ export function inferState(entries: readonly unknown[]): InferredState | null {
     }
   }
   return null;
+}
+
+/**
+ * When the agent last did something, by the transcript's own timestamps — not the file's mtime: Claude Code touches
+ * old transcripts (cost bookkeeping on resume, rewrites) without the agent running. Undefined without timestamps.
+ */
+export function lastActivityAt(entries: readonly unknown[]): number | undefined {
+  let latest: number | undefined;
+  for (const entry of entries.filter(isEntry)) {
+    const at = entry.timestamp ? Date.parse(entry.timestamp) : NaN;
+    if (!Number.isNaN(at) && (latest === undefined || at > latest)) {
+      latest = at;
+    }
+  }
+  return latest;
 }
 
 function notificationVerdict(text: string, toolUseId: string): SubagentVerdict | null {

@@ -6,12 +6,12 @@ import { basename, join } from 'node:path';
 import { categorizeTool, type DenEvent, type DenEventKind } from '@agent-den/contracts';
 
 import type { DenStore } from '../den-store';
-import { type InferredState, inferState } from './infer-state';
+import { type InferredState, inferState, lastActivityAt } from './infer-state';
 import { readJson, readSubagentMeta, readSubagentVerdict, readTail } from './transcript-files';
 import type { TranscriptRegistry } from './transcript-registry';
 
 const PROJECTS_DIR = join(homedir(), '.claude', 'projects');
-/** Only transcripts touched this recently count as live sessions. */
+/** Only transcripts touched — and written to — this recently count as live sessions. */
 const ACTIVE_WINDOW_MS = 10 * 60_000;
 
 type Identity = Pick<DenEvent, 'sessionId' | 'agentId' | 'parentAgentId'>;
@@ -68,6 +68,12 @@ async function freshFiles(dir: string, now: number, pattern: RegExp): Promise<{ 
   return files.filter(file => now - file.mtime < ACTIVE_WINDOW_MS);
 }
 
+/** When the transcript says the agent last acted, or null when that is too long ago to be live. */
+function liveSince(tail: readonly unknown[], mtime: number, now: number): number | null {
+  const at = Math.min(lastActivityAt(tail) ?? mtime, mtime);
+  return now - at < ACTIVE_WINDOW_MS ? at : null;
+}
+
 function event(identity: Identity, kind: DenEventKind, timestamp: number, extra: Partial<DenEvent> = {}): DenEvent {
   return { id: randomUUID(), source: 'claude-code', kind, timestamp, ...identity, ...extra };
 }
@@ -107,12 +113,13 @@ export async function scanTranscripts(
       if (!store.has(sessionId)) {
         const tail = await readTail(file.path);
         const state = inferState(tail);
-        if (state) {
+        const at = liveSince(tail, file.mtime, now);
+        if (state && at !== null) {
           const title = (await readJson<{ customTitle?: string }>(join(sessionDir, 'custom-title.json')))?.customTitle;
           const identity = { sessionId, agentId: sessionId };
           const cwd = await resolveProjectDir(file.path, project, tail);
-          store.push(event(identity, 'session-start', file.mtime, { cwd, title }));
-          store.push(stateEvent(identity, state, file.mtime));
+          store.push(event(identity, 'session-start', at, { cwd, title }));
+          store.push(stateEvent(identity, state, at));
           added++;
         }
       }
@@ -123,15 +130,17 @@ export async function scanTranscripts(
         if (store.has(agentId)) {
           continue;
         }
-        const state = inferState(await readTail(subagent.path));
+        const tail = await readTail(subagent.path);
+        const state = inferState(tail);
+        const at = liveSince(tail, subagent.mtime, now);
         // A finished subagent is already back in its box — by its own transcript or by its parent's word.
-        if (!state || state.kind === 'stop' || (await readSubagentVerdict(subagent.path))) {
+        if (!state || at === null || state.kind === 'stop' || (await readSubagentVerdict(subagent.path))) {
           continue;
         }
         const meta = await readSubagentMeta(subagent.path);
         const identity = { sessionId, agentId, parentAgentId: sessionId };
-        store.push(event(identity, 'subagent-start', subagent.mtime, { cwd: state.cwd, title: meta?.agentType }));
-        store.push(stateEvent(identity, state, subagent.mtime));
+        store.push(event(identity, 'subagent-start', at, { cwd: state.cwd, title: meta?.agentType }));
+        store.push(stateEvent(identity, state, at));
         added++;
       }
     }

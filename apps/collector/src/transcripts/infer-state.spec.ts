@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest';
 
-import { inferState, inferSubagentVerdict } from './infer-state';
+import { inferState, inferSubagentVerdict, lastActivityAt } from './infer-state';
 
 const cwd = 'D:/projects/agent-den';
 
@@ -23,6 +23,14 @@ describe('inferState', () => {
       { type: 'user', cwd, message: { content: [{ type: 'tool_result' }] } },
     ]);
     expect(state?.kind).toBe('tool-end');
+  });
+
+  it('is done after a tool result that ends the run (a background subagent handing back)', () => {
+    const state = inferState([
+      { type: 'assistant', cwd, message: { content: [{ type: 'tool_use', name: 'SubagentHandback' }] } },
+      { type: 'user', cwd, toolEndsTurn: true, message: { content: [{ type: 'tool_result' }] } },
+    ]);
+    expect(state?.kind).toBe('stop');
   });
 
   it('is done after the stop hook summary, skipping bookkeeping entries', () => {
@@ -100,5 +108,21 @@ describe('inferSubagentVerdict', () => {
 
   it('is null while the parent has heard nothing about this subagent', () => {
     expect(inferSubagentVerdict([notification('completed')], 'toolu_other')).toBeNull();
+  });
+});
+
+describe('lastActivityAt', () => {
+  it('takes the latest entry timestamp, ignoring bookkeeping entries without one', () => {
+    const at = lastActivityAt([
+      { type: 'user', timestamp: '2026-10-22T09:48:17.000Z' },
+      { type: 'assistant', timestamp: '2026-10-22T09:48:20.000Z' },
+      { type: 'last-prompt' },
+      { type: 'cost-state' },
+    ]);
+    expect(at).toBe(Date.parse('2026-10-22T09:48:20.000Z'));
+  });
+
+  it('is undefined when nothing carries a timestamp', () => {
+    expect(lastActivityAt([{ type: 'cost-state' }, 'junk'])).toBeUndefined();
   });
 });

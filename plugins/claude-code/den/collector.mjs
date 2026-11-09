@@ -612,7 +612,7 @@ function stateOf(entry) {
       return { kind: "prompt" };
     }
     if (blocks(entry).some((block) => block.type === "tool_result")) {
-      return { kind: "tool-end" };
+      return { kind: entry.toolEndsTurn ? "stop" : "tool-end" };
     }
   }
   return null;
@@ -628,6 +628,16 @@ function inferState(entries) {
     }
   }
   return null;
+}
+function lastActivityAt(entries) {
+  let latest;
+  for (const entry of entries.filter(isEntry)) {
+    const at = entry.timestamp ? Date.parse(entry.timestamp) : NaN;
+    if (!Number.isNaN(at) && (latest === void 0 || at > latest)) {
+      latest = at;
+    }
+  }
+  return latest;
 }
 function notificationVerdict(text, toolUseId) {
   if (!text.includes(`<tool-use-id>${toolUseId}</tool-use-id>`)) {
@@ -807,6 +817,10 @@ async function freshFiles(dir, now, pattern) {
   );
   return files.filter((file) => now - file.mtime < ACTIVE_WINDOW_MS);
 }
+function liveSince(tail, mtime, now) {
+  const at = Math.min(lastActivityAt(tail) ?? mtime, mtime);
+  return now - at < ACTIVE_WINDOW_MS ? at : null;
+}
 function event(identity, kind, timestamp, extra = {}) {
   return { id: randomUUID4(), source: "claude-code", kind, timestamp, ...identity, ...extra };
 }
@@ -834,12 +848,13 @@ async function scanTranscripts(store2, registry, now = Date.now()) {
       if (!store2.has(sessionId)) {
         const tail = await readTail(file.path);
         const state = inferState(tail);
-        if (state) {
+        const at = liveSince(tail, file.mtime, now);
+        if (state && at !== null) {
           const title = (await readJson(join4(sessionDir, "custom-title.json")))?.customTitle;
           const identity = { sessionId, agentId: sessionId };
           const cwd = await resolveProjectDir(file.path, project, tail);
-          store2.push(event(identity, "session-start", file.mtime, { cwd, title }));
-          store2.push(stateEvent(identity, state, file.mtime));
+          store2.push(event(identity, "session-start", at, { cwd, title }));
+          store2.push(stateEvent(identity, state, at));
           added++;
         }
       }
@@ -849,14 +864,16 @@ async function scanTranscripts(store2, registry, now = Date.now()) {
         if (store2.has(agentId)) {
           continue;
         }
-        const state = inferState(await readTail(subagent.path));
-        if (!state || state.kind === "stop" || await readSubagentVerdict(subagent.path)) {
+        const tail = await readTail(subagent.path);
+        const state = inferState(tail);
+        const at = liveSince(tail, subagent.mtime, now);
+        if (!state || at === null || state.kind === "stop" || await readSubagentVerdict(subagent.path)) {
           continue;
         }
         const meta = await readSubagentMeta(subagent.path);
         const identity = { sessionId, agentId, parentAgentId: sessionId };
-        store2.push(event(identity, "subagent-start", subagent.mtime, { cwd: state.cwd, title: meta?.agentType }));
-        store2.push(stateEvent(identity, state, subagent.mtime));
+        store2.push(event(identity, "subagent-start", at, { cwd: state.cwd, title: meta?.agentType }));
+        store2.push(stateEvent(identity, state, at));
         added++;
       }
     }
